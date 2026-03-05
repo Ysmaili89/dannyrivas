@@ -1,0 +1,296 @@
+<!-- templates/admin/lista_invitaciones.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Administrar Invitaciones{% endblock %}
+
+{% block page_title %}Invitaciones a Predicar{% endblock %}
+
+{% block content %}
+<div class="invitaciones-admin-container">
+    <div class="admin-section-header">
+        <h2>Lista de Invitaciones</h2>
+        <div class="header-stats">
+            <span class="stat-badge">
+                <i class="fas fa-calendar"></i> Total: {{ invitaciones.total if invitaciones else 0 }}
+            </span>
+            <span class="stat-badge pending">
+                <i class="fas fa-clock"></i> Pendientes: {{ pendientes_count if pendientes_count else 0 }}
+            </span>
+        </div>
+    </div>
+
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInvitacion" placeholder="Buscar invitaciones...">
+        </div>
+        <div class="filter-options">
+            <select id="filterTipo">
+                <option value="">Todos los tipos</option>
+                <option value="culto">Culto</option>
+                <option value="cruzada">Cruzada</option>
+                <option value="retiro">Retiro</option>
+                <option value="conferencia">Conferencia</option>
+                <option value="celula">Célula</option>
+                <option value="calle">Calle</option>
+                <option value="otro">Otro</option>
+            </select>
+            <select id="filterConfirmada">
+                <option value="">Todas</option>
+                <option value="confirmada">Confirmada</option>
+                <option value="pendiente">Pendiente</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Contacto</th>
+                    <th>Iglesia</th>
+                    <th>Evento</th>
+                    <th>Fecha</th>
+                    <th>Lugar</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if invitaciones and invitaciones.items %}
+                    {% for inv in invitaciones.items %}
+                    <tr data-tipo="{{ inv.tipo_evento }}" data-confirmada="{{ 'confirmada' if inv.confirmada else 'pendiente' }}">
+                        <td>{{ inv.id }}</td>
+                        <td>
+                            <strong>{{ inv.nombre }}</strong><br>
+                            <small>{{ inv.email }}</small>
+                        </td>
+                        <td>{{ inv.iglesia or 'No especificada' }}</td>
+                        <td>{{ inv.tipo_evento_mostrar if inv.tipo_evento_mostrar else inv.tipo_evento|title if inv.tipo_evento else 'No especificado' }}</td>
+                        <td>{{ inv.fecha_evento.strftime('%d/%m/%Y') if inv.fecha_evento else 'Sin fecha' }}<br>
+                            <small>{{ inv.hora }}</small>
+                        </td>
+                        <td>{{ inv.lugar[:30] }}{% if inv.lugar|length > 30 %}...{% endif %}</td>
+                        <td>
+                            <span class="badge-estado {{ 'confirmada' if inv.confirmada else 'pendiente' }}">
+                                {{ 'Confirmada' if inv.confirmada else 'Pendiente' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('editar_invitacion', id=inv.id) }}" class="action-btn edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <button class="action-btn delete" 
+                                        onclick="confirmarEliminacion('{{ inv.id }}')"
+                                        title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+
+                                {% if not inv.confirmada %}
+                                <button class="action-btn check" 
+                                        onclick="confirmarInvitacion('{{ inv.id }}')"
+                                        title="Confirmar">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <h3>No hay invitaciones</h3>
+                                <p>Las solicitudes de invitación aparecerán aquí</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if invitaciones and invitaciones.pages > 1 %}
+    <div class="pagination">
+        {% if invitaciones.page > 1 %}
+            <a href="?page={{ invitaciones.page - 1 }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        {% endif %}
+        
+        <span class="page-info">Página {{ invitaciones.page }} de {{ invitaciones.pages }}</span>
+        
+        {% if invitaciones.page < invitaciones.pages %}
+            <a href="?page={{ invitaciones.page + 1 }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal de confirmación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Eliminación</h3>
+            <button class="modal-close" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>¿Eliminar esta invitación?</p>
+            <p class="warning-text" style="color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Token oculto para AJAX -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let invitacionIdEliminar = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Panel de invitaciones cargado');
+    
+    const searchInput = document.getElementById('searchInvitacion');
+    const tipoSelect = document.getElementById('filterTipo');
+    const confirmadaSelect = document.getElementById('filterConfirmada');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterInvitaciones);
+    }
+    
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', filterInvitaciones);
+    }
+    
+    if (confirmadaSelect) {
+        confirmadaSelect.addEventListener('change', filterInvitaciones);
+    }
+});
+
+function filterInvitaciones() {
+    const searchTerm = document.getElementById('searchInvitacion')?.value.toLowerCase() || '';
+    const tipo = document.getElementById('filterTipo')?.value || '';
+    const confirmada = document.getElementById('filterConfirmada')?.value || '';
+    
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        if (row.querySelector('td[colspan]')) return;
+        
+        const texto = row.textContent.toLowerCase();
+        const rowTipo = row.dataset.tipo || '';
+        const rowConfirmada = row.dataset.confirmada || '';
+        
+        const matchesSearch = texto.includes(searchTerm);
+        const matchesTipo = !tipo || rowTipo === tipo;
+        const matchesConfirmada = !confirmada || rowConfirmada === confirmada;
+        
+        row.style.display = (matchesSearch && matchesTipo && matchesConfirmada) ? '' : 'none';
+    });
+}
+
+function confirmarEliminacion(id) {
+    if (!id) return;
+    
+    invitacionIdEliminar = id;
+    
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    
+    if (modal && form) {
+        form.action = '/admin/invitaciones/' + id + '/eliminar';
+        modal.classList.add('show');
+    }
+}
+
+function confirmarInvitacion(id) {
+    if (!id) return;
+    
+    if (confirm('¿Confirmar esta invitación?')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        fetch('/admin/invitaciones/' + id + '/confirmar', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error al confirmar la invitación');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al confirmar la invitación');
+        });
+    }
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    invitacionIdEliminar = null;
+}
+
+function cambiarPagina(direccion) {
+    const url = new URL(window.location.href);
+    const currentPage = parseInt(url.searchParams.get('page') || '1');
+    
+    if (direccion === 'prev' && currentPage > 1) {
+        url.searchParams.set('page', currentPage - 1);
+        window.location.href = url.toString();
+    } else if (direccion === 'next') {
+        url.searchParams.set('page', currentPage + 1);
+        window.location.href = url.toString();
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});
+</script>
+{% endblock %}

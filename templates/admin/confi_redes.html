@@ -1,0 +1,538 @@
+<!-- templates/admin/confi_redes.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Configuración de Redes Sociales{% endblock %}
+
+{% block page_title %}Redes Sociales{% endblock %}
+
+{% block content %}
+<div class="redes-config-container">
+    <div class="admin-section-header">
+        <h2><i class="fas fa-share-alt"></i> Gestión de Redes Sociales</h2>
+        <div class="header-info">
+            <i class="fas fa-info-circle" style="color: #3b82f6;"></i>
+            <span>Estas URLs aparecerán en TODO el sitio (banner, sidebar, footer, etc.)</span>
+        </div>
+        <p class="text-muted mt-2">Configuración global - una sola URL por red social</p>
+    </div>
+
+    <!-- Mensajes Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="config-form" id="redesForm">
+        <!-- CSRF Token - Versión HTML puro -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+
+        <!-- Panel: REDES PRINCIPALES -->
+        <div class="config-panel active">
+            <h3 class="panel-title">
+                <i class="fas fa-share-alt"></i>
+                Redes Sociales Globales
+            </h3>
+            <p class="section-hint">Configura aquí las URLs de tus perfiles. Aparecerán en todas las páginas del sitio.</p>
+            
+            <div class="redes-grid">
+                <!-- Facebook -->
+                <div class="red-item">
+                    <div class="red-icon facebook-bg">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                    <div class="red-inputs">
+                        <label for="facebook_url" class="form-label">Facebook URL</label>
+                        <input type="url" class="form-control url-input" id="facebook_url" name="facebook_url" 
+                               placeholder="https://facebook.com/tu-pagina" 
+                               value="{{ config.facebook_url if config and config.facebook_url else '' }}">
+                        <small class="form-text text-muted">Ej: https://facebook.com/jhonatandannyrivas</small>
+                        {% if config and config.facebook_url %}
+                        <div class="url-preview mt-1">
+                            <a href="{{ config.facebook_url }}" target="_blank" class="text-success">
+                                <i class="fas fa-external-link-alt"></i> Ver perfil
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Instagram -->
+                <div class="red-item">
+                    <div class="red-icon instagram-bg">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <div class="red-inputs">
+                        <label for="instagram_url" class="form-label">Instagram URL</label>
+                        <input type="url" class="form-control url-input" id="instagram_url" name="instagram_url" 
+                               placeholder="https://instagram.com/tu-usuario" 
+                               value="{{ config.instagram_url if config and config.instagram_url else '' }}">
+                        <small class="form-text text-muted">Ej: https://instagram.com/jhonatandannyrivas</small>
+                        {% if config and config.instagram_url %}
+                        <div class="url-preview mt-1">
+                            <a href="{{ config.instagram_url }}" target="_blank" class="text-success">
+                                <i class="fas fa-external-link-alt"></i> Ver perfil
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- YouTube -->
+                <div class="red-item">
+                    <div class="red-icon youtube-bg">
+                        <i class="fab fa-youtube"></i>
+                    </div>
+                    <div class="red-inputs">
+                        <label for="youtube_url" class="form-label">YouTube URL</label>
+                        <input type="url" class="form-control url-input" id="youtube_url" name="youtube_url" 
+                               placeholder="https://youtube.com/@canal" 
+                               value="{{ config.youtube_url if config and config.youtube_url else '' }}">
+                        <small class="form-text text-muted">Ej: https://youtube.com/@jhonatanrivasoficial4487</small>
+                        {% if config and config.youtube_url %}
+                        <div class="url-preview mt-1">
+                            <a href="{{ config.youtube_url }}" target="_blank" class="text-success">
+                                <i class="fas fa-external-link-alt"></i> Ver canal
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- TikTok -->
+                <div class="red-item">
+                    <div class="red-icon tiktok-bg">
+                        <i class="fab fa-tiktok"></i>
+                    </div>
+                    <div class="red-inputs">
+                        <label for="tiktok_url" class="form-label">TikTok URL</label>
+                        <input type="url" class="form-control url-input" id="tiktok_url" name="tiktok_url" 
+                               placeholder="https://tiktok.com/@usuario" 
+                               value="{{ config.tiktok_url if config and config.tiktok_url else '' }}">
+                        <small class="form-text text-muted">Ej: https://tiktok.com/@evangelistajhonat8</small>
+                        {% if config and config.tiktok_url %}
+                        <div class="url-preview mt-1">
+                            <a href="{{ config.tiktok_url }}" target="_blank" class="text-success">
+                                <i class="fas fa-external-link-alt"></i> Ver perfil
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Twitter / X -->
+                <div class="red-item">
+                    <div class="red-icon twitter-bg">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <div class="red-inputs">
+                        <label for="twitter_url" class="form-label">Twitter / X URL</label>
+                        <input type="url" class="form-control url-input" id="twitter_url" name="twitter_url" 
+                               placeholder="https://twitter.com/usuario" 
+                               value="{{ config.twitter_url if config and config.twitter_url else '' }}">
+                        <small class="form-text text-muted">Ej: https://twitter.com/jhonatandannyrivas</small>
+                        {% if config and config.twitter_url %}
+                        <div class="url-preview mt-1">
+                            <a href="{{ config.twitter_url }}" target="_blank" class="text-success">
+                                <i class="fas fa-external-link-alt"></i> Ver perfil
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- LinkedIn -->
+                <div class="red-item">
+                    <div class="red-icon linkedin-bg">
+                        <i class="fab fa-linkedin-in"></i>
+                    </div>
+                    <div class="red-inputs">
+                        <label for="linkedin_url" class="form-label">LinkedIn URL</label>
+                        <input type="url" class="form-control url-input" id="linkedin_url" name="linkedin_url" 
+                               placeholder="https://linkedin.com/in/usuario" 
+                               value="{{ config.linkedin_url if config and config.linkedin_url else '' }}">
+                        <small class="form-text text-muted">Ej: https://linkedin.com/in/jhonatandannyrivas</small>
+                        {% if config and config.linkedin_url %}
+                        <div class="url-preview mt-1">
+                            <a href="{{ config.linkedin_url }}" target="_blank" class="text-success">
+                                <i class="fas fa-external-link-alt"></i> Ver perfil
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <h4 class="mb-3"><i class="fas fa-video"></i> Configuración Específica para "En Vivo"</h4>
+            <div class="redes-grid">
+                <!-- TikTok Live (opcional) -->
+                <div class="red-item">
+                    <div class="red-icon tiktok-bg">
+                        <i class="fab fa-tiktok"></i>
+                    </div>
+                    <div class="red-inputs">
+                        <label for="live_tiktok_url" class="form-label">TikTok Live URL (Opcional)</label>
+                        <input type="url" class="form-control url-input" id="live_tiktok_url" name="live_tiktok_url" 
+                               placeholder="https://tiktok.com/@usuario/live" 
+                               value="{{ config.live_tiktok_url if config and config.live_tiktok_url else '' }}">
+                        <small class="form-text text-muted">URL específica para la tarjeta "En Vivo" en el sidebar</small>
+                        {% if config and config.live_tiktok_url %}
+                        <div class="url-preview mt-1">
+                            <a href="{{ config.live_tiktok_url }}" target="_blank" class="text-success">
+                                <i class="fas fa-external-link-alt"></i> Ver live
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen de configuración actual -->
+        <div class="config-summary">
+            <h4><i class="fas fa-list"></i> Resumen de URLs configuradas:</h4>
+            <ul class="summary-list">
+                <li><i class="fab fa-facebook"></i> Facebook: {{ config.facebook_url if config and config.facebook_url else 'No configurado' }}</li>
+                <li><i class="fab fa-instagram"></i> Instagram: {{ config.instagram_url if config and config.instagram_url else 'No configurado' }}</li>
+                <li><i class="fab fa-youtube"></i> YouTube: {{ config.youtube_url if config and config.youtube_url else 'No configurado' }}</li>
+                <li><i class="fab fa-tiktok"></i> TikTok: {{ config.tiktok_url if config and config.tiktok_url else 'No configurado' }}</li>
+                <li><i class="fab fa-twitter"></i> Twitter: {{ config.twitter_url if config and config.twitter_url else 'No configurado' }}</li>
+                <li><i class="fab fa-linkedin"></i> LinkedIn: {{ config.linkedin_url if config and config.linkedin_url else 'No configurado' }}</li>
+                <li><i class="fas fa-video"></i> TikTok Live: {{ config.live_tiktok_url if config and config.live_tiktok_url else 'No configurado' }}</li>
+            </ul>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <i class="fas fa-save"></i> Guardar configuración
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Estilos adicionales -->
+<style>
+/* Estilos específicos para configuración de redes */
+.redes-config-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.admin-section-header {
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #D4AF37;
+}
+
+.admin-section-header h2 {
+    color: #1E3A5F;
+    margin-bottom: 10px;
+}
+
+.admin-section-header h2 i {
+    color: #D4AF37;
+    margin-right: 10px;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.config-panel {
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.panel-title {
+    color: #1E3A5F;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid #D4AF37;
+    font-size: 1.3rem;
+}
+
+.panel-title i {
+    color: #D4AF37;
+    margin-right: 0.5rem;
+}
+
+.section-hint {
+    color: #6b7280;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.redes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.red-item {
+    background: white;
+    border-radius: 12px;
+    padding: 1.2rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s;
+}
+
+.red-item:hover {
+    border-color: #D4AF37;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1);
+}
+
+.red-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.facebook-bg { background: #1877f2; }
+.instagram-bg { background: linear-gradient(45deg, #f09433, #d62976, #962fbf, #4f5bd5); }
+.tiktok-bg { background: #000000; }
+.youtube-bg { background: #ff0000; }
+.twitter-bg { background: #1da1f2; }
+.linkedin-bg { background: #0077b5; }
+
+.red-inputs {
+    flex: 1;
+}
+
+.red-inputs label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+}
+
+.red-inputs input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    margin-bottom: 0.3rem;
+}
+
+.red-inputs input:focus {
+    outline: none;
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.form-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.url-preview a {
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.url-preview a:hover {
+    text-decoration: underline;
+}
+
+/* Validación de URLs */
+.url-input.is-valid {
+    border-color: #28a745;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+.url-input.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+/* Resumen de configuración */
+.config-summary {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.config-summary h4 {
+    color: #1E3A5F;
+    margin-bottom: 1rem;
+}
+
+.summary-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 0.8rem;
+}
+
+.summary-list li {
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.summary-list li i {
+    width: 20px;
+    color: #D4AF37;
+}
+
+/* Botones */
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn-secondary {
+    padding: 0.6rem 1.2rem;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    color: white;
+}
+
+.btn-primary {
+    padding: 0.6rem 1.2rem;
+    background: #D4AF37;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: #b8960f;
+    color: white;
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .redes-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .red-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .red-inputs {
+        width: 100%;
+    }
+    
+    .summary-list {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<!-- Script de validación -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Panel de configuración de redes cargado');
+    
+    // Validación de URLs en tiempo real
+    const urlInputs = document.querySelectorAll('.url-input');
+    
+    urlInputs.forEach(input => {
+        // Validar al escribir
+        input.addEventListener('input', function() {
+            const value = this.value.trim();
+            
+            if (value === '') {
+                this.classList.remove('is-valid', 'is-invalid');
+                return;
+            }
+            
+            try {
+                const url = new URL(value);
+                if (url.protocol === 'http:' || url.protocol === 'https:') {
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                } else {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                }
+            } catch {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            }
+        });
+    });
+    
+    // Validar formulario al enviar
+    const form = document.getElementById('redesForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            // Deshabilitar botón para evitar doble envío
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            
+            return true;
+        });
+    }
+});
+</script>
+{% endblock %}

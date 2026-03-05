@@ -1,0 +1,328 @@
+<!-- templates/admin/dashboard.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Tarjeta de bienvenida con fecha -->
+    <div class="welcome-card">
+        <div class="welcome-content">
+            <div>
+                <h2>¡Bienvenido, {{ current_user.username }}!</h2>
+                <p>{{ current_user.email }} · {{ ahora().strftime('%d de %B, %Y') if ahora else 'Panel de administración' }}</p>
+            </div>
+            <div class="welcome-badge">
+                <i class="fas fa-crown"></i>
+                <span>Administrador</span>
+            </div>
+        </div>
+        <div class="welcome-footer">
+            <span><i class="fas fa-clock"></i> Último acceso: {{ current_user.ultimo_acceso.strftime('%d/%m/%Y %H:%M') if current_user.ultimo_acceso else 'Primer ingreso' }}</span>
+        </div>
+    </div>
+
+    <!-- Grid de estadísticas -->
+    <div class="stats-grid">
+        <!-- Oraciones -->
+        <div class="stat-card">
+            <div class="stat-icon oraciones-icon">
+                <i class="fas fa-pray"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Oraciones</h3>
+                <div class="stat-numbers">
+                    <span class="stat-total">{{ stats.total_oraciones|default(0) }}</span>
+                    <span class="stat-pending">{{ stats.oraciones_pendientes|default(0) }} pendientes</span>
+                </div>
+                <a href="{{ url_for('lista_oraciones') }}" class="stat-link">Ver todas <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <!-- Testimonios -->
+        <div class="stat-card">
+            <div class="stat-icon testimonios-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Testimonios</h3>
+                <div class="stat-numbers">
+                    <span class="stat-total">{{ stats.total_testimonios|default(0) }}</span>
+                    <span class="stat-pending">{{ stats.testimonios_pendientes|default(0) }} pendientes</span>
+                </div>
+                <a href="{{ url_for('lista_testimonios') }}" class="stat-link">Ver todos <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <!-- Contactos -->
+        <div class="stat-card">
+            <div class="stat-icon contactos-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Contactos</h3>
+                <div class="stat-numbers">
+                    <span class="stat-total">{{ stats.total_contactos|default(0) }}</span>
+                    <span class="stat-pending">{{ stats.contactos_no_leidos|default(0) }} no leídos</span>
+                </div>
+                <a href="{{ url_for('lista_contactos') }}" class="stat-link">Ver todos <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <!-- Invitaciones -->
+        <div class="stat-card">
+            <div class="stat-icon invitaciones-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Invitaciones</h3>
+                <div class="stat-numbers">
+                    <span class="stat-total">{{ stats.total_invitaciones|default(0) }}</span>
+                    <span class="stat-pending">{{ stats.invitaciones_pendientes|default(0) }} pendientes</span>
+                </div>
+                <a href="{{ url_for('lista_invitaciones') }}" class="stat-link">Ver todas <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <!-- Videos -->
+        <div class="stat-card">
+            <div class="stat-icon videos-icon">
+                <i class="fas fa-video"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Videos</h3>
+                <div class="stat-numbers">
+                    <span class="stat-total">{{ stats.total_videos|default(0) }}</span>
+                </div>
+                <a href="{{ url_for('lista_videos') }}" class="stat-link">Ver todos <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <!-- Shorts -->
+        <div class="stat-card">
+            <div class="stat-icon shorts-icon">
+                <i class="fas fa-film"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Shorts</h3>
+                <div class="stat-numbers">
+                    <span class="stat-total">{{ stats.total_shorts|default(0) }}</span>
+                </div>
+                <a href="{{ url_for('lista_shorts') }}" class="stat-link">Ver todos <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <!-- Galería -->
+        <div class="stat-card">
+            <div class="stat-icon galeria-icon">
+                <i class="fas fa-images"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Galería</h3>
+                <div class="stat-numbers">
+                    <span class="stat-total">{{ stats.total_galeria|default(0) }}</span>
+                    <span class="stat-pending">{{ stats.galeria_destacadas|default(0) }} destacadas</span>
+                </div>
+                <a href="{{ url_for('lista_galeria') }}" class="stat-link">Ver todas <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <!-- Newsletter -->
+        <div class="stat-card">
+            <div class="stat-icon newsletter-icon">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Newsletter</h3>
+                <div class="stat-numbers">
+                    <span class="stat-total">{{ stats.total_newsletter|default(0) }}</span>
+                    <span class="stat-pending">{{ stats.newsletter_activos|default(0) }} activos</span>
+                </div>
+                <a href="{{ url_for('lista_newsletter') }}" class="stat-link">Ver todos <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <!-- Usuarios -->
+        <div class="stat-card">
+            <div class="stat-icon usuarios-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Usuarios</h3>
+                <div class="stat-numbers">
+                    <span class="stat-total">{{ stats.total_usuarios|default(0) }}</span>
+                    <span class="stat-pending">{{ stats.usuarios_activos|default(0) }} activos</span>
+                </div>
+                <a href="{{ url_for('lista_usuarios') }}" class="stat-link">Ver todos <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="quick-actions">
+        <h2 class="section-title">
+            <i class="fas fa-bolt section-title-icon"></i>
+            Acciones Rápidas
+        </h2>
+        <div class="actions-grid">
+            <a href="{{ url_for('crear_video') }}" class="action-card">
+                <i class="fas fa-plus-circle"></i>
+                <div>
+                    <strong>Nuevo Video</strong>
+                    <small>Agregar contenido</small>
+                </div>
+            </a>
+            <a href="{{ url_for('crear_short') }}" class="action-card">
+                <i class="fas fa-plus-circle"></i>
+                <div>
+                    <strong>Nuevo Short</strong>
+                    <small>Video corto</small>
+                </div>
+            </a>
+            <a href="{{ url_for('crear_categoria') }}" class="action-card">
+                <i class="fas fa-tag"></i>
+                <div>
+                    <strong>Nueva Categoría</strong>
+                    <small>Organizar contenido</small>
+                </div>
+            </a>
+            <a href="{{ url_for('crear_imagen') }}" class="action-card">
+                <i class="fas fa-plus-circle"></i>
+                <div>
+                    <strong>Subir Imagen</strong>
+                    <small>Galería</small>
+                </div>
+            </a>
+            <a href="{{ url_for('lista_testimonios') }}?pendientes=1" class="action-card">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <strong>Testimonios Pendientes</strong>
+                    <small>{{ stats.testimonios_pendientes|default(0) }} por revisar</small>
+                </div>
+            </a>
+            <a href="{{ url_for('lista_oraciones') }}?urgentes=1" class="action-card urgent">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                    <strong>Oraciones Urgentes</strong>
+                    <small>Prioridad alta</small>
+                </div>
+            </a>
+            <a href="{{ url_for('lista_contactos') }}?no_leidos=1" class="action-card">
+                <i class="fas fa-envelope"></i>
+                <div>
+                    <strong>Mensajes No Leídos</strong>
+                    <small>{{ stats.contactos_no_leidos|default(0) }} sin leer</small>
+                </div>
+            </a>
+            <a href="{{ url_for('lista_invitaciones') }}?pendientes=1" class="action-card">
+                <i class="fas fa-calendar-check"></i>
+                <div>
+                    <strong>Invitaciones Pendientes</strong>
+                    <small>{{ stats.invitaciones_pendientes|default(0) }} por confirmar</small>
+                </div>
+            </a>
+            
+            <!-- NUEVA ACCIÓN RÁPIDA PARA REDES SOCIALES -->
+            <a href="{{ url_for('configurar_redes') }}" class="action-card">
+                <i class="fas fa-share-alt"></i>
+                <div>
+                    <strong>Redes Sociales</strong>
+                    <small>Configurar por sección</small>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('configurar_donaciones') }}" class="action-card">
+                <i class="fas fa-hand-holding-heart"></i>
+                <div>
+                    <strong>Donaciones</strong>
+                    <small>Configurar</small>
+                </div>
+            </a>
+            
+            <!-- CORREGIDO: usa configuracion en lugar de configuracion_general -->
+            <a href="{{ url_for('configuracion') }}" class="action-card">
+                <i class="fas fa-cog"></i>
+                <div>
+                    <strong>Configuración General</strong>
+                    <small>Ajustes del sitio</small>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Actividad Reciente -->
+    <div class="recent-activity">
+        <h2 class="section-title">
+            <i class="fas fa-history section-title-icon"></i>
+            Actividad Reciente
+        </h2>
+        <div class="activity-grid">
+            <div class="activity-card">
+                <h4><i class="fas fa-pray"></i> Últimas oraciones</h4>
+                <div class="activity-list">
+                    {% for oracion in ultimas_oraciones[:3] %}
+                    <div class="activity-item">
+                        <span class="activity-name">{{ oracion.nombre if not oracion.anonimo else 'Anónimo' }}</span>
+                        <span class="activity-date">{{ oracion.fecha.strftime('%d/%m') if oracion.fecha else 'Sin fecha' }}</span>
+                    </div>
+                    {% else %}
+                    <div class="activity-empty">No hay oraciones recientes</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="activity-card">
+                <h4><i class="fas fa-star"></i> Últimos testimonios</h4>
+                <div class="activity-list">
+                    {% for testimonio in ultimos_testimonios[:3] %}
+                    <div class="activity-item">
+                        <span class="activity-name">{{ testimonio.nombre }}</span>
+                        <span class="activity-date">{{ testimonio.fecha.strftime('%d/%m') if testimonio.fecha else 'Sin fecha' }}</span>
+                    </div>
+                    {% else %}
+                    <div class="activity-empty">No hay testimonios recientes</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="activity-card">
+                <h4><i class="fas fa-envelope"></i> Últimos contactos</h4>
+                <div class="activity-list">
+                    {% for contacto in ultimos_contactos[:3] %}
+                    <div class="activity-item">
+                        <span class="activity-name">{{ contacto.nombre }}</span>
+                        <span class="activity-date">{{ contacto.fecha.strftime('%d/%m') if contacto.fecha else 'Sin fecha' }}</span>
+                    </div>
+                    {% else %}
+                    <div class="activity-empty">No hay contactos recientes</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statTotals = document.querySelectorAll('.stat-total');
+    statTotals.forEach(element => {
+        const value = parseInt(element.textContent);
+        if (!isNaN(value) && value > 0) {
+            let start = 0;
+            const duration = 1000;
+            const increment = value / (duration / 16);
+            
+            const timer = setInterval(() => {
+                start += increment;
+                if (start >= value) {
+                    element.textContent = value;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(start);
+                }
+            }, 16);
+        }
+    });
+});
+</script>
+{% endblock %}

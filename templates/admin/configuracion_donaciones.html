@@ -1,0 +1,340 @@
+<!-- templates/admin/configuracion_donaciones.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Configuración de Donaciones{% endblock %}
+
+{% block page_title %}Configuración de Donaciones{% endblock %}
+
+{% block content %}
+<div class="donaciones-config-container">
+    <form method="POST" class="config-form" id="donacionesForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+        
+        <!-- Pestañas de navegación -->
+        <div class="config-tabs">
+            <button type="button" class="config-tab active" data-tab="bancaria">
+                <i class="fas fa-university"></i>
+                Información Bancaria
+            </button>
+            <button type="button" class="config-tab" data-tab="paypal">
+                <i class="fab fa-paypal"></i>
+                PayPal
+            </button>
+            <button type="button" class="config-tab" data-tab="mensajes">
+                <i class="fas fa-comment"></i>
+                Mensajes
+            </button>
+            <button type="button" class="config-tab" data-tab="montos">
+                <i class="fas fa-coins"></i>
+                Montos Sugeridos
+            </button>
+            <button type="button" class="config-tab" data-tab="redes">
+                <i class="fas fa-share-alt"></i>
+                Redes Sociales
+            </button>
+        </div>
+
+        <!-- Panel: Información Bancaria -->
+        <div class="config-panel active" id="panel-bancaria">
+            <h3 class="panel-title">
+                <i class="fas fa-university"></i>
+                Datos Bancarios
+            </h3>
+            
+            <div class="form-group">
+                <label for="banco">Banco</label>
+                <input type="text" id="banco" name="banco" 
+                       value="{{ config.banco or 'Banco BHD León' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="titular">Titular de la cuenta</label>
+                <input type="text" id="titular" name="titular" 
+                       value="{{ config.titular or 'Evangelista Jhonatan Danny Rivas' }}">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tipo_cuenta">Tipo de cuenta</label>
+                    <select id="tipo_cuenta" name="tipo_cuenta">
+                        <option value="Corriente" {% if config.tipo_cuenta == 'Corriente' %}selected{% endif %}>Corriente</option>
+                        <option value="Ahorros" {% if config.tipo_cuenta == 'Ahorros' %}selected{% endif %}>Ahorros</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="numero_cuenta">Número de cuenta</label>
+                    <input type="text" id="numero_cuenta" name="numero_cuenta" 
+                           value="{{ config.numero_cuenta or '1234567890' }}">
+                </div>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>Estos datos se mostrarán cuando el usuario seleccione "Transferencia bancaria"</p>
+            </div>
+        </div>
+
+        <!-- Panel: PayPal -->
+        <div class="config-panel" id="panel-paypal">
+            <h3 class="panel-title">
+                <i class="fab fa-paypal"></i>
+                Configuración de PayPal
+            </h3>
+            
+            <div class="form-group">
+                <label for="email_paypal">Email de PayPal (para donaciones)</label>
+                <input type="email" id="email_paypal" name="email_paypal" 
+                       value="{{ config.email_paypal or 'paypal@ejemplo.com' }}"
+                       placeholder="ejemplo@paypal.com">
+                <small class="form-hint">El email donde recibirás las donaciones</small>
+            </div>
+
+            <div class="form-group">
+                <label for="paypal_me">Usuario de PayPal.Me</label>
+                <div class="input-prefix">
+                    <span>paypal.me/</span>
+                    <input type="text" id="paypal_me" name="paypal_me" 
+                           value="{{ config.paypal_me or 'YOUR_USERNAME' }}"
+                           placeholder="tu_usuario">
+                </div>
+                <small class="form-hint">Ej: https://paypal.me/tu_usuario</small>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>Los botones de PayPal se generarán automáticamente con estos datos</p>
+            </div>
+        </div>
+
+        <!-- Panel: Mensajes -->
+        <div class="config-panel" id="panel-mensajes">
+            <h3 class="panel-title">
+                <i class="fas fa-comment"></i>
+                Mensajes Personalizados
+            </h3>
+            
+            <div class="form-group">
+                <label for="mensaje_bienvenida">Mensaje de bienvenida</label>
+                <textarea id="mensaje_bienvenida" name="mensaje_bienvenida" rows="2">{{ config.mensaje_bienvenida or 'Tu generosidad nos ayuda a llevar el mensaje de esperanza a más personas' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="mensaje_agradecimiento">Mensaje de agradecimiento</label>
+                <textarea id="mensaje_agradecimiento" name="mensaje_agradecimiento" rows="2">{{ config.mensaje_agradecimiento or '¡Gracias por tu generosidad!' }}</textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="versiculo">Versículo</label>
+                    <input type="text" id="versiculo" name="versiculo" 
+                           value="{{ config.versiculo or 'Honra a Jehová con tus bienes, y con las primicias de todos tus frutos' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="versiculo_referencia">Referencia</label>
+                    <input type="text" id="versiculo_referencia" name="versiculo_referencia" 
+                           value="{{ config.versiculo_referencia or 'Proverbios 3:9' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Montos Sugeridos -->
+        <div class="config-panel" id="panel-montos">
+            <h3 class="panel-title">
+                <i class="fas fa-coins"></i>
+                Montos Sugeridos
+            </h3>
+            
+            <p class="section-hint">Define los montos que aparecerán como opciones predeterminadas</p>
+            
+            <div class="montos-grid" id="montosGrid">
+                {% set montos = config.montos_lista if config and config.montos_lista else [10,25,50,100,500] %}
+                {% for monto in montos %}
+                <div class="monto-item">
+                    <i class="fas fa-dollar-sign"></i>
+                    <input type="number" name="montos[]" value="{{ monto }}" min="1" step="1">
+                    <button type="button" class="remove-monto" {% if loop.length <= 1 %}disabled{% endif %}>
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <button type="button" class="btn-add-monto" id="addMontoBtn">
+                <i class="fas fa-plus"></i>
+                Agregar monto
+            </button>
+
+            <div class="info-box mt-3">
+                <i class="fas fa-info-circle"></i>
+                <p>Estos montos aparecerán como botones en la página de donaciones</p>
+            </div>
+        </div>
+
+        <!-- Panel: Redes Sociales -->
+        <div class="config-panel" id="panel-redes">
+            <h3 class="panel-title">
+                <i class="fas fa-share-alt"></i>
+                Redes Sociales
+            </h3>
+            
+            <p class="section-hint">Estos enlaces aparecerán en la página de donaciones</p>
+            
+            <div class="form-group">
+                <label><i class="fab fa-facebook" style="color: #1877f2;"></i> Facebook</label>
+                <input type="url" name="facebook" value="{{ config.facebook or '' }}" 
+                       placeholder="https://facebook.com/...">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fab fa-instagram" style="color: #e4405f;"></i> Instagram</label>
+                <input type="url" name="instagram" value="{{ config.instagram or '' }}"
+                       placeholder="https://instagram.com/...">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fab fa-youtube" style="color: #ff0000;"></i> YouTube</label>
+                <input type="url" name="youtube" value="{{ config.youtube or '' }}"
+                       placeholder="https://youtube.com/@...">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp</label>
+                <input type="text" name="whatsapp" value="{{ config.whatsapp or '' }}"
+                       placeholder="+18095551234">
+                <small class="form-hint">Número con código de país</small>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <i class="fas fa-save"></i> Guardar configuración
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Variable para contar montos
+let montosCount = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Contar montos iniciales
+    montosCount = document.querySelectorAll('.monto-item').length;
+    
+    // Configurar eventos de pestañas
+    document.querySelectorAll('.config-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            showTab(tabName, this);
+        });
+    });
+    
+    // Configurar botón de agregar monto
+    const addBtn = document.getElementById('addMontoBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', agregarMonto);
+    }
+    
+    // Configurar botones de eliminar monto
+    document.querySelectorAll('.remove-monto').forEach(btn => {
+        btn.addEventListener('click', function() {
+            eliminarMonto(this);
+        });
+    });
+    
+    // Configurar validación del formulario
+    const form = document.getElementById('donacionesForm');
+    if (form) {
+        form.addEventListener('submit', validateForm);
+    }
+});
+
+// Función para mostrar pestañas
+function showTab(tabName, clickedElement) {
+    document.querySelectorAll('.config-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    
+    document.querySelectorAll('.config-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    document.getElementById('panel-' + tabName).classList.add('active');
+    
+    if (clickedElement) {
+        clickedElement.classList.add('active');
+    }
+}
+
+// Función para agregar monto
+function agregarMonto() {
+    const grid = document.getElementById('montosGrid');
+    if (!grid) return;
+    
+    const newMonto = document.createElement('div');
+    newMonto.className = 'monto-item';
+    newMonto.innerHTML = `
+        <i class="fas fa-dollar-sign"></i>
+        <input type="number" name="montos[]" value="10" min="1" step="1">
+        <button type="button" class="remove-monto">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    grid.appendChild(newMonto);
+    
+    const newRemoveBtn = newMonto.querySelector('.remove-monto');
+    if (newRemoveBtn) {
+        newRemoveBtn.addEventListener('click', function() {
+            eliminarMonto(this);
+        });
+    }
+    
+    montosCount++;
+}
+
+// Función para eliminar monto
+function eliminarMonto(btn) {
+    const totalMontos = document.querySelectorAll('.monto-item').length;
+    
+    if (totalMontos > 1) {
+        const montoItem = btn.closest('.monto-item');
+        if (montoItem) {
+            montoItem.remove();
+            montosCount--;
+        }
+    }
+}
+
+// Función para validar formulario
+function validateForm(e) {
+    const paypalEmail = document.getElementById('email_paypal').value;
+    
+    if (paypalEmail && !paypalEmail.includes('@')) {
+        e.preventDefault();
+        alert('❌ Por favor ingresa un email de PayPal válido');
+        return false;
+    }
+    
+    if (montosCount === 0) {
+        e.preventDefault();
+        alert('❌ Debes tener al menos un monto configurado');
+        return false;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    }
+    
+    return true;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,208 @@
+<!-- templates/ver_short.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ short.titulo }} - Shorts Ministerio{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ver_short.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="short-view-container">
+    <div class="short-nav">
+        <a href="{{ url_for('short') }}" class="back-to-shorts">
+            <i class="fas fa-arrow-left"></i> Volver a Shorts
+        </a>
+    </div>
+
+    <div class="short-view-grid">
+        <div class="short-player-section">
+            <div class="short-player-wrapper">
+                {% if short.video %}
+                    <video controls autoplay class="short-player">
+                        <source src="{{ url_for('static', filename='videos/' + short.video) }}" type="video/mp4">
+                    </video>
+                {% elif short.youtube_url %}
+                    {% if 'v=' in short.youtube_url %}
+                        {% set video_id = short.youtube_url.split('v=')[1].split('&')[0] %}
+                    {% elif '/shorts/' in short.youtube_url %}
+                        {% set video_id = short.youtube_url.split('/shorts/')[1].split('?')[0] %}
+                    {% else %}
+                        {% set video_id = short.youtube_url.split('/')[-1] %}
+                    {% endif %}
+                    <iframe 
+                        src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1"
+                        title="{{ short.titulo }}"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        class="short-iframe">
+                    </iframe>
+                {% else %}
+                    <div class="no-video">
+                        <i class="fas fa-film"></i>
+                        <p>Short no disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="short-info-section">
+            <h1 class="short-title">{{ short.titulo }}</h1>
+            
+            <div class="short-stats">
+                <span class="short-views">
+                    <i class="fas fa-eye"></i> {{ short.vistas|default(0) }} vistas
+                </span>
+                <span class="short-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    {{ short.fecha_publicacion.strftime('%d/%m/%Y') if short.fecha_publicacion else 'Fecha no disponible' }}
+                </span>
+                {% if short.duracion %}
+                <span class="short-duration-badge">
+                    <i class="fas fa-clock"></i> {{ short.duracion }}
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="short-actions">
+                <button class="short-action-btn" id="btn-share-short">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Compartir</span>
+                </button>
+                <button class="short-action-btn" id="btn-like-short" data-id="{{ short.id }}">
+                    <i class="far fa-heart"></i>
+                    <span>Me gusta</span>
+                </button>
+                {% if short.youtube_url %}
+                <a href="{{ short.youtube_url }}" target="_blank" class="short-action-btn youtube-link">
+                    <i class="fab fa-youtube"></i>
+                    <span>YouTube</span>
+                </a>
+                {% endif %}
+            </div>
+
+            {% if short.descripcion %}
+            <div class="short-description">
+                <h3>Descripción</h3>
+                <p>{{ short.descripcion|replace('\n', '<br>')|safe }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if relacionados %}
+    <div class="related-shorts">
+        <h2 class="related-title">
+            <i class="fas fa-film"></i> Más shorts
+        </h2>
+        <div class="related-shorts-grid">
+            {% for rel in relacionados %}
+            <div class="related-short-card" data-url="{{ url_for('ver_short', id=rel.id) }}">
+                <div class="related-short-thumbnail">
+                    {% if rel.thumbnail %}
+                        <img src="{{ url_for('static', filename='images/' + rel.thumbnail) }}" alt="{{ rel.titulo }}">
+                    {% elif rel.thumbnail_url %}
+                        <img src="{{ rel.thumbnail_url }}" alt="{{ rel.titulo }}">
+                    {% elif rel.youtube_url %}
+                        {% if 'v=' in rel.youtube_url %}
+                            {% set vid = rel.youtube_url.split('v=')[1].split('&')[0] %}
+                        {% elif '/shorts/' in rel.youtube_url %}
+                            {% set vid = rel.youtube_url.split('/shorts/')[1].split('?')[0] %}
+                        {% else %}
+                            {% set vid = rel.youtube_url.split('/')[-1] %}
+                        {% endif %}
+                        <img src="https://img.youtube.com/vi/{{ vid }}/default.jpg" alt="{{ rel.titulo }}">
+                    {% endif %}
+                </div>
+                <div class="related-short-info">
+                    <h4>{{ rel.titulo|truncate(30) }}</h4>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Compartir Short</h3>
+            <button class="modal-close" id="close-modal-short">×</button>
+        </div>
+        <div class="modal-body">
+            <p class="share-url">{{ request.url }}</p>
+            <div class="share-buttons">
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" target="_blank" class="share-btn facebook">f</a>
+                <a href="https://wa.me/?text={{ short.titulo|urlencode }}%20{{ request.url|urlencode }}" target="_blank" class="share-btn whatsapp">w</a>
+            </div>
+            <button class="copy-link-btn" id="btn-copy-short">
+                <i class="fas fa-copy"></i> Copiar enlace
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    "use strict";
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('shareModal');
+
+        // 1. Modal de compartir
+        const btnShare = document.getElementById('btn-share-short');
+        if (btnShare) {
+            btnShare.addEventListener('click', () => modal.classList.add('show'));
+        }
+
+        const btnClose = document.getElementById('close-modal-short');
+        if (btnClose) {
+            btnClose.addEventListener('click', () => modal.classList.remove('show'));
+        }
+
+        const btnCopy = document.getElementById('btn-copy-short');
+        if (btnCopy) {
+            btnCopy.addEventListener('click', function() {
+                const url = document.querySelector('.share-url').textContent;
+                navigator.clipboard.writeText(url).then(() => alert('¡Enlace copiado!'));
+            });
+        }
+
+        // 2. Lógica de Like
+        const btnLike = document.getElementById('btn-like-short');
+        if (btnLike) {
+            btnLike.addEventListener('click', function() {
+                const shortId = this.getAttribute('data-id');
+                const icon = this.querySelector('i');
+                
+                if (icon.classList.contains('far')) {
+                    icon.classList.replace('far', 'fas');
+                    console.log('Like al short:', shortId);
+                } else {
+                    icon.classList.replace('fas', 'far');
+                }
+            });
+        }
+
+        // 3. Navegación de relacionados
+        document.querySelectorAll('.related-short-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const url = this.getAttribute('data-url');
+                if (url) window.location.href = url;
+            });
+        });
+
+        // 4. Cerrar modal con ESC o clic fuera
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') modal.classList.remove('show');
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('show');
+        });
+    });
+})();
+</script>
+{% endblock %}

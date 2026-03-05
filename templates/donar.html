@@ -1,0 +1,355 @@
+<!-- templates/donar.html -->
+{% extends "base.html" %}
+
+{% block title %}Donar - Apoya este Ministerio{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/donar.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set config_data = config if config else {} %}
+{% set versiculo = config_data.versiculo or 'CADA UNO DÉ COMO PROPUSO EN SU CORAZÓN, NO CON TRISTEZA, NI POR NECESIDAD, PORQUE DIOS AMA AL DADOR ALEGRE.' %}
+{% set versiculo_ref = config_data.versiculo_referencia or '2 CORINTIOS 9:7' %}
+{% set mensaje_bienvenida = config_data.mensaje_bienvenida or 'Tu generosidad nos ayuda a llevar el mensaje de esperanza a más personas' %}
+{% set mensaje_agradecimiento = config_data.mensaje_agradecimiento or '¡Gracias por tu generosidad!' %}
+{% set montos = config_data.montos_lista if config_data and config_data.montos_lista else [10,25,50,100,500] %}
+{% set banco = config_data.banco or 'Banco BHD León' %}
+{% set titular = config_data.titular or 'Evangelista Jhonatan Danny Rivas' %}
+{% set tipo_cuenta = config_data.tipo_cuenta or 'Corriente' %}
+{% set numero_cuenta = config_data.numero_cuenta or '1234567890' %}
+{% set email_paypal = config_data.email_paypal or 'TU_EMAIL_PAYPAL@ejemplo.com' %}
+{% set paypal_me = config_data.paypal_me or 'YOUR_USERNAME' %}
+
+<!-- Datos bancarios ocultos -->
+<span id="bank-data" 
+      data-banco="{{ banco }}"
+      data-titular="{{ titular }}"
+      data-tipo="{{ tipo_cuenta }}"
+      data-numero="{{ numero_cuenta }}"
+      style="display: none;"></span>
+
+<div class="container">
+    <!-- Banner con versículo bíblico -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">{{ versiculo }}</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">{{ versiculo_ref }}</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado -->
+    <div class="donate-header">
+        <h1 class="page-title">Apoya este Ministerio</h1>
+        <p class="page-subtitle">{{ mensaje_bienvenida }}</p>
+    </div>
+
+    <!-- Panel: Donación Única -->
+    <div id="tab-unica" class="tab-panel active">
+        <div class="donate-card">
+            <div class="donate-card-header">
+                <i class="fas fa-hand-holding-heart"></i>
+                <h2>Donación Única</h2>
+            </div>
+            <div class="donate-card-body">
+                <p class="donate-description">
+                    Realiza una donación única de forma segura. Elige el monto y método de pago.
+                </p>
+                
+                <div class="donation-amounts">
+                    <h3>Selecciona un monto:</h3>
+                    <div class="amount-buttons">
+                        {% for monto in montos %}
+                        <button class="amount-btn" data-amount="{{ monto }}">${{ monto }}</button>
+                        {% endfor %}
+                        <!-- Opción Desde $1 hasta donde desees -->
+                        <button class="amount-btn custom-amount">Desde $1</button>
+                    </div>
+                    
+                    <div class="custom-amount-field" style="display: none;">
+                        <input type="number" id="custom-amount-unica" placeholder="Ingresa el monto que desees" min="1" step="1">
+                        <small class="amount-hint">Mínimo $1 - ¡hasta donde tu corazón desee!</small>
+                    </div>
+                </div>
+
+                <div class="payment-methods">
+                    <h3>Método de pago:</h3>
+                    <div class="payment-buttons">
+                        <button class="payment-btn paypal active" data-payment="paypal" data-tab="unica">
+                            <i class="fab fa-paypal"></i> PayPal
+                        </button>
+                        <button class="payment-btn bank" data-payment="bank" data-tab="unica">
+                            <i class="fas fa-university"></i> Transferencia
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PayPal Form - Única -->
+                <div id="paypal-unica-section" class="payment-section active">
+                    <form action="https://www.paypal.com/donate" method="post" target="_top" class="paypal-form">
+                        <input type="hidden" name="business" value="{{ email_paypal }}">
+                        <input type="hidden" name="currency_code" value="USD">
+                        <input type="hidden" name="amount" id="paypal-amount-unica" value="">
+                        <input type="hidden" name="item_name" value="Donación Única al Ministerio">
+                        
+                        <button type="submit" class="donate-btn paypal-donate-btn">
+                            <i class="fab fa-paypal"></i> 
+                            <span>Donar con PayPal</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Bank Transfer Section - Única -->
+                <div id="bank-unica-section" class="payment-section">
+                    <div class="bank-details">
+                        <div class="bank-detail-item">
+                            <span class="detail-label">Banco:</span>
+                            <span class="detail-value">{{ banco }}</span>
+                        </div>
+                        <div class="bank-detail-item">
+                            <span class="detail-label">Titular:</span>
+                            <span class="detail-value">{{ titular }}</span>
+                        </div>
+                        <div class="bank-detail-item">
+                            <span class="detail-label">Tipo de Cuenta:</span>
+                            <span class="detail-value">{{ tipo_cuenta }}</span>
+                        </div>
+                        <div class="bank-detail-item">
+                            <span class="detail-label">Número de Cuenta:</span>
+                            <span class="detail-value">{{ numero_cuenta }}</span>
+                        </div>
+                    </div>
+
+                    <button class="copy-bank-details" onclick="copyBankDetails()">
+                        <i class="fas fa-copy"></i> Copiar datos bancarios
+                    </button>
+
+                    <div class="bank-note">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Envía el comprobante a <strong>{{ email_paypal }}</strong></p>
+                    </div>
+                </div>
+
+                <p class="secure-badge">
+                    <i class="fas fa-lock"></i> Transacción 100% segura
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel: Otras Plataformas -->
+    <div id="tab-plataformas" class="tab-panel">
+        <div class="platforms-grid">
+            <div class="platform-card">
+                <i class="fab fa-patreon"></i>
+                <h3>Patreon</h3>
+                <p>Únete a nuestra comunidad en Patreon y recibe contenido exclusivo</p>
+                <a href="https://www.patreon.com/TU_USUARIO" target="_blank" class="platform-btn patreon">
+                    <i class="fab fa-patreon"></i> Visitar Patreon
+                </a>
+            </div>
+
+            <div class="platform-card">
+                <i class="fab fa-paypal"></i>
+                <h3>PayPal</h3>
+                <p>Donación directa a través de PayPal (sin registro)</p>
+                <a href="https://paypal.me/{{ paypal_me }}" target="_blank" rel="noopener noreferrer" class="platform-btn paypal">
+                    <i class="fab fa-paypal"></i> Donar con PayPal
+                </a>
+            </div>
+
+            <div class="platform-card">
+                <i class="fas fa-university"></i>
+                <h3>Transferencia</h3>
+                <p>Transferencia bancaria directa desde tu banco</p>
+                <button class="platform-btn bank" onclick="showBankDetails()">
+                    <i class="fas fa-university"></i> Ver datos bancarios
+                </button>
+            </div>
+
+            <div class="platform-card">
+                <i class="fas fa-pray"></i>
+                <h3>Oración</h3>
+                <p>Tu apoyo en oración es invaluable</p>
+                <a href="{{ url_for('oracion') }}" class="platform-btn prayer">
+                    <i class="fas fa-pray"></i> Enviar petición
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de datos bancarios -->
+    <div id="bankModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Datos Bancarios</h3>
+                <button class="modal-close" onclick="closeBankModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="bank-details">
+                    <div class="bank-detail-item">
+                        <span class="detail-label">Banco:</span>
+                        <span class="detail-value">{{ banco }}</span>
+                    </div>
+                    <div class="bank-detail-item">
+                        <span class="detail-label">Titular:</span>
+                        <span class="detail-value">{{ titular }}</span>
+                    </div>
+                    <div class="bank-detail-item">
+                        <span class="detail-label">Tipo de Cuenta:</span>
+                        <span class="detail-value">{{ tipo_cuenta }}</span>
+                    </div>
+                    <div class="bank-detail-item">
+                        <span class="detail-label">Número de Cuenta:</span>
+                        <span class="detail-value">{{ numero_cuenta }}</span>
+                    </div>
+                </div>
+                <button class="copy-bank-details" onclick="copyBankDetailsFromModal()">
+                    <i class="fas fa-copy"></i> Copiar datos
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de gracias -->
+    <section class="donate-thankyou">
+        <div class="thankyou-content">
+            <i class="fas fa-heart"></i>
+            <h2>{{ mensaje_agradecimiento }}</h2>
+            <p>"{{ versiculo }}"</p>
+            <p class="thankyou-reference">{{ versiculo_ref }}</p>
+        </div>
+    </section>
+</div>
+
+<script>
+// Variables globales
+let selectedAmount = 0;
+
+// Obtener datos bancarios
+const bankDataEl = document.getElementById('bank-data');
+const bankDetails = {
+    banco: bankDataEl ? bankDataEl.dataset.banco : '{{ banco }}',
+    titular: bankDataEl ? bankDataEl.dataset.titular : '{{ titular }}',
+    tipo_cuenta: bankDataEl ? bankDataEl.dataset.tipo : '{{ tipo_cuenta }}',
+    numero_cuenta: bankDataEl ? bankDataEl.dataset.numero : '{{ numero_cuenta }}'
+};
+
+// Función para inicializar eventos
+function initDonationEvents() {
+    // Montos fijos única
+    document.querySelectorAll('#tab-unica .amount-btn:not(.custom-amount)').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#tab-unica .amount-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelector('#tab-unica .custom-amount-field').style.display = 'none';
+            selectedAmount = this.dataset.amount;
+            document.getElementById('paypal-amount-unica').value = selectedAmount;
+        });
+    });
+
+    // Botón "Desde $1" única
+    const customAmountBtn = document.querySelector('#tab-unica .custom-amount');
+    if (customAmountBtn) {
+        customAmountBtn.addEventListener('click', function() {
+            document.querySelectorAll('#tab-unica .amount-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelector('#tab-unica .custom-amount-field').style.display = 'block';
+            selectedAmount = 0;
+            document.getElementById('paypal-amount-unica').value = '';
+        });
+    }
+
+    // Campo personalizado única
+    const customAmountInput = document.getElementById('custom-amount-unica');
+    if (customAmountInput) {
+        customAmountInput.addEventListener('input', function() {
+            selectedAmount = this.value;
+            document.getElementById('paypal-amount-unica').value = selectedAmount;
+        });
+    }
+
+    // Métodos de pago
+    document.querySelectorAll('.payment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const method = this.dataset.payment;
+            const tab = this.dataset.tab;
+            document.querySelectorAll('#tab-' + tab + ' .payment-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#tab-' + tab + ' .payment-section').forEach(s => s.classList.remove('active'));
+            this.classList.add('active');
+            const section = document.getElementById(method + '-' + tab + '-section');
+            if (section) section.classList.add('active');
+        });
+    });
+}
+
+// Copiar datos bancarios
+function copyBankDetails() {
+    const details = `Banco: ${bankDetails.banco}
+Titular: ${bankDetails.titular}
+Tipo de Cuenta: ${bankDetails.tipo_cuenta}
+Número de Cuenta: ${bankDetails.numero_cuenta}`;
+    
+    navigator.clipboard.writeText(details).then(() => {
+        alert('✅ Datos bancarios copiados');
+    }).catch(() => {
+        alert('❌ No se pudo copiar');
+    });
+}
+
+// Modal
+function showBankDetails() {
+    document.getElementById('bankModal').classList.add('show');
+}
+
+function closeBankModal() {
+    document.getElementById('bankModal').classList.remove('show');
+}
+
+function copyBankDetailsFromModal() {
+    copyBankDetails();
+}
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    initDonationEvents();
+    
+    // Seleccionar primer monto única por defecto
+    const firstAmount = document.querySelector('#tab-unica .amount-btn:not(.custom-amount)');
+    if (firstAmount) {
+        firstAmount.classList.add('active');
+        selectedAmount = firstAmount.dataset.amount;
+        document.getElementById('paypal-amount-unica').value = selectedAmount;
+    }
+    
+    // Cerrar modal al hacer clic fuera
+    const modal = document.getElementById('bankModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeBankModal();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

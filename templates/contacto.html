@@ -1,0 +1,242 @@
+<!-- templates/contacto.html -->
+{% extends "base.html" %}
+
+{% block title %}Contacto - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/contacto.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-contact">
+    
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"CLAMA A MÍ, Y YO TE RESPONDERÉ, Y TE ENSEÑARÉ COSAS GRANDES Y OCULTAS QUE TÚ NO CONOCES"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">JEREMÍAS 33:3</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <header class="contact-header-simple">
+        <h1>Ponte en Contacto</h1>
+        <p>Estamos aquí para escucharte, apoyarte y orar por tus necesidades.</p>
+    </header>
+
+    <div class="contact-center-wrapper">
+        
+        <section class="contact-form-container">
+            <h2 class="form-inner-title">Envíanos un mensaje</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages-container">
+                        {% for category, message in messages %}
+                            <div class="flash-notice flash-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('contacto') }}" class="contact-form" id="mainContactForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre"><i class="fas fa-user"></i> Nombre completo *</label>
+                        <input type="text" id="nombre" name="nombre" required placeholder="Ej. Juan Pérez" minlength="2" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Correo electrónico *</label>
+                        <input type="email" id="email" name="email" required placeholder="correo@ejemplo.com">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telefono"><i class="fas fa-phone"></i> Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" placeholder="809-555-1234" pattern="[0-9+\-\s]+" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="asunto"><i class="fas fa-tag"></i> Asunto *</label>
+                        <select id="asunto" name="asunto" required>
+                            <option value="" disabled selected>Selecciona un asunto</option>
+                            <option value="oracion">🙏 Petición de oración</option>
+                            <option value="invitacion">🎤 Invitación a predicar</option>
+                            <option value="consulta">❓ Consulta general</option>
+                            <option value="testimonio">✨ Compartir testimonio</option>
+                            <option value="donacion">💰 Información sobre donaciones</option>
+                            <option value="otro">📝 Otro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mensaje"><i class="fas fa-comment"></i> Mensaje *</label>
+                    <textarea id="mensaje" name="mensaje" rows="5" required placeholder="Escribe tu mensaje aquí..." minlength="5" maxlength="5000"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    Enviar mensaje
+                </button>
+            </form>
+        </section>
+
+        <!-- INFO CARDS - MEJORADA LA VALIDACIÓN -->
+        <section class="info-grid-horizontal">
+            {% if config and config.telefono %}
+            <div class="info-mini-card">
+                <div class="mini-icon"><i class="fas fa-phone"></i></div>
+                <div class="mini-text">
+                    <h3>Teléfono</h3>
+                    <p><a href="tel:{{ config.telefono }}" style="color: inherit; text-decoration: none;">{{ config.telefono }}</a></p>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if config and config.email_contacto %}
+            <div class="info-mini-card">
+                <div class="mini-icon"><i class="fas fa-envelope"></i></div>
+                <div class="mini-text">
+                    <h3>Email</h3>
+                    <p><a href="mailto:{{ config.email_contacto }}" style="color: inherit; text-decoration: none;">{{ config.email_contacto }}</a></p>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if config and config.direccion %}
+            <div class="info-mini-card">
+                <div class="mini-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="mini-text">
+                    <h3>Ubicación</h3>
+                    <p>{{ config.direccion }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- REDES SOCIALES - MEJORADA LA VALIDACIÓN -->
+        {% if config and (config.facebook_url or config.instagram_url or config.youtube_url or config.tiktok_url or config.twitter_url or config.linkedin_url) %}
+        <section class="contact-social-center">
+            <h3>Síguenos en nuestras redes</h3>
+            <div class="social-row">
+                {% if config.facebook_url %}
+                <a href="{{ config.facebook_url }}" class="s-link fb" target="_blank" rel="noopener noreferrer" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                {% endif %}
+                
+                {% if config.instagram_url %}
+                <a href="{{ config.instagram_url }}" class="s-link ig" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="fab fa-instagram"></i></a>
+                {% endif %}
+                
+                {% if config.youtube_url %}
+                <a href="{{ config.youtube_url }}" class="s-link yt" target="_blank" rel="noopener noreferrer" title="YouTube"><i class="fab fa-youtube"></i></a>
+                {% endif %}
+                
+                {% if config.tiktok_url %}
+                <a href="{{ config.tiktok_url }}" class="s-link tk" target="_blank" rel="noopener noreferrer" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                {% endif %}
+                
+                {% if config.twitter_url %}
+                <a href="{{ config.twitter_url }}" class="s-link tw" target="_blank" rel="noopener noreferrer" title="Twitter"><i class="fab fa-twitter"></i></a>
+                {% endif %}
+                
+                {% if config.linkedin_url %}
+                <a href="{{ config.linkedin_url }}" class="s-link li" target="_blank" rel="noopener noreferrer" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ✅ WHATSAPP - CORREGIDO CON VALIDACIÓN SEGURA -->
+        {% if config and config.whatsapp %}
+        <section class="prayer-urgent-box">
+            <div class="prayer-icon-main">
+                <i class="fas fa-pray"></i>
+            </div>
+            <h3>¿Necesitas oración urgente?</h3>
+            <p>Si tienes una petición de oración que no puede esperar, nuestro equipo de intercesión está disponible para ti ahora mismo a través de WhatsApp.</p>
+            
+            <!-- Validación segura de WhatsApp -->
+            {% set whatsapp_raw = config.whatsapp|string %}
+            {% set whatsapp_clean = whatsapp_raw|replace('+', '')|replace(' ', '')|replace('-', '')|replace('(', '')|replace(')', '') %}
+            {% if whatsapp_clean|length >= 10 and whatsapp_clean|length <= 15 and whatsapp_clean.isdigit() %}
+            <a href="https://wa.me/{{ whatsapp_clean }}" class="whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-whatsapp"></i>
+                Enviar petición por WhatsApp
+            </a>
+            {% else %}
+            <!-- Fallback si el número no es válido -->
+            <a href="{{ url_for('contacto') }}#mainContactForm" class="whatsapp-btn" style="background-color: #6c757d;">
+                <i class="fas fa-envelope"></i>
+                Usar formulario de contacto
+            </a>
+            <small style="display: block; margin-top: 10px; color: #ffc107;">⚠️ El número de WhatsApp no está configurado correctamente. Usa el formulario.</small>
+            {% endif %}
+        </section>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('mainContactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const mensaje = document.getElementById('mensaje').value.trim();
+            const asunto = document.getElementById('asunto').value;
+            
+            if (!nombre || !email || !mensaje || !asunto) {
+                e.preventDefault();
+                alert('❌ Por favor completa todos los campos requeridos.');
+                return false;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('❌ Por favor ingresa un correo electrónico válido.');
+                return false;
+            }
+            
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            }
+            
+            return true;
+        });
+    }
+    
+    const telefonoInput = document.getElementById('telefono');
+    if (telefonoInput) {
+        telefonoInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9+\-\s]/g, '');
+        });
+    }
+});
+</script>
+{% endblock %}

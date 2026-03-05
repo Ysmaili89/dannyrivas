@@ -1,0 +1,194 @@
+<!-- templates/accesibilidad.html -->
+{% extends "base.html" %}
+
+{% block title %}Declaración de Accesibilidad - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"LEVANTAOS, ANDAD"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">JUAN 5:8</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado -->
+    <div class="accessibility-header" style="text-align: center; margin-bottom: 3rem;">
+        <h1 class="page-title" style="color: #0F2A44 !important; font-size: 2.8rem;">Declaración de Accesibilidad</h1>
+        <p class="page-subtitle" style="color: #2C4B6E !important; font-size: 1.2rem;">Compromiso con la inclusión y accesibilidad para todos</p>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="accessibility-content" style="max-width: 900px; margin: 0 auto;">
+        
+        <!-- Introducción -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-heart" style="color: #D4AF37;"></i>
+                Nuestro Compromiso
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important; line-height: 1.6;">
+                En el ministerio del Evangelista Jhonatan Danny Rivas, estamos comprometidos con hacer que nuestro sitio web sea accesible para todas las personas, incluyendo aquellas con discapacidades. Creemos que el mensaje del evangelio debe estar disponible para todos, sin barreras.
+            </p>
+        </div>
+
+        <!-- Estándares -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-check-circle" style="color: #D4AF37;"></i>
+                Estándares de Accesibilidad
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important; line-height: 1.6;">
+                Nuestro sitio web sigue las pautas de accesibilidad al contenido web (WCAG 2.1) nivel AA. Estas pautas establecen los estándares internacionales para hacer que el contenido web sea más accesible para personas con discapacidades.
+            </p>
+        </div>
+
+        <!-- Características de accesibilidad -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-cog" style="color: #D4AF37;"></i>
+                Características de Accesibilidad
+            </h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                
+                <div style="background: white; border: 1px solid #D4AF37; border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <i class="fas fa-adjust" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; margin-bottom: 0.5rem;">Modo Oscuro/Claro</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">Puedes alternar entre tema oscuro y claro usando el botón de cambio de tema.</p>
+                </div>
+
+                <div style="background: white; border: 1px solid #D4AF37; border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <i class="fas fa-font" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; margin-bottom: 0.5rem;">Texto Redimensionable</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">Puedes ampliar el texto usando las funciones de zoom del navegador.</p>
+                </div>
+
+                <div style="background: white; border: 1px solid #D4AF37; border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <i class="fas fa-keyboard" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; margin-bottom: 0.5rem;">Navegación por Teclado</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">Todas las funciones son accesibles mediante teclado (Tab, Enter).</p>
+                </div>
+
+                <div style="background: white; border: 1px solid #D4AF37; border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <i class="fas fa-universal-access" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; margin-bottom: 0.5rem;">Estructura Semántica</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">Usamos encabezados para facilitar la navegación con lectores de pantalla.</p>
+                </div>
+
+                <div style="background: white; border: 1px solid #D4AF37; border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <i class="fas fa-images" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; margin-bottom: 0.5rem;">Texto Alternativo</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">Todas las imágenes incluyen descripciones para lectores de pantalla.</p>
+                </div>
+
+                <div style="background: white; border: 1px solid #D4AF37; border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <i class="fas fa-video" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; margin-bottom: 0.5rem;">Subtítulos en Videos</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">Los videos incluyen subtítulos cuando están disponibles.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Limitaciones conocidas -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-exclamation-triangle" style="color: #D4AF37;"></i>
+                Limitaciones Conocidas
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important;">A pesar de nuestros esfuerzos, algunas áreas del sitio pueden tener limitaciones:</p>
+            <ul style="color: #2C4B6E !important; padding-left: 1.5rem;">
+                <li style="margin-bottom: 0.5rem;">Algunos videos antiguos pueden no tener subtítulos disponibles</li>
+                <li style="margin-bottom: 0.5rem;">El contenido incrustado de YouTube tiene su propia configuración de accesibilidad</li>
+                <li style="margin-bottom: 0.5rem;">El traductor de Google puede tener limitaciones en su interfaz</li>
+                <li style="margin-bottom: 0.5rem;">Algunos documentos PDF pueden no ser completamente accesibles</li>
+            </ul>
+        </div>
+
+        <!-- Cómo reportar problemas -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-flag" style="color: #D4AF37;"></i>
+                Reportar Problemas de Accesibilidad
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important;">Si encuentras alguna barrera de accesibilidad, infórmanos:</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                
+                <div style="background: white; border: 1px solid #D4AF37; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem;">
+                    <i class="fas fa-envelope" style="color: #D4AF37; font-size: 1.5rem;"></i>
+                    <div>
+                        <h4 style="color: #0F2A44 !important; margin: 0 0 0.2rem 0;">Email</h4>
+                        <a href="mailto:info@jhonatandannyrivas.com" style="color: #2C4B6E !important; text-decoration: none;">info@jhonatandannyrivas.com</a>
+                    </div>
+                </div>
+                
+                <div style="background: white; border: 1px solid #D4AF37; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem;">
+                    <i class="fas fa-phone" style="color: #D4AF37; font-size: 1.5rem;"></i>
+                    <div>
+                        <h4 style="color: #0F2A44 !important; margin: 0 0 0.2rem 0;">Teléfono</h4>
+                        <a href="tel:+18095551234" style="color: #2C4B6E !important; text-decoration: none;">+1 809-555-1234</a>
+                    </div>
+                </div>
+                
+                <div style="background: white; border: 1px solid #D4AF37; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem;">
+                    <i class="fas fa-comment" style="color: #D4AF37; font-size: 1.5rem;"></i>
+                    <div>
+                        <h4 style="color: #0F2A44 !important; margin: 0 0 0.2rem 0;">Formulario</h4>
+                        <a href="{{ url_for('contacto') }}" style="color: #2C4B6E !important; text-decoration: none;">Contacto</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fecha de actualización - CORREGIDO con fecha dinámica -->
+        <div style="background: #FFF9E6; border: 1px solid #D4AF37; border-radius: 12px; padding: 1.5rem; text-align: center; margin: 2rem 0;">
+            <i class="fas fa-calendar-alt" style="color: #D4AF37; margin-right: 0.5rem;"></i>
+            <p style="color: #0F2A44 !important; margin: 0;">
+                {% if current_date %}
+                    Esta declaración fue actualizada por última vez el {{ current_date.strftime('%d de %B de %Y') }}
+                {% else %}
+                    Esta declaración fue actualizada por última vez el 4 de marzo de 2026
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Enlaces relacionados -->
+    <div style="margin: 3rem 0; text-align: center;">
+        <h3 style="color: #0F2A44 !important; margin-bottom: 1rem;">Información relacionada:</h3>
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+            <a href="{{ url_for('terminos') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: white; border: 2px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; text-decoration: none;">
+                <i class="fas fa-file-contract" style="color: #D4AF37;"></i> Términos
+            </a>
+            <a href="{{ url_for('privacidad') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: white; border: 2px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; text-decoration: none;">
+                <i class="fas fa-shield-alt" style="color: #D4AF37;"></i> Privacidad
+            </a>
+            <a href="{{ url_for('cookies') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: white; border: 2px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; text-decoration: none;">
+                <i class="fas fa-cookie-bite" style="color: #D4AF37;"></i> Cookies
+            </a>
+            <a href="{{ url_for('aviso_legal') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: white; border: 2px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; text-decoration: none;">
+                <i class="fas fa-gavel" style="color: #D4AF37;"></i> Aviso Legal
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

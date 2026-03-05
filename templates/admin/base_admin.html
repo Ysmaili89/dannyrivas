@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - {% block title %}Dashboard{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    
+    <!-- Estilos adicionales por página -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <h2>Panel de Administración</h2>
+                <p>Evangelista Jhonatan Danny Rivas</p>
+                <span class="admin-badge">
+                    <i class="fas fa-shield-alt"></i> Administrador
+                </span>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <!-- Principal -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Principal</div>
+                    <a href="{{ url_for('admin_dashboard') }}" class="menu-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <!-- Contenido -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Contenido</div>
+                    <a href="{{ url_for('lista_videos') }}" class="menu-item {% if request.endpoint in ['lista_videos', 'crear_video', 'editar_video'] %}active{% endif %}">
+                        <i class="fas fa-video"></i>
+                        <span>Videos</span>
+                    </a>
+                    <a href="{{ url_for('lista_shorts') }}" class="menu-item {% if request.endpoint in ['lista_shorts', 'crear_short', 'editar_short'] %}active{% endif %}">
+                        <i class="fas fa-film"></i>
+                        <span>Shorts</span>
+                    </a>
+                    <a href="{{ url_for('lista_categorias') }}" class="menu-item {% if request.endpoint in ['lista_categorias', 'crear_categoria', 'editar_categoria'] %}active{% endif %}">
+                        <i class="fas fa-tags"></i>
+                        <span>Categorías</span>
+                    </a>
+                    <a href="{{ url_for('lista_galeria') }}" class="menu-item {% if request.endpoint in ['lista_galeria', 'crear_imagen', 'editar_imagen'] %}active{% endif %}">
+                        <i class="fas fa-images"></i>
+                        <span>Galería</span>
+                    </a>
+                </div>
+
+                <!-- Interacción -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Interacción</div>
+                    <a href="{{ url_for('lista_testimonios') }}" class="menu-item {% if request.endpoint in ['lista_testimonios', 'editar_testimonio'] %}active{% endif %}">
+                        <i class="fas fa-star"></i>
+                        <span>Testimonios</span>
+                    </a>
+                    <a href="{{ url_for('lista_oraciones') }}" class="menu-item {% if request.endpoint in ['lista_oraciones', 'editar_oracion'] %}active{% endif %}">
+                        <i class="fas fa-pray"></i>
+                        <span>Peticiones de Oración</span>
+                    </a>
+                    <a href="{{ url_for('lista_contactos') }}" class="menu-item {% if request.endpoint in ['lista_contactos', 'editar_contacto'] %}active{% endif %}">
+                        <i class="fas fa-envelope"></i>
+                        <span>Contactos</span>
+                    </a>
+                    <a href="{{ url_for('lista_invitaciones') }}" class="menu-item {% if request.endpoint in ['lista_invitaciones', 'editar_invitacion'] %}active{% endif %}">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Invitaciones</span>
+                    </a>
+                    <a href="{{ url_for('lista_newsletter') }}" class="menu-item {% if request.endpoint == 'lista_newsletter' %}active{% endif %}">
+                        <i class="fas fa-envelope-open-text"></i>
+                        <span>Newsletter</span>
+                    </a>
+                </div>
+
+                <!-- Configuración -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Configuración</div>
+                    
+                    <!-- Redes Sociales -->
+                    <a href="{{ url_for('configurar_redes') }}" class="menu-item {% if request.endpoint == 'configurar_redes' %}active{% endif %}">
+                        <i class="fas fa-share-alt"></i>
+                        <span>Redes Sociales</span>
+                    </a>
+                    
+                    <!-- Usuarios -->
+                    <a href="{{ url_for('lista_usuarios') }}" class="menu-item {% if request.endpoint in ['lista_usuarios', 'crear_usuario', 'editar_usuario'] %}active{% endif %}">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Usuarios</span>
+                    </a>
+                    
+                    <!-- Donaciones -->
+                    <a href="{{ url_for('configurar_donaciones') }}" class="menu-item {% if request.endpoint == 'configurar_donaciones' %}active{% endif %}">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <span>Donaciones</span>
+                    </a>
+                    
+                    <!-- CONFIGURACIÓN GENERAL - CORREGIDO: usa configuracion en lugar de configuracion_general -->
+                    <a href="{{ url_for('configuracion') }}" class="menu-item {% if request.endpoint == 'configuracion' %}active{% endif %}">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración General</span>
+                    </a>
+                </div>
+
+                <!-- Acciones -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Acciones</div>
+                    <a href="{{ url_for('index') }}" class="menu-item" target="_blank">
+                        <i class="fas fa-external-link-alt"></i>
+                        <span>Ver sitio web</span>
+                    </a>
+                    <a href="{{ url_for('cerrar_sesion') }}" class="menu-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="admin-content">
+            <!-- Top bar -->
+            <div class="admin-topbar">
+                <div class="topbar-title">
+                    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                
+                <div class="topbar-actions">
+                    <!-- Notificaciones (opcional) -->
+                    <div class="notification-badge" id="notificationBadge">
+                        <i class="far fa-bell"></i>
+                        <span class="badge-count">3</span>
+                    </div>
+
+                    <!-- Usuario dropdown -->
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-info" id="userInfo">
+                            <div class="user-avatar">
+                                {{ current_user.username[0]|upper if current_user else 'A' }}
+                            </div>
+                            <div class="user-details">
+                                <span class="user-name">{{ current_user.username if current_user else 'Admin' }}</span>
+                                <span class="user-role">
+                                    {% if current_user.es_admin %}Administrador
+                                    {% elif current_user.es_editor %}Editor
+                                    {% else %}Usuario{% endif %}
+                                </span>
+                            </div>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </div>
+                        
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="{{ url_for('perfil') }}" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i>
+                                <span>Mi Perfil</span>
+                            </a>
+                            
+                            <!-- CORREGIDO: usa configuracion en lugar de configuracion_general -->
+                            <a href="{{ url_for('configuracion') }}" class="dropdown-item">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>Preferencias</span>
+                            </a>
+                            
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('index') }}" class="dropdown-item" target="_blank">
+                                <i class="fas fa-globe"></i>
+                                <span>Ver sitio</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('cerrar_sesion') }}" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Cerrar sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Contenido principal de cada página -->
+            <div class="main-content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

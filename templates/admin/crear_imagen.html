@@ -1,0 +1,286 @@
+<!-- templates/admin/crear_imagen.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Subir Imagen{% endblock %}
+
+{% block page_title %}Subir Nueva Imagen{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST" enctype="multipart/form-data" class="admin-form" id="imagenForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+        
+        <div class="form-grid">
+            <!-- Columna izquierda - Información básica -->
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="titulo">Título de la imagen *</label>
+                    <input type="text" id="titulo" name="titulo" required 
+                           placeholder="Ej. Conferencia 2024, Campamento de Jóvenes, etc.">
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" rows="4" 
+                              placeholder="Describe la imagen..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="categoria">Categoría *</label>
+                        <select id="categoria" name="categoria" required>
+                            <option value="">Seleccionar categoría</option>
+                            <option value="eventos">Eventos</option>
+                            <option value="predicaciones">Predicaciones</option>
+                            <option value="campamentos">Campamentos</option>
+                            <option value="misiones">Misiones</option>
+                            <option value="bautismos">Bautismos</option>
+                            <option value="retiros">Retiros</option>
+                            <option value="conferencias">Conferencias</option>
+                            <option value="redes">Redes Sociales</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha">Fecha del evento</label>
+                        <input type="date" id="fecha" name="fecha">
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" id="destacada" name="destacada">
+                    <label for="destacada">Marcar como imagen destacada</label>
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" id="url_externa" name="url_externa">
+                    <label for="url_externa">Usar URL externa</label>
+                </div>
+            </div>
+
+            <!-- Columna derecha - Fuente de la imagen -->
+            <div class="form-column">
+                <div class="form-section upload-section" id="uploadSection">
+                    <h3 class="section-subtitle">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Subir imagen desde tu computadora
+                    </h3>
+                    <p class="section-hint">Formatos permitidos: JPG, PNG, GIF. Máx: 10MB</p>
+                    
+                    <div class="form-group">
+                        <div class="file-upload">
+                            <input type="file" id="archivo" name="archivo" 
+                                   accept="image/jpeg,image/png,image/gif">
+                            <div class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Seleccionar imagen</span>
+                                <small class="file-limits">Máx: 10MB</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section url-section" id="urlSection" style="display: none;">
+                    <h3 class="section-subtitle">
+                        <i class="fas fa-link"></i>
+                        Imagen desde URL externa
+                    </h3>
+                    <p class="section-hint">Pega el enlace de la imagen</p>
+                    
+                    <div class="form-group">
+                        <label for="imagen_url">URL de la imagen *</label>
+                        <input type="url" id="imagen_url" name="imagen_url" 
+                               placeholder="https://ejemplo.com/mi-imagen.jpg">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="creditos">Créditos / Fuente (opcional)</label>
+                        <input type="text" id="creditos" name="creditos" 
+                               placeholder="Ej: Facebook oficial, Instagram, etc.">
+                    </div>
+                </div>
+
+                <div id="imagePreviewContainer" class="image-preview" style="display: none;">
+                    <h4>Vista previa:</h4>
+                    <img id="imagePreview" src="" alt="Vista previa">
+                    <button type="button" class="btn-remove-preview" onclick="removeImage()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p>
+                        <strong>Para imágenes de redes sociales:</strong><br>
+                        - Facebook: Haz clic derecho y "Copiar dirección de imagen"<br>
+                        - Instagram: Abre la imagen en nueva pestaña y copia la URL
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('lista_galeria') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <i class="fas fa-save"></i> Subir Imagen
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const urlExternaCheckbox = document.getElementById('url_externa');
+    if (urlExternaCheckbox) {
+        urlExternaCheckbox.addEventListener('change', toggleFuenteImagen);
+    }
+    
+    const archivoInput = document.getElementById('archivo');
+    if (archivoInput) {
+        archivoInput.addEventListener('change', function() {
+            previewImagen(this);
+        });
+    }
+    
+    const urlInput = document.getElementById('imagen_url');
+    if (urlInput) {
+        urlInput.addEventListener('change', function() {
+            previewImagenFromUrl(this.value);
+        });
+    }
+    
+    const form = document.getElementById('imagenForm');
+    if (form) {
+        form.addEventListener('submit', validateForm);
+    }
+});
+
+function toggleFuenteImagen() {
+    const usarUrl = document.getElementById('url_externa').checked;
+    const uploadSection = document.getElementById('uploadSection');
+    const urlSection = document.getElementById('urlSection');
+    const archivoInput = document.getElementById('archivo');
+    const urlInput = document.getElementById('imagen_url');
+    
+    if (usarUrl) {
+        uploadSection.style.display = 'none';
+        urlSection.style.display = 'block';
+        archivoInput.required = false;
+        urlInput.required = true;
+    } else {
+        uploadSection.style.display = 'block';
+        urlSection.style.display = 'none';
+        archivoInput.required = true;
+        urlInput.required = false;
+    }
+    
+    removeImage();
+}
+
+function previewImagen(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    if (file.size > 10 * 1024 * 1024) {
+        alert('❌ La imagen no puede ser mayor a 10MB');
+        input.value = '';
+        return;
+    }
+    
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+        alert('❌ Solo se permiten archivos JPG, PNG o GIF');
+        input.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('imagePreviewContainer');
+        const img = document.getElementById('imagePreview');
+        if (preview && img) {
+            img.src = e.target.result;
+            preview.style.display = 'block';
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function previewImagenFromUrl(url) {
+    if (!url) return;
+    
+    try {
+        new URL(url);
+    } catch (e) {
+        alert('❌ Por favor ingresa una URL válida');
+        return;
+    }
+    
+    const preview = document.getElementById('imagePreviewContainer');
+    const img = document.getElementById('imagePreview');
+    
+    if (preview && img) {
+        img.src = url;
+        preview.style.display = 'block';
+        
+        img.onload = function() {};
+        img.onerror = function() {
+            alert('❌ No se pudo cargar la imagen desde esa URL');
+            removeImage();
+        };
+    }
+}
+
+function removeImage() {
+    const preview = document.getElementById('imagePreviewContainer');
+    const img = document.getElementById('imagePreview');
+    const archivoInput = document.getElementById('archivo');
+    const urlInput = document.getElementById('imagen_url');
+    
+    if (preview) preview.style.display = 'none';
+    if (img) img.src = '';
+    if (archivoInput) archivoInput.value = '';
+    if (urlInput) urlInput.value = '';
+}
+
+function validateForm(e) {
+    const titulo = document.getElementById('titulo').value;
+    const categoria = document.getElementById('categoria').value;
+    const usarUrl = document.getElementById('url_externa').checked;
+    
+    if (!titulo || !categoria) {
+        e.preventDefault();
+        alert('❌ Por favor completa el título y la categoría');
+        return false;
+    }
+    
+    if (usarUrl) {
+        const url = document.getElementById('imagen_url').value;
+        if (!url) {
+            e.preventDefault();
+            alert('❌ Por favor ingresa la URL de la imagen');
+            return false;
+        }
+    } else {
+        const archivo = document.getElementById('archivo').value;
+        if (!archivo) {
+            e.preventDefault();
+            alert('❌ Por favor selecciona un archivo de imagen');
+            return false;
+        }
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+    }
+    
+    return true;
+}
+</script>
+{% endblock %}

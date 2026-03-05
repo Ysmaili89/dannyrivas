@@ -1,0 +1,290 @@
+<!-- templates/admin/lista_oraciones.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Administrar Peticiones de Oración{% endblock %}
+
+{% block page_title %}Peticiones de Oración{% endblock %}
+
+{% block content %}
+<div class="oraciones-admin-container">
+    <div class="admin-section-header">
+        <h2>Lista de Peticiones</h2>
+        <div class="header-stats">
+            <span class="stat-badge">
+                <i class="fas fa-pray"></i> Total: {{ oraciones.total if oraciones else 0 }}
+            </span>
+            <span class="stat-badge urgent">
+                <i class="fas fa-exclamation-circle"></i> Urgentes: {{ urgentes_count if urgentes_count else 0 }}
+            </span>
+        </div>
+    </div>
+
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchOracion" placeholder="Buscar peticiones...">
+        </div>
+        <div class="filter-options">
+            <select id="filterUrgencia">
+                <option value="">Todas las urgencias</option>
+                <option value="normal">Normal</option>
+                <option value="urgente">Urgente</option>
+                <option value="muy-urgente">Muy urgente</option>
+            </select>
+            <select id="filterEstado">
+                <option value="">Todos los estados</option>
+                <option value="respondida">Respondida</option>
+                <option value="pendiente">Pendiente</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Petición</th>
+                    <th>Urgencia</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if oraciones and oraciones.items %}
+                    {% for oracion in oraciones.items %}
+                    <tr data-urgencia="{{ oracion.urgencia|lower }}" data-estado="{{ 'respondida' if oracion.respondida else 'pendiente' }}">
+                        <td>{{ oracion.id }}</td>
+                        <td>{{ oracion.nombre_mostrar if oracion.nombre_mostrar else (oracion.nombre if not oracion.anonimo else 'Anónimo') }}</td>
+                        <td>{{ oracion.email if not oracion.anonimo else 'Oculto' }}</td>
+                        <td>{{ oracion.peticion[:50] }}{% if oracion.peticion|length > 50 %}...{% endif %}</td>
+                        <td>
+                            <span class="badge-urgencia {{ oracion.urgencia|lower }}">
+                                {{ oracion.nivel_urgencia if oracion.nivel_urgencia else (oracion.urgencia|title if oracion.urgencia else 'Normal') }}
+                            </span>
+                        </td>
+                        <td>{{ oracion.fecha.strftime('%d/%m/%Y') if oracion.fecha else 'Sin fecha' }}</td>
+                        <td>
+                            <span class="badge-estado {{ 'respondida' if oracion.respondida else 'pendiente' }}">
+                                {{ 'Respondida' if oracion.respondida else 'Pendiente' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('editar_oracion', id=oracion.id) }}" class="action-btn edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="action-btn delete" 
+                                        onclick="confirmarEliminacion('{{ oracion.id }}')"
+                                        title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% if not oracion.respondida %}
+                                <button class="action-btn check" 
+                                        onclick="marcarRespondida('{{ oracion.id }}')"
+                                        title="Marcar como respondida">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            <div class="empty-state">
+                                <i class="fas fa-pray"></i>
+                                <h3>No hay peticiones de oración</h3>
+                                <p>Las peticiones del formulario de oración aparecerán aquí</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if oraciones and oraciones.pages > 1 %}
+    <div class="pagination">
+        {% if oraciones.page > 1 %}
+            <a href="?page={{ oraciones.page - 1 }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        {% endif %}
+        
+        <span class="page-info">Página {{ oraciones.page }} de {{ oraciones.pages }}</span>
+        
+        {% if oraciones.page < oraciones.pages %}
+            <a href="?page={{ oraciones.page + 1 }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal de confirmación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Eliminación</h3>
+            <button class="modal-close" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>¿Estás seguro de que deseas eliminar esta petición?</p>
+            <p class="warning-text" style="color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Token oculto para AJAX -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let oracionIdEliminar = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Panel de oraciones cargado');
+    
+    const searchInput = document.getElementById('searchOracion');
+    const urgenciaSelect = document.getElementById('filterUrgencia');
+    const estadoSelect = document.getElementById('filterEstado');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterOraciones);
+    }
+    
+    if (urgenciaSelect) {
+        urgenciaSelect.addEventListener('change', filterOraciones);
+    }
+    
+    if (estadoSelect) {
+        estadoSelect.addEventListener('change', filterOraciones);
+    }
+});
+
+function filterOraciones() {
+    const searchTerm = document.getElementById('searchOracion')?.value.toLowerCase() || '';
+    const urgencia = document.getElementById('filterUrgencia')?.value || '';
+    const estado = document.getElementById('filterEstado')?.value || '';
+    
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        if (row.querySelector('td[colspan]')) return;
+        
+        const texto = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || '';
+        const nombre = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+        const rowUrgencia = row.dataset.urgencia || '';
+        const rowEstado = row.dataset.estado || '';
+        
+        const matchesSearch = texto.includes(searchTerm) || nombre.includes(searchTerm);
+        const matchesUrgencia = !urgencia || rowUrgencia === urgencia;
+        const matchesEstado = !estado || rowEstado === estado;
+        
+        row.style.display = (matchesSearch && matchesUrgencia && matchesEstado) ? '' : 'none';
+    });
+}
+
+function confirmarEliminacion(id) {
+    if (!id) return;
+    
+    oracionIdEliminar = id;
+    
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    
+    if (modal && form) {
+        form.action = '/admin/oraciones/' + id + '/eliminar';
+        modal.classList.add('show');
+    }
+}
+
+function marcarRespondida(id) {
+    if (!id) return;
+    
+    if (confirm('¿Marcar esta petición como respondida?')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        fetch('/admin/oraciones/' + id + '/responder', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error al marcar como respondida');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al marcar como respondida');
+        });
+    }
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    oracionIdEliminar = null;
+}
+
+function cambiarPagina(direccion) {
+    const url = new URL(window.location.href);
+    const currentPage = parseInt(url.searchParams.get('page') || '1');
+    
+    if (direccion === 'prev' && currentPage > 1) {
+        url.searchParams.set('page', currentPage - 1);
+        window.location.href = url.toString();
+    } else if (direccion === 'next') {
+        url.searchParams.set('page', currentPage + 1);
+        window.location.href = url.toString();
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});
+</script>
+{% endblock %}

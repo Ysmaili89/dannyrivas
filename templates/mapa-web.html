@@ -1,0 +1,131 @@
+<!-- templates/mapa-web.html -->
+{% extends "base.html" %}
+
+{% block title %}Mapa del Sitio - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mapa-web.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"ORDENA MIS PASOS CON TU PALABRA"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">SALMO 119:133</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado -->
+    <div class="sitemap-header">
+        <h1 class="page-title">Mapa del Sitio</h1>
+        <p class="page-subtitle">Encuentra rápidamente todas las páginas disponibles</p>
+    </div>
+
+    <!-- Grid principal del mapa -->
+    <div class="sitemap-grid">
+        <!-- Sección Principal -->
+        <div class="sitemap-section">
+            <h2 class="sitemap-section-title">
+                <i class="fas fa-home"></i>
+                Principal
+            </h2>
+            <ul class="sitemap-list">
+                <li><a href="{{ url_for('index') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Inicio</a></li>
+                <li><a href="{{ url_for('nosotros') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Nosotros</a></li>
+                <li><a href="{{ url_for('contacto') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Contacto</a></li>
+            </ul>
+        </div>
+
+        <!-- Sección Ministerial -->
+        <div class="sitemap-section">
+            <h2 class="sitemap-section-title">
+                <i class="fas fa-pray"></i>
+                Ministerial
+            </h2>
+            <ul class="sitemap-list">
+                <li><a href="{{ url_for('oracion') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Oración</a></li>
+                <li><a href="{{ url_for('testimonio') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Testimonios</a></li>
+                <li><a href="{{ url_for('agenda') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Agenda / Invitaciones</a></li>
+                <li><a href="{{ url_for('categoria') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Categorías</a></li>
+            </ul>
+        </div>
+
+        <!-- Sección Multimedia -->
+        <div class="sitemap-section">
+            <h2 class="sitemap-section-title">
+                <i class="fas fa-video"></i>
+                Multimedia
+            </h2>
+            <ul class="sitemap-list">
+                <li><a href="{{ url_for('video') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Videos</a></li>
+                <li><a href="{{ url_for('short') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Shorts</a></li>
+                <li><a href="{{ url_for('galeria') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Galería de Fotos</a></li>
+            </ul>
+        </div>
+
+        <!-- Sección Donaciones -->
+        <div class="sitemap-section">
+            <h2 class="sitemap-section-title">
+                <i class="fas fa-hand-holding-heart"></i>
+                Donaciones
+            </h2>
+            <ul class="sitemap-list">
+                <li><a href="{{ url_for('donar') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Donar</a></li>
+            </ul>
+        </div>
+
+        <!-- Sección Legal -->
+        <div class="sitemap-section">
+            <h2 class="sitemap-section-title">
+                <i class="fas fa-gavel"></i>
+                Legal
+            </h2>
+            <ul class="sitemap-list">
+                <li><a href="{{ url_for('terminos') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Términos y Condiciones</a></li>
+                <li><a href="{{ url_for('privacidad') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Política de Privacidad</a></li>
+                <li><a href="{{ url_for('cookies') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Política de Cookies</a></li>
+                <li><a href="{{ url_for('aviso_legal') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Aviso Legal</a></li>
+            </ul>
+        </div>
+
+        <!-- Sección Ayuda -->
+        <div class="sitemap-section">
+            <h2 class="sitemap-section-title">
+                <i class="fas fa-question-circle"></i>
+                Ayuda
+            </h2>
+            <ul class="sitemap-list">
+                <li><a href="{{ url_for('faq') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Preguntas Frecuentes</a></li>
+                <li><a href="{{ url_for('accesibilidad') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Accesibilidad</a></li>
+                <li><a href="{{ url_for('mapa_web') }}" class="sitemap-link active"><i class="fas fa-chevron-right"></i> Mapa del Sitio</a></li>
+                <li><a href="{{ url_for('buscar') }}" class="sitemap-link"><i class="fas fa-chevron-right"></i> Buscador</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Nota informativa -->
+    <div class="sitemap-note">
+        <i class="fas fa-info-circle"></i>
+        <p>Este mapa del sitio te ayuda a navegar por todas las páginas disponibles. Si no encuentras lo que buscas, utiliza el <a href="{{ url_for('buscar') }}">buscador</a>.</p>
+    </div>
+</div>
+{% endblock %}

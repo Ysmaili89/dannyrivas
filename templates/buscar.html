@@ -1,0 +1,193 @@
+<!-- templates/buscar.html -->
+{% extends "base.html" %}
+
+{% block title %}Búsqueda - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"BUSCAD, Y HALLARÉIS"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">MATEO 7:7</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado -->
+    <div class="search-header">
+        <h1 class="page-title">Buscador</h1>
+        <p class="page-subtitle">Encuentra contenido en nuestro sitio</p>
+    </div>
+
+    <!-- Formulario de búsqueda -->
+    <div class="search-form-container">
+        <form action="{{ url_for('buscar') }}" method="GET" class="search-form">
+            <div class="search-wrapper">
+                <input type="text" 
+                       name="q" 
+                       placeholder="Buscar videos, artículos, devocionales..." 
+                       value="{{ query }}"
+                       required
+                       autofocus>
+                <button type="submit">
+                    <i class="fas fa-search"></i>
+                    Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if query %}
+        <!-- Resultados de búsqueda -->
+        <div class="search-results">
+            <div class="results-header">
+                <h2>Resultados para: <span>"{{ query }}"</span></h2>
+                <p class="results-count">
+                    {% if resultados and resultados.total > 0 %}
+                        Se encontraron {{ resultados.total }} resultado(s)
+                    {% else %}
+                        No se encontraron resultados
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if resultados and resultados.total > 0 %}
+                <!-- MOSTRAR RESULTADOS -->
+                <div class="videos-grid" style="margin-top: 2rem;">
+                    {% for resultado in resultados.videos %}
+                        <div class="video-card">
+                            <a href="{{ url_for('ver_video', id=resultado.id) }}">
+                                <div class="video-thumbnail">
+                                    {% if resultado.thumbnail_url %}
+                                        <img src="{{ resultado.thumbnail_url }}" alt="{{ resultado.titulo }}">
+                                    {% elif resultado.thumbnail %}
+                                        <img src="{{ url_for('static', filename='images/' + resultado.thumbnail) }}" alt="{{ resultado.titulo }}">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='images/default-video.jpg') }}" alt="{{ resultado.titulo }}">
+                                    {% endif %}
+                                    <span class="video-duration">{{ resultado.duracion or '00:00' }}</span>
+                                </div>
+                                <div class="video-info">
+                                    <h3>{{ resultado.titulo }}</h3>
+                                    <p class="video-views">
+                                        <i class="fas fa-eye"></i> {{ resultado.vistas or 0 }} vistas
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% if resultados.testimonios %}
+                <h3 style="margin-top: 3rem; color: #0F2A44;">Testimonios encontrados</h3>
+                <div class="testimonios-grid">
+                    {% for testimonio in resultados.testimonios %}
+                        <div class="testimonio-card">
+                            <div class="testimonio-header">
+                                <div class="testimonio-avatar">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div>
+                                    <h4 class="testimonio-nombre">{{ testimonio.nombre_mostrar }}</h4>
+                                    <p class="testimonio-ciudad">{{ testimonio.ciudad or '' }}</p>
+                                </div>
+                            </div>
+                            <h3 class="testimonio-titulo">{{ testimonio.titulo }}</h3>
+                            <p class="testimonio-texto">{{ testimonio.texto|truncate(150) }}</p>
+                            <div class="testimonio-footer">
+                                <a href="{{ url_for('testimonio') }}#testimonio-{{ testimonio.id }}">Ver completo</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+            {% else %}
+                <!-- Mensaje cuando no hay resultados -->
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <h3>No encontramos resultados para tu búsqueda</h3>
+                    <p>Sugerencias:</p>
+                    <ul>
+                        <li>Verifica que todas las palabras estén escritas correctamente</li>
+                        <li>Prueba con términos más generales</li>
+                        <li>Prueba con términos diferentes</li>
+                    </ul>
+                    
+                    <div class="suggested-links">
+                        <p>También puedes visitar:</p>
+                        <div class="links-grid">
+                            <a href="{{ url_for('video') }}" class="suggested-link">
+                                <i class="fas fa-video"></i>
+                                Videos
+                            </a>
+                            <a href="{{ url_for('categoria') }}" class="suggested-link">
+                                <i class="fas fa-tags"></i>
+                                Categorías
+                            </a>
+                            <a href="{{ url_for('galeria') }}" class="suggested-link">
+                                <i class="fas fa-images"></i>
+                                Galería
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- Búsqueda inicial (sin query) -->
+        <div class="search-empty">
+            <i class="fas fa-arrow-up"></i>
+            <p>Escribe algo en el buscador para comenzar</p>
+        </div>
+    {% endif %}
+
+    <!-- Secciones populares -->
+    <div class="popular-sections">
+        <h3>O explora por secciones:</h3>
+        <div class="sections-grid">
+            <a href="{{ url_for('video') }}" class="section-card">
+                <i class="fas fa-video"></i>
+                <span>Videos</span>
+            </a>
+            <a href="{{ url_for('categoria_detalle', slug='predicaciones') }}" class="section-card">
+                <i class="fas fa-cross"></i>
+                <span>Predicaciones</span>
+            </a>
+            <a href="{{ url_for('categoria_detalle', slug='estudios-biblicos') }}" class="section-card">
+                <i class="fas fa-bible"></i>
+                <span>Estudios</span>
+            </a>
+            <a href="{{ url_for('oracion') }}" class="section-card">
+                <i class="fas fa-pray"></i>
+                <span>Oración</span>
+            </a>
+            <a href="{{ url_for('testimonio') }}" class="section-card">
+                <i class="fas fa-star"></i>
+                <span>Testimonios</span>
+            </a>
+            <a href="{{ url_for('galeria') }}" class="section-card">
+                <i class="fas fa-images"></i>
+                <span>Galería</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

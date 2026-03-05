@@ -1,0 +1,413 @@
+<!-- templates/faq.html -->
+{% extends "base.html" %}
+
+{% block title %}Preguntas Frecuentes - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/faq.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"PREGUNTAD, Y SE OS DIRÁ"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">MATEO 7:7</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado -->
+    <div class="faq-header">
+        <h1 class="page-title">Preguntas Frecuentes</h1>
+        <p class="page-subtitle">Encuentra respuestas a las preguntas más comunes</p>
+    </div>
+
+    <!-- Categorías de preguntas -->
+    <div class="faq-categories">
+        <button class="faq-category-btn active" data-category="general">General</button>
+        <button class="faq-category-btn" data-category="donaciones">Donaciones</button>
+        <button class="faq-category-btn" data-category="eventos">Eventos</button>
+        <button class="faq-category-btn" data-category="contacto">Contacto</button>
+    </div>
+
+    <!-- Contenedor de preguntas -->
+    <div class="faq-container">
+        <!-- Categoría: General -->
+        <div class="faq-category-content" id="general">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Quién es el Evangelista Jhonatan Danny Rivas?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>El Evangelista Jhonatan Danny Rivas es un siervo de Dios dedicado a la predicación del evangelio, con un llamado a llevar el mensaje de esperanza y salvación a través de diferentes medios y plataformas.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Cómo puedo recibir oración?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Puedes enviar tu petición de oración a través de nuestra página de <a href="{{ url_for('oracion') }}">Oración</a>. También puedes contactarnos directamente por WhatsApp o correo electrónico.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿El contenido es gratuito?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Sí, todo el contenido de enseñanza, videos, devocionales y materiales en nuestro sitio web es completamente gratuito, como parte de nuestro compromiso de llevar el evangelio a todos.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categoría: Donaciones -->
+        <div class="faq-category-content" id="donaciones" style="display: none;">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Cómo puedo donar al ministerio?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Puedes donar a través de nuestra página de <a href="{{ url_for('donar') }}">Donaciones</a>, donde encontrarás opciones como PayPal y transferencia bancaria. Todas las donaciones son voluntarias y se destinan al sostenimiento del ministerio.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Mis donaciones son deducibles de impuestos?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Actualmente no contamos con estatus de exención fiscal. Te recomendamos consultar con tu asesor fiscal para conocer las leyes aplicables en tu país.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Puedo hacer una donación mensual?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Sí, puedes configurar donaciones mensuales a través de nuestra página de <a href="{{ url_for('donar') }}">Donaciones</a> seleccionando la opción de frecuencia mensual en PayPal.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categoría: Eventos -->
+        <div class="faq-category-content" id="eventos" style="display: none;">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Cómo puedo invitar al Evangelista a mi iglesia?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Puedes enviar una solicitud de invitación a través de nuestra página de <a href="{{ url_for('agenda') }}">Agenda</a>. Completa el formulario con los detalles del evento y te contactaremos a la brevedad.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Con cuánta anticipación debo solicitar una fecha?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Recomendamos solicitar con al menos 2-3 meses de anticipación para poder coordinar adecuadamente la agenda y los detalles del evento.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Qué tipos de eventos aceptan?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Aceptamos invitaciones para cultos, cruzadas evangelísticas, retiros espirituales, conferencias, células y otros eventos donde se predique el evangelio.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categoría: Contacto -->
+        <div class="faq-category-content" id="contacto" style="display: none;">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Cómo puedo contactarlos?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Puedes contactarnos a través de:</p>
+                    <ul class="faq-contact-list">
+                        {% if config and config.email_contacto %}
+                        <li><i class="fas fa-envelope"></i> Email: <a href="mailto:{{ config.email_contacto }}">{{ config.email_contacto }}</a></li>
+                        {% endif %}
+                        
+                        {% if config and config.telefono %}
+                        <li><i class="fas fa-phone"></i> Teléfono: <a href="tel:{{ config.telefono }}">{{ config.telefono }}</a></li>
+                        {% endif %}
+                        
+                        <li><i class="fas fa-pray"></i> <a href="{{ url_for('oracion') }}">Peticiones de oración</a></li>
+                        <li><i class="fas fa-calendar-alt"></i> <a href="{{ url_for('agenda') }}">Invitaciones</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿En qué horario responden?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Tenemos disponibilidad 24/7 para oración y emergencias. Para consultas generales, procuramos responder dentro de las 24-48 horas hábiles.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>¿Dónde están ubicados?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Nuestra base principal está en Santo Domingo, República Dominicana, aunque el ministerio tiene alcance internacional.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REDES SOCIALES DE FAQ - MEJORADA CON VALIDACIÓN -->
+    {% if config and (config.facebook_url or config.instagram_url or config.youtube_url or config.tiktok_url or config.twitter_url or config.linkedin_url) %}
+    <div class="faq-social-section">
+        <h3 class="faq-social-title">Conéctate con nosotros en redes</h3>
+        <div class="faq-social-links">
+            {% if config.facebook_url %}
+            <a href="{{ config.facebook_url }}" class="faq-social-link facebook" target="_blank" rel="noopener noreferrer" title="Facebook">
+                <i class="fab fa-facebook-f"></i>
+                <span>Facebook</span>
+            </a>
+            {% endif %}
+            
+            {% if config.instagram_url %}
+            <a href="{{ config.instagram_url }}" class="faq-social-link instagram" target="_blank" rel="noopener noreferrer" title="Instagram">
+                <i class="fab fa-instagram"></i>
+                <span>Instagram</span>
+            </a>
+            {% endif %}
+            
+            {% if config.youtube_url %}
+            <a href="{{ config.youtube_url }}" class="faq-social-link youtube" target="_blank" rel="noopener noreferrer" title="YouTube">
+                <i class="fab fa-youtube"></i>
+                <span>YouTube</span>
+            </a>
+            {% endif %}
+            
+            {% if config.tiktok_url %}
+            <a href="{{ config.tiktok_url }}" class="faq-social-link tiktok" target="_blank" rel="noopener noreferrer" title="TikTok">
+                <i class="fab fa-tiktok"></i>
+                <span>TikTok</span>
+            </a>
+            {% endif %}
+            
+            {% if config.twitter_url %}
+            <a href="{{ config.twitter_url }}" class="faq-social-link twitter" target="_blank" rel="noopener noreferrer" title="Twitter">
+                <i class="fab fa-twitter"></i>
+                <span>Twitter</span>
+            </a>
+            {% endif %}
+            
+            {% if config.linkedin_url %}
+            <a href="{{ config.linkedin_url }}" class="faq-social-link linkedin" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+                <span>LinkedIn</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ✅ Sección de contacto adicional - CORREGIDA CON VALIDACIÓN SEGURA DE WHATSAPP -->
+    <div class="faq-contact">
+        <div class="faq-contact-card">
+            <i class="fas fa-question-circle"></i>
+            <h3>¿No encuentras tu pregunta?</h3>
+            <p>Contáctanos directamente y te responderemos a la brevedad</p>
+            <div class="faq-contact-buttons">
+                <a href="{{ url_for('contacto') }}" class="faq-contact-btn">
+                    <i class="fas fa-envelope"></i>
+                    Contactar
+                </a>
+                
+                <!-- Validación segura de WhatsApp -->
+                {% if config and config.whatsapp %}
+                    {% set whatsapp_raw = config.whatsapp|string %}
+                    {% set whatsapp_clean = whatsapp_raw|replace('+', '')|replace(' ', '')|replace('-', '')|replace('(', '')|replace(')', '') %}
+                    {% if whatsapp_clean|length >= 10 and whatsapp_clean|length <= 15 and whatsapp_clean.isdigit() %}
+                    <a href="https://wa.me/{{ whatsapp_clean }}" class="faq-contact-btn whatsapp" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-whatsapp"></i>
+                        WhatsApp
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('contacto') }}#mainContactForm" class="faq-contact-btn whatsapp" style="background-color: #6c757d;" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-envelope"></i>
+                        Contactar
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos para las redes sociales de FAQ -->
+<style>
+.faq-social-section {
+    margin-top: 40px;
+    margin-bottom: 30px;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #1E3A5F 0%, #2a4a7a 100%);
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+}
+
+.faq-social-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.faq-social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.faq-social-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 50px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.faq-social-link:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.faq-social-link.facebook { background: #1877f2; }
+.faq-social-link.instagram { background: linear-gradient(45deg, #f09433, #d62976, #962fbf, #4f5bd5); }
+.faq-social-link.youtube { background: #ff0000; }
+.faq-social-link.tiktok { background: #000000; }
+.faq-social-link.twitter { background: #1da1f2; }
+.faq-social-link.linkedin { background: #0077b5; }
+
+.faq-social-link i {
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .faq-social-links {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .faq-social-link {
+        width: 200px;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para mostrar/ocultar respuestas
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    
+    faqQuestions.forEach(question => {
+        question.addEventListener('click', function() {
+            const faqItem = this.parentElement;
+            const answer = faqItem.querySelector('.faq-answer');
+            const icon = this.querySelector('i');
+            
+            // Toggle actual
+            faqItem.classList.toggle('active');
+            
+            if (faqItem.classList.contains('active')) {
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                answer.style.maxHeight = null;
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+    });
+
+    // Filtros por categoría
+    const categoryBtns = document.querySelectorAll('.faq-category-btn');
+    const categoryContents = document.querySelectorAll('.faq-category-content');
+    
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Actualizar botones
+            categoryBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Ocultar todas las categorías
+            categoryContents.forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Mostrar categoría seleccionada
+            const categoryId = this.dataset.category;
+            const categoryElement = document.getElementById(categoryId);
+            if (categoryElement) {
+                categoryElement.style.display = 'block';
+            }
+            
+            // Reiniciar preguntas abiertas
+            document.querySelectorAll('.faq-item.active').forEach(item => {
+                item.classList.remove('active');
+                const answer = item.querySelector('.faq-answer');
+                const icon = item.querySelector('i');
+                if (answer) answer.style.maxHeight = null;
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            });
+        });
+    });
+
+    // Abrir primera pregunta por defecto
+    const firstQuestion = document.querySelector('.faq-item .faq-question');
+    if (firstQuestion) {
+        setTimeout(() => {
+            firstQuestion.click();
+        }, 500);
+    }
+});
+</script>
+{% endblock %}

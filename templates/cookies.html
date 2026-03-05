@@ -1,0 +1,240 @@
+<!-- templates/cookies.html -->
+{% extends "base.html" %}
+
+{% block title %}Política de Cookies - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cookies.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"PROBADLO TODO, RETENED LO BUENO"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">1 TESALONICENSES 5:21</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado -->
+    <div class="legal-header">
+        <h1 class="page-title">Política de Cookies</h1>
+        <p class="page-subtitle">Última actualización: {{ now().strftime('%d de %B de %Y') if now else '18 de febrero de 2026' }}</p>
+    </div>
+
+    <!-- Contenido legal -->
+    <div class="legal-content">
+        <div class="legal-section">
+            <h2 class="legal-section-title">🍪 ¿Qué son las Cookies?</h2>
+            <p class="legal-text">Las cookies son pequeños archivos de texto que los sitios web almacenan en tu dispositivo (computadora, tablet, móvil) cuando los visitas. Son como pequeñas "memorias" que ayudan al sitio a reconocerte y recordar tus preferencias para ofrecerte una mejor experiencia.</p>
+            <div class="legal-highlight">
+                <i class="fas fa-info-circle"></i>
+                <p>En nuestro ministerio, las usamos para que tu visita sea más agradable y personalizada.</p>
+            </div>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">📋 Tipos de Cookies que Utilizamos</h2>
+            
+            <div class="cookie-type-card">
+                <div class="cookie-type-header">
+                    <i class="fas fa-cog"></i>
+                    <h3 class="legal-subtitle">Cookies Técnicas (Necesarias)</h3>
+                </div>
+                <p class="legal-text">Son esenciales para el funcionamiento básico del sitio. Sin ellas, no podríamos ofrecerte una experiencia fluida.</p>
+                <ul class="legal-list">
+                    <li><i class="fas fa-check-circle"></i> Mantener tu sesión iniciada</li>
+                    <li><i class="fas fa-check-circle"></i> Recordar tus preferencias de tema (oscuro/claro)</li>
+                    <li><i class="fas fa-check-circle"></i> Guardar tu preferencia de vista (grid/lista)</li>
+                </ul>
+            </div>
+
+            <div class="cookie-type-card">
+                <div class="cookie-type-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3 class="legal-subtitle">Cookies de Análisis</h3>
+                </div>
+                <p class="legal-text">Nos ayudan a entender cómo los visitantes interactúan con el sitio, qué páginas son más populares y cómo podemos mejorar.</p>
+                <ul class="legal-list">
+                    <li><i class="fas fa-check-circle"></i> Google Analytics (anónimo)</li>
+                    <li><i class="fas fa-check-circle"></i> Contador de visitas a páginas</li>
+                    <li><i class="fas fa-check-circle"></i> Tiempo de permanencia en el sitio</li>
+                </ul>
+            </div>
+
+            <div class="cookie-type-card">
+                <div class="cookie-type-header">
+                    <i class="fas fa-paint-brush"></i>
+                    <h3 class="legal-subtitle">Cookies de Funcionalidad</h3>
+                </div>
+                <p class="legal-text">Permiten recordar tus preferencias para personalizar tu experiencia.</p>
+                <ul class="legal-list">
+                    <li><i class="fas fa-check-circle"></i> Idioma preferido (traducción)</li>
+                    <li><i class="fas fa-check-circle"></i> Preferencias de visualización</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">🔗 Cookies de Terceros</h2>
+            <p class="legal-text">Algunas cookies son colocadas por servicios externos que utilizamos para enriquecer tu experiencia:</p>
+            
+            <div class="third-party-grid">
+                <div class="third-party-item">
+                    <i class="fab fa-youtube"></i>
+                    <div>
+                        <strong>YouTube:</strong>
+                        <p>Para mostrar videos incrustados. Pueden establecer cookies para mejorar la experiencia de video.</p>
+                    </div>
+                </div>
+                
+                <div class="third-party-item">
+                    <i class="fas fa-language"></i>
+                    <div>
+                        <strong>Google Translate:</strong>
+                        <p>Para la funcionalidad de traducción del sitio.</p>
+                    </div>
+                </div>
+                
+                <div class="third-party-item">
+                    <i class="fab fa-paypal"></i>
+                    <div>
+                        <strong>PayPal:</strong>
+                        <p>Para procesar donaciones de forma segura.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="legal-note">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>No tenemos control sobre estas cookies. Te recomendamos revisar las políticas de privacidad de estos servicios.</p>
+            </div>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">⚙️ Cómo Controlar las Cookies</h2>
+            <p class="legal-text">Puedes configurar tu navegador para aceptar o rechazar cookies. La mayoría de los navegadores aceptan cookies automáticamente, pero tú tienes el control.</p>
+            
+            <div class="browsers-grid">
+                <div class="browser-item">
+                    <i class="fab fa-chrome"></i>
+                    <span>Chrome</span>
+                    <small>Configuración → Privacidad y seguridad → Cookies</small>
+                </div>
+                <div class="browser-item">
+                    <i class="fab fa-firefox"></i>
+                    <span>Firefox</span>
+                    <small>Opciones → Privacidad y seguridad → Cookies</small>
+                </div>
+                <div class="browser-item">
+                    <i class="fab fa-safari"></i>
+                    <span>Safari</span>
+                    <small>Preferencias → Privacidad → Cookies</small>
+                </div>
+                <div class="browser-item">
+                    <i class="fab fa-edge"></i>
+                    <span>Edge</span>
+                    <small>Configuración → Cookies y permisos</small>
+                </div>
+            </div>
+            
+            <div class="legal-warning">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Si bloqueas las cookies, algunas funcionalidades del sitio pueden verse afectadas, pero siempre podrás acceder a nuestro contenido principal.</p>
+            </div>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">✅ Consentimiento</h2>
+            <p class="legal-text">Al continuar navegando en nuestro sitio, aceptas el uso de cookies según esta política. Valoramos tu confianza y nos comprometemos a ser transparentes.</p>
+            <div class="consent-box">
+                <i class="fas fa-hand-peace"></i>
+                <p>Si no estás de acuerdo, puedes desactivarlas en tu navegador o abandonar el sitio. Respetamos tu decisión.</p>
+            </div>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">🔄 Actualizaciones</h2>
+            <p class="legal-text">Podemos actualizar esta política de cookies ocasionalmente. Te recomendamos revisarla periódicamente para estar informado de cualquier cambio.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">📞 Contacto</h2>
+            <p class="legal-text">Si tienes preguntas sobre nuestra política de cookies:</p>
+            <div class="contact-flex">
+                {% if config.email_contacto %}
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:{{ config.email_contacto }}">{{ config.email_contacto }}</a>
+                </div>
+                {% endif %}
+                
+                {% if config.telefono %}
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <a href="tel:{{ config.telefono }}">{{ config.telefono }}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Banner de consentimiento (simulado) -->
+    <div class="cookie-banner-demo">
+        <div class="cookie-banner-content">
+            <div class="cookie-banner-icon">
+                <i class="fas fa-cookie-bite"></i>
+            </div>
+            <div class="cookie-banner-text">
+                <h4>Este sitio utiliza cookies</h4>
+                <p>Utilizamos cookies propias y de terceros para mejorar tu experiencia y mostrar contenido personalizado.</p>
+            </div>
+            <div class="cookie-banner-buttons">
+                <button class="cookie-btn cookie-btn-accept">Aceptar todas</button>
+                <button class="cookie-btn cookie-btn-config">Configurar</button>
+                <button class="cookie-btn cookie-btn-reject">Solo necesarias</button>
+            </div>
+        </div>
+        <div class="cookie-banner-footer">
+            <p>Ejemplo de cómo se vería el banner de cookies en nuestro sitio</p>
+        </div>
+    </div>
+
+    <!-- Enlaces relacionados -->
+    <div class="legal-related">
+        <h3>También te puede interesar:</h3>
+        <div class="related-links">
+            <a href="{{ url_for('privacidad') }}" class="related-link">
+                <i class="fas fa-shield-alt"></i>
+                Política de Privacidad
+            </a>
+            <a href="{{ url_for('terminos') }}" class="related-link">
+                <i class="fas fa-file-contract"></i>
+                Términos y Condiciones
+            </a>
+            <a href="{{ url_for('aviso_legal') }}" class="related-link">
+                <i class="fas fa-gavel"></i>
+                Aviso Legal
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,157 @@
+<!-- templates/short.html -->
+{% extends "base.html" %}
+
+{% block title %}Shorts - Ministerio Jhonatan Danny Rivas{% endblock %}
+
+{% block content %}
+<div class="videos-page-container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-film"></i>
+            Shorts
+        </h1>
+        <p class="page-subtitle">Videos cortos para tu crecimiento espiritual</p>
+    </div>
+
+    <section class="shorts-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-film"></i>
+                Todos los Shorts
+            </h2>
+            <div class="header-actions">
+                <span class="items-count">{{ shorts|length }} shorts</span>
+            </div>
+        </div>
+
+        <div class="shorts-grid">
+            {% if shorts %}
+                {% for short in shorts %}
+                <div class="short-card" data-url="{{ url_for('ver_short', id=short.id) }}">
+                    <div class="short-video">
+                        {% if short.video %}
+                            <video src="{{ url_for('static', filename='videos/' + short.video) }}" 
+                                   loop muted class="preview-video">
+                            </video>
+                        {% elif short.youtube_url %}
+                            {% if 'v=' in short.youtube_url %}
+                                {% set video_id = short.youtube_url.split('v=')[1].split('&')[0] %}
+                            {% elif '/shorts/' in short.youtube_url %}
+                                {% set video_id = short.youtube_url.split('/shorts/')[1].split('?')[0] %}
+                            {% else %}
+                                {% set video_id = short.youtube_url.split('/')[-1] %}
+                            {% endif %}
+                            <img src="https://img.youtube.com/vi/{{ video_id }}/hqdefault.jpg" 
+                                 alt="{{ short.titulo }}">
+                        {% else %}
+                            <div class="no-thumbnail">
+                                <i class="fas fa-film"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="short-overlay">
+                            <button class="short-play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                        
+                        {% if short.duracion %}
+                        <span class="short-duration">{{ short.duracion }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="short-info">
+                        <h4>{{ short.titulo|truncate(40) }}</h4>
+                        <div class="short-meta">
+                            <span class="short-views">
+                                <i class="fas fa-eye"></i> {{ short.vistas|default(0) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-content-message">
+                    <i class="fas fa-film fa-3x"></i>
+                    <p>No hay shorts disponibles</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if total_paginas and total_paginas > 1 %}
+        <div class="pagination-controls">
+            {% if pagina_actual > 1 %}
+                <a href="{{ url_for('short', page=pagina_actual-1) }}" class="pagination-btn">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </a>
+            {% else %}
+                <span class="pagination-btn disabled">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </span>
+            {% endif %}
+            
+            <span class="pagination-info">
+                Página {{ pagina_actual }} de {{ total_paginas }}
+            </span>
+            
+            {% if pagina_actual < total_paginas %}
+                <a href="{{ url_for('short', page=pagina_actual+1) }}" class="pagination-btn">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn disabled">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+
+<script>
+(function() {
+    "use strict";
+
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. Manejo de navegación (clic en tarjeta)
+        document.querySelectorAll('.short-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (e.target.closest('.short-play-btn')) {
+                    e.stopPropagation();
+                    return;
+                }
+                const url = this.getAttribute('data-url');
+                if (url) window.location.href = url;
+            });
+        });
+
+        // 2. Efecto Hover para videos
+        document.querySelectorAll('.preview-video').forEach(video => {
+            const card = video.closest('.short-card');
+            if (card) {
+                card.addEventListener('mouseenter', () => {
+                    video.play().catch(err => console.log("Auto-play bloqueado"));
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    video.pause();
+                    video.currentTime = 0;
+                });
+            }
+        });
+
+        // 3. Botones de play individuales
+        document.querySelectorAll('.short-play-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const card = this.closest('.short-card');
+                const url = card.getAttribute('data-url');
+                if (url) window.location.href = url;
+            });
+        });
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,317 @@
+<!-- templates/galeria.html -->
+{% extends "base.html" %}
+
+{% block title %}Galería · Jhonatan Danny Rivas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/galeria.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="galeria-header">
+    <div class="galeria-header-content">
+        <h1 class="galeria-titulo">Galería de Fotos</h1>
+        <p class="galeria-subtitulo">
+            <i class="fas fa-circle"></i>
+            Momentos de Fe y Comunidad
+        </p>
+        <p class="galeria-descripcion">
+            Revive los momentos especiales de nuestros eventos, campamentos, 
+            predicaciones y actividades de ministerio.
+        </p>
+    </div>
+</section>
+
+<div class="galeria-filtros">
+    <div class="categorias-filtro">
+        <button class="filtro-btn active" data-categoria="todas" type="button">
+            <i class="fas fa-th-large"></i> Todas
+        </button>
+        <button class="filtro-btn" data-categoria="eventos" type="button">
+            <i class="fas fa-calendar-alt"></i> Eventos
+        </button>
+        <button class="filtro-btn" data-categoria="predicaciones" type="button">
+            <i class="fas fa-cross"></i> Predicaciones
+        </button>
+        <button class="filtro-btn" data-categoria="campamentos" type="button">
+            <i class="fas fa-campground"></i> Campamentos
+        </button>
+        <button class="filtro-btn" data-categoria="misiones" type="button">
+            <i class="fas fa-globe-americas"></i> Misiones
+        </button>
+        <button class="filtro-btn" data-categoria="bautismos" type="button">
+            <i class="fas fa-water"></i> Bautismos
+        </button>
+        <button class="filtro-btn" data-categoria="retiros" type="button">
+            <i class="fas fa-tree"></i> Retiros
+        </button>
+    </div>
+    
+    <div class="vista-options">
+        <button class="vista-btn active" data-vista="grid" title="Vista cuadrícula" type="button">
+            <i class="fas fa-th"></i>
+        </button>
+        <button class="vista-btn" data-vista="masonry" title="Vista masonry" type="button">
+            <i class="fas fa-th-large"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Los datos se pasan en un atributo data- -->
+<div id="galeria-data" data-imagenes='{{ imagenes|tojson|safe }}' style="display: none;"></div>
+
+<div class="galeria-grid grid-view" id="galeriaGrid">
+    {% if imagenes and imagenes|length > 0 %}
+        {% for imagen in imagenes %}
+        <div class="galeria-item" data-categoria="{{ imagen.categoria }}" data-id="{{ imagen.id }}">
+            <div class="galeria-item-imagen" onclick='abrirModal("{{ imagen.id }}")'>
+                {% if imagen.url_externa %}
+                    <img src="{{ imagen.url_externa }}" alt="{{ imagen.titulo }}" loading="lazy">
+                {% elif imagen.archivo %}
+                    <img src="{{ url_for('static', filename='images/gallery/' + imagen.archivo) }}" alt="{{ imagen.titulo }}" loading="lazy">
+                {% else %}
+                    <img src="https://via.placeholder.com/400x300/1E3A5F/D4AF37?text=Galería" alt="{{ imagen.titulo }}" loading="lazy">
+                {% endif %}
+                
+                {% if imagen.destacada %}
+                <span class="galeria-badge">
+                    <i class="fas fa-star"></i> Destacada
+                </span>
+                {% endif %}
+                
+                <div class="galeria-overlay">
+                    <div class="galeria-info">
+                        <h3>{{ imagen.titulo }}</h3>
+                        <p>
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ imagen.fecha_evento if imagen.fecha_evento else imagen.fecha_subida }}
+                        </p>
+                        {% if imagen.creditos %}
+                        <p>
+                            <i class="fas fa-camera"></i> {{ imagen.creditos }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-content-message">
+            <i class="fas fa-images"></i>
+            <h3>No hay imágenes en la galería</h3>
+            <p>Pronto compartiremos nuevos momentos de nuestro ministerio.</p>
+        </div>
+    {% endif %}
+</div>
+
+<div class="galeria-loader" id="galeriaLoader">
+    <div class="loader-spinner"></div>
+    <p>Cargando más imágenes...</p>
+</div>
+
+<div class="modal-imagen" id="modalImagen">
+    <button class="modal-cerrar" onclick="cerrarModal()" type="button">
+        <i class="fas fa-times"></i>
+    </button>
+    
+    <div class="modal-navegacion">
+        <button class="modal-nav-btn" onclick="navegarImagen('anterior')" id="btnAnterior" type="button">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="modal-nav-btn" onclick="navegarImagen('siguiente')" id="btnSiguiente" type="button">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+    
+    <div class="modal-contenido">
+        <div class="modal-imagen-container">
+            <img src="" alt="" id="modalImg">
+        </div>
+    </div>
+    
+    <div class="modal-info">
+        <h3 id="modalTitulo"></h3>
+        <p id="modalDescripcion"></p>
+    </div>
+</div>
+
+<script>
+// Cargar datos desde el atributo data-
+var galeriaData = document.getElementById('galeria-data');
+var imagenesData = [];
+
+if (galeriaData) {
+    try {
+        imagenesData = JSON.parse(galeriaData.dataset.imagenes) || [];
+    } catch(e) {
+        console.error('Error al parsear datos de galería:', e);
+        imagenesData = [];
+    }
+}
+
+var imagenActualIndex = 0;
+var filtroActual = 'todas';
+var vistaActual = 'grid';
+
+function filtrarImagenes() {
+    var items = document.querySelectorAll('.galeria-item');
+    var itemsVisibles = 0;
+    
+    for (var i = 0; i < items.length; i++) {
+        var categoria = items[i].dataset.categoria;
+        if (filtroActual === 'todas' || categoria === filtroActual) {
+            items[i].style.display = '';
+            itemsVisibles++;
+        } else {
+            items[i].style.display = 'none';
+        }
+    }
+    
+    var noResults = document.getElementById('noResultsMessage');
+    if (itemsVisibles === 0 && items.length > 0) {
+        if (!noResults) {
+            var grid = document.getElementById('galeriaGrid');
+            var div = document.createElement('div');
+            div.className = 'no-content-message';
+            div.id = 'noResultsMessage';
+            div.innerHTML = '<i class="fas fa-search"></i><h3>No hay imágenes en esta categoría</h3><p>Pronto compartiremos nuevos momentos.</p>';
+            grid.appendChild(div);
+        }
+    } else {
+        if (noResults) {
+            noResults.remove();
+        }
+    }
+}
+
+function abrirModal(id) {
+    var idBusqueda = String(id);
+    for (var i = 0; i < imagenesData.length; i++) {
+        if (String(imagenesData[i].id) === idBusqueda) {
+            imagenActualIndex = i;
+            break;
+        }
+    }
+    actualizarModal();
+    document.getElementById('modalImagen').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModal() {
+    document.getElementById('modalImagen').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function navegarImagen(direccion) {
+    if (direccion === 'anterior') {
+        imagenActualIndex--;
+        if (imagenActualIndex < 0) {
+            imagenActualIndex = imagenesData.length - 1;
+        }
+    } else {
+        imagenActualIndex++;
+        if (imagenActualIndex >= imagenesData.length) {
+            imagenActualIndex = 0;
+        }
+    }
+    actualizarModal();
+}
+
+function actualizarModal() {
+    var imagen = imagenesData[imagenActualIndex];
+    if (!imagen) return;
+    
+    var modalImg = document.getElementById('modalImg');
+    var modalTitulo = document.getElementById('modalTitulo');
+    var modalDescripcion = document.getElementById('modalDescripcion');
+    
+    // Construir URL de la imagen
+    if (imagen.url_externa) {
+        modalImg.src = imagen.url_externa;
+    } else if (imagen.archivo) {
+        modalImg.src = "{{ url_for('static', filename='images/gallery/') }}" + imagen.archivo;
+    }
+    
+    modalImg.alt = imagen.titulo;
+    modalTitulo.textContent = imagen.titulo;
+    
+    var descripcion = '';
+    if (imagen.descripcion) descripcion += imagen.descripcion;
+    if (imagen.creditos) {
+        if (descripcion) descripcion += ' · ';
+        descripcion += '📷 ' + imagen.creditos;
+    }
+    
+    var fecha = imagen.fecha_evento || imagen.fecha_subida;
+    if (fecha) {
+        if (descripcion) descripcion += ' · ';
+        descripcion += '📅 ' + fecha;
+    }
+    
+    modalDescripcion.innerHTML = descripcion;
+    
+    var btnAnterior = document.getElementById('btnAnterior');
+    var btnSiguiente = document.getElementById('btnSiguiente');
+    if (btnAnterior && btnSiguiente) {
+        if (imagenesData.length <= 1) {
+            btnAnterior.style.display = 'none';
+            btnSiguiente.style.display = 'none';
+        } else {
+            btnAnterior.style.display = '';
+            btnSiguiente.style.display = '';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var filtros = document.querySelectorAll('.filtro-btn');
+    for (var i = 0; i < filtros.length; i++) {
+        filtros[i].addEventListener('click', function() {
+            for (var j = 0; j < filtros.length; j++) {
+                filtros[j].classList.remove('active');
+            }
+            this.classList.add('active');
+            filtroActual = this.dataset.categoria;
+            filtrarImagenes();
+        });
+    }
+    
+    var vistas = document.querySelectorAll('.vista-btn');
+    for (var i = 0; i < vistas.length; i++) {
+        vistas[i].addEventListener('click', function() {
+            for (var j = 0; j < vistas.length; j++) {
+                vistas[j].classList.remove('active');
+            }
+            this.classList.add('active');
+            
+            var grid = document.getElementById('galeriaGrid');
+            grid.classList.remove('grid-view', 'masonry-view');
+            vistaActual = this.dataset.vista;
+            grid.classList.add(vistaActual === 'grid' ? 'grid-view' : 'masonry-view');
+            try {
+                localStorage.setItem('galeria_vista', vistaActual);
+            } catch(e) {
+                console.log('LocalStorage no disponible');
+            }
+        });
+    }
+    
+    try {
+        var vistaGuardada = localStorage.getItem('galeria_vista');
+        if (vistaGuardada) {
+            var btnVista = document.querySelector('[data-vista="' + vistaGuardada + '"]');
+            if (btnVista) btnVista.click();
+        }
+    } catch(e) {
+        console.log('LocalStorage no disponible');
+    }
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') cerrarModal();
+        else if (e.key === 'ArrowLeft') navegarImagen('anterior');
+        else if (e.key === 'ArrowRight') navegarImagen('siguiente');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,372 @@
+<!-- templates/admin/configuracion.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Configuración del Sitio{% endblock %}
+
+{% block page_title %}Configuración{% endblock %}
+
+{% block content %}
+<div class="configuracion-container">
+    <form method="POST" class="config-form" id="configForm" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+        
+        <!-- Pestañas de navegación - SIN REDES SOCIALES -->
+        <div class="config-tabs">
+            <button type="button" class="config-tab active" data-tab="general">
+                <i class="fas fa-globe"></i>
+                General
+            </button>
+            <button type="button" class="config-tab" data-tab="contenido">
+                <i class="fas fa-video"></i>
+                Contenido
+            </button>
+            <button type="button" class="config-tab" data-tab="contacto">
+                <i class="fas fa-envelope"></i>
+                Contacto
+            </button>
+            <button type="button" class="config-tab" data-tab="sistema">
+                <i class="fas fa-cog"></i>
+                Sistema
+            </button>
+        </div>
+
+        <!-- Panel: General -->
+        <div class="config-panel active" id="panel-general">
+            <h3 class="panel-title">Configuración General</h3>
+            
+            <div class="form-group">
+                <label for="sitio_titulo">Título del Sitio</label>
+                <input type="text" id="sitio_titulo" name="sitio_titulo" 
+                       value="{{ config.sitio_titulo or 'Evangelista Jhonatan Danny Rivas' }}">
+                <small class="form-hint">Aparece en el título de las páginas y en el header</small>
+            </div>
+
+            <div class="form-group">
+                <label for="sitio_descripcion">Descripción del Sitio</label>
+                <textarea id="sitio_descripcion" name="sitio_descripcion" rows="3">{{ config.sitio_descripcion or 'Ministerio dedicado a llevar el mensaje de esperanza y salvación' }}</textarea>
+                <small class="form-hint">Para SEO y compartir en redes sociales</small>
+            </div>
+
+            <div class="form-group">
+                <label for="sitio_keywords">Palabras clave (SEO)</label>
+                <input type="text" id="sitio_keywords" name="sitio_keywords" 
+                       value="{{ config.sitio_keywords or 'evangelista, predicación, biblia, cristiano, fe' }}">
+                <small class="form-hint">Separadas por comas</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="sitio_idioma">Idioma principal</label>
+                    <select id="sitio_idioma" name="sitio_idioma">
+                        <option value="es" {% if config.sitio_idioma == 'es' %}selected{% endif %}>Español</option>
+                        <option value="en" {% if config.sitio_idioma == 'en' %}selected{% endif %}>Inglés</option>
+                        <option value="pt" {% if config.sitio_idioma == 'pt' %}selected{% endif %}>Portugués</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sitio_zona_horaria">Zona horaria</label>
+                    <select id="sitio_zona_horaria" name="sitio_zona_horaria">
+                        <option value="America/Santo_Domingo" {% if config.sitio_zona_horaria == 'America/Santo_Domingo' %}selected{% endif %}>Santo Domingo</option>
+                        <option value="America/New_York" {% if config.sitio_zona_horaria == 'America/New_York' %}selected{% endif %}>Nueva York</option>
+                        <option value="America/Mexico_City" {% if config.sitio_zona_horaria == 'America/Mexico_City' %}selected{% endif %}>México</option>
+                        <option value="Europe/Madrid" {% if config.sitio_zona_horaria == 'Europe/Madrid' %}selected{% endif %}>Madrid</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Logo del sitio</label>
+                <div class="logo-upload">
+                    <div class="current-logo">
+                        <img src="{% if config.logo %}{{ url_for('static', filename='images/' + config.logo) }}{% else %}https://via.placeholder.com/200x80?text=Logo{% endif %}" 
+                             alt="Logo actual" id="logoPreview">
+                    </div>
+                    <div class="file-upload">
+                        <input type="file" id="logo" name="logo" accept="image/*">
+                        <div class="file-upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Cambiar logo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Contenido -->
+        <div class="config-panel" id="panel-contenido">
+            <h3 class="panel-title">Configuración de Contenido</h3>
+
+            <div class="form-group">
+                <label>Videos por página</label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="number" name="videos_por_pagina" 
+                               value="{{ config.videos_por_pagina or 12 }}" min="1" max="50">
+                    </div>
+                    <div class="form-group">
+                        <small>Número de videos a mostrar en listados</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Shorts por página</label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="number" name="shorts_por_pagina" 
+                               value="{{ config.shorts_por_pagina or 8 }}" min="1" max="50">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="comentarios_habilitados" name="comentarios_habilitados" 
+                       {% if config.comentarios_habilitados %}checked{% endif %}>
+                <label for="comentarios_habilitados">Habilitar comentarios en videos</label>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="videos_destacados" name="videos_destacados" 
+                       {% if config.videos_destacados %}checked{% endif %}>
+                <label for="videos_destacados">Mostrar sección de videos destacados</label>
+            </div>
+
+            <div class="form-group">
+                <label for="categorias_orden">Orden de categorías</label>
+                <select id="categorias_orden" name="categorias_orden">
+                    <option value="nombre" {% if config.categorias_orden == 'nombre' %}selected{% endif %}>Alfabético</option>
+                    <option value="videos" {% if config.categorias_orden == 'videos' %}selected{% endif %}>Por cantidad de videos</option>
+                    <option value="manual" {% if config.categorias_orden == 'manual' %}selected{% endif %}>Orden manual</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Panel: Contacto -->
+        <div class="config-panel" id="panel-contacto">
+            <h3 class="panel-title">Información de Contacto</h3>
+            <p class="section-hint">Estos datos aparecerán automáticamente en footer, contacto y FAQ</p>
+
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email de contacto</label>
+                <input type="email" name="email_contacto" value="{{ config.email_contacto or 'info@jhonatandannyrivas.com' }}">
+                <small class="form-hint">Se mostrará en footer, contacto y FAQ</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> Teléfono</label>
+                <input type="text" name="telefono" value="{{ config.telefono or '+1 809-555-1234' }}">
+                <small class="form-hint">Se mostrará en footer, contacto y FAQ</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp</label>
+                <input type="text" name="whatsapp" value="{{ config.whatsapp or '+18095551234' }}"
+                       placeholder="Número con código de país">
+                <small class="form-hint">Se mostrará en footer, contacto y FAQ</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+                <textarea name="direccion" rows="2">{{ config.direccion or 'Santo Domingo, República Dominicana' }}</textarea>
+                <small class="form-hint">Se mostrará en footer y contacto</small>
+            </div>
+
+            <div class="form-group">
+                <label>Coordenadas (Google Maps)</label>
+                <div class="form-row">
+                    <input type="text" name="latitud" placeholder="Latitud" value="{{ config.latitud or '' }}">
+                    <input type="text" name="longitud" placeholder="Longitud" value="{{ config.longitud or '' }}">
+                </div>
+                <small class="form-hint">Para mapas en contacto</small>
+            </div>
+        </div>
+
+        <!-- Panel: Sistema -->
+        <div class="config-panel" id="panel-sistema">
+            <h3 class="panel-title">Configuración del Sistema</h3>
+
+            <div class="form-group">
+                <label>Modo de mantenimiento</label>
+                <div class="form-check">
+                    <input type="checkbox" id="modo_mantenimiento" name="modo_mantenimiento" 
+                           {% if config.modo_mantenimiento %}checked{% endif %}>
+                    <label for="modo_mantenimiento">Activar modo mantenimiento</label>
+                </div>
+                <small class="form-hint">Los usuarios verán una página de mantenimiento</small>
+            </div>
+
+            <div class="form-group">
+                <label>Registro de usuarios</label>
+                <div class="form-check">
+                    <input type="checkbox" id="registro_abierto" name="registro_abierto" 
+                           {% if config.registro_abierto %}checked{% endif %}>
+                    <label for="registro_abierto">Permitir registro de nuevos usuarios</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>API Keys</label>
+                <div class="form-group">
+                    <label for="youtube_api_key">YouTube API Key</label>
+                    <input type="text" id="youtube_api_key" name="youtube_api_key" 
+                           value="{{ config.youtube_api_key or '' }}">
+                    <small>Para obtener datos automáticos de videos</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="recaptcha_key">reCAPTCHA Site Key</label>
+                    <input type="text" id="recaptcha_key" name="recaptcha_key" 
+                           value="{{ config.recaptcha_key or '' }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Respaldos automáticos</label>
+                <select name="backup_frecuencia">
+                    <option value="diario" {% if config.backup_frecuencia == 'diario' %}selected{% endif %}>Diario</option>
+                    <option value="semanal" {% if config.backup_frecuencia == 'semanal' %}selected{% endif %}>Semanal</option>
+                    <option value="mensual" {% if config.backup_frecuencia == 'mensual' %}selected{% endif %}>Mensual</option>
+                    <option value="nunca" {% if config.backup_frecuencia == 'nunca' %}selected{% endif %}>Nunca</option>
+                </select>
+            </div>
+
+            <div class="stats-box">
+                <h4>Información del Sistema</h4>
+                <div class="stat-item">
+                    <span>Versión de Python:</span>
+                    <strong>{{ system_info.python_version }}</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Versión de Flask:</span>
+                    <strong>{{ system_info.flask_version }}</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Base de datos:</span>
+                    <strong>{{ system_info.db_type }}</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Espacio usado:</span>
+                    <strong>{{ system_info.disk_usage }}</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Último backup:</span>
+                    <strong>{{ system_info.last_backup or 'Nunca' }}</strong>
+                </div>
+            </div>
+
+            <div class="backup-actions">
+                <button type="button" class="btn-secondary" onclick="crearBackup()">
+                    <i class="fas fa-database"></i>
+                    Crear backup ahora
+                </button>
+                <button type="button" class="btn-secondary" onclick="limpiarCache()">
+                    <i class="fas fa-broom"></i>
+                    Limpiar caché
+                </button>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <i class="fas fa-save"></i> Guardar configuración
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function showTab(tabName, clickedElement) {
+    document.querySelectorAll('.config-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    
+    document.querySelectorAll('.config-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    document.getElementById('panel-' + tabName).classList.add('active');
+    
+    if (clickedElement) {
+        clickedElement.classList.add('active');
+    }
+    
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', tabName);
+    window.history.replaceState({}, '', url);
+}
+
+function previewLogo(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        if (file.size > 5 * 1024 * 1024) {
+            alert('❌ La imagen no puede ser mayor a 5MB');
+            input.value = '';
+            return;
+        }
+        
+        if (!file.type.startsWith('image/')) {
+            alert('❌ Por favor selecciona un archivo de imagen válido');
+            input.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('logoPreview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function crearBackup() {
+    if (confirm('¿Crear un backup de la base de datos ahora?')) {
+        window.location.href = '/admin/backup/crear';
+    }
+}
+
+function limpiarCache() {
+    if (confirm('¿Limpiar la caché del sitio?')) {
+        window.location.href = '/admin/cache/limpiar';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.config-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            showTab(tabName, this);
+        });
+    });
+    
+    const logoInput = document.getElementById('logo');
+    if (logoInput) {
+        logoInput.addEventListener('change', function() {
+            previewLogo(this);
+        });
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab') || 'general';
+    
+    const tabToActivate = document.querySelector(`.config-tab[data-tab="${tabParam}"]`);
+    if (tabToActivate) {
+        showTab(tabParam, tabToActivate);
+    }
+    
+    const form = document.getElementById('configForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        });
+    }
+});
+</script>
+{% endblock %}

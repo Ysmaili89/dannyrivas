@@ -1,0 +1,87 @@
+<!-- templates/500.html -->
+{% extends "base.html" %}
+
+{% block title %}Error del Servidor - Error 500{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner" style="background: linear-gradient(135deg, #0F2A44, #1E3A5F); border-radius: 30px; padding: 3rem 2rem; margin: 2rem 0 3rem; border: 1px solid #D4AF37;">
+        <div class="verse-content" style="display: flex; align-items: center; justify-content: center; gap: 2rem; text-align: center;">
+            <div class="verse-icon" style="font-size: 2.5rem; color: #D4AF37;"><i class="fas fa-scroll"></i></div>
+            <div class="verse-text">
+                <h2 class="verse" style="font-size: 1.6rem; font-weight: 600; color: white !important;">"ECHANDO TODA VUESTRA ANSIEDAD SOBRE ÉL, PORQUE ÉL TIENE CUIDADO DE VOSOTROS"</h2>
+                <div class="verse-divider" style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 1rem 0;">
+                    <span style="width: 50px; height: 2px; background: rgba(255,255,255,0.5);"></span>
+                    <i class="fas fa-star" style="color: #D4AF37;"></i>
+                    <span style="width: 50px; height: 2px; background: rgba(255,255,255,0.5);"></span>
+                </div>
+                <p class="verse-reference" style="font-size: 1.2rem; color: white !important;">1 PEDRO 5:7</p>
+            </div>
+            <div class="verse-icon" style="font-size: 2.5rem; color: #D4AF37;"><i class="fas fa-crown"></i></div>
+        </div>
+    </section>
+
+    <!-- Contenido principal del error 500 -->
+    <div class="error-container" style="max-width: 800px; margin: 0 auto;">
+        <div class="error-content" style="text-align: center;">
+            
+            <!-- Número de error -->
+            <div class="error-number" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <span class="error-digit" style="font-size: 8rem; font-weight: 700; color: #D4AF37; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">5</span>
+                <span class="error-digit" style="font-size: 8rem; font-weight: 700; color: #D4AF37; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">0</span>
+                <span class="error-digit" style="font-size: 8rem; font-weight: 700; color: #D4AF37; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">0</span>
+            </div>
+
+            <h1 class="error-title" style="font-size: 2.5rem; color: #0F2A44 !important; margin-bottom: 1rem;">Error interno del servidor</h1>
+            
+            <div class="error-divider" style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 1.5rem 0;">
+                <span style="width: 100px; height: 2px; background: #D4AF37;"></span>
+                <i class="fas fa-star" style="color: #D4AF37;"></i>
+                <span style="width: 100px; height: 2px; background: #D4AF37;"></span>
+            </div>
+
+            <div class="error-description" style="margin: 2rem 0;">
+                <p class="error-message" style="font-size: 1.2rem; color: #2C4B6E !important; margin-bottom: 0.5rem;">Lo sentimos, ha ocurrido un error inesperado en el servidor.</p>
+                <p class="error-consuelo" style="font-size: 1rem; color: #2C4B6E !important;">Nuestro equipo técnico ha sido notificado y estamos trabajando para solucionarlo.</p>
+            </div>
+
+            <!-- Versículo de ánimo -->
+            <div class="error-verse" style="background: #FFF9E6; border: 1px solid #D4AF37; border-radius: 12px; padding: 2rem; margin: 2rem 0;">
+                <i class="fas fa-quote-left" style="color: #D4AF37; font-size: 1.5rem; display: block; margin-bottom: 1rem;"></i>
+                <blockquote style="font-size: 1.3rem; color: #0F2A44 !important; font-style: italic; margin: 0;">"No te he dicho que si crees, verás la gloria de Dios?"</blockquote>
+                <cite style="display: block; margin-top: 1rem; color: #D4AF37;">Juan 11:40</cite>
+                <i class="fas fa-quote-right" style="color: #D4AF37; font-size: 1.5rem; display: block; margin-top: 1rem;"></i>
+            </div>
+
+            <!-- Opciones de navegación -->
+            <div class="error-actions" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin: 2rem 0;">
+                
+                <a href="{{ url_for('index') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: #0F2A44; border-radius: 50px; color: white !important; font-weight: 600; text-decoration: none;">
+                    <i class="fas fa-home"></i> Ir al Inicio
+                </a>
+                
+                <a href="{{ url_for('contacto') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: #D4AF37; border-radius: 50px; color: #0F2A44 !important; font-weight: 600; text-decoration: none;">
+                    <i class="fas fa-envelope"></i> Reportar Problema
+                </a>
+                
+                <button id="reloadBtn" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: white; border: 2px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-sync-alt"></i> Reintentar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reloadBtn = document.getElementById('reloadBtn');
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            location.reload();
+        });
+    }
+});
+</script>
+{% endblock %}

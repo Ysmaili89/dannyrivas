@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- ✅ VIEWPORT CORREGIDO - ÚNICO Y OPTIMIZADO -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+
+    <title>{% block title %}Mensajes Cristianos y Música Cristiana | Jhonatan Danny Rivas{% endblock %}</title>
+    
+    <!-- Meta tags SEO optimizados -->
+    <meta name="description" content="Mensajes cristianos y prédicas de Jhonatan Danny Rivas. Devocional cristiano diario, música cristiana 2026, versículos bíblicos, oración para tiempos difíciles y reflexiones para fortalecer la fe.">
+    <meta name="keywords" content="mensajes cristianos, prédicas cristianas, música cristiana 2026, devocional diario, versículos bíblicos, oración cristiana, Jhonatan Danny Rivas, reflexiones cristianas">
+    <meta name="author" content="Jhonatan Danny Rivas">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#1E3A5F">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tus CSS existentes (los mantienes) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        /* =============================================
+           FIX URGENTES PARA CELULAR - NO TOCAR
+           ============================================= */
+        
+        /* Garantizar que imágenes nunca se salgan */
+        img {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+        
+        /* Fix para contenedores en móvil */
+        @media (max-width: 768px) {
+            /* Sidebar debe ir abajo */
+            .content-wrapper {
+                flex-direction: column !important;
+            }
+            
+            .sidebar {
+                width: 100% !important;
+                position: static !important;
+                margin-top: 2rem !important;
+                order: 2 !important;
+            }
+            
+            .main-content {
+                order: 1 !important;
+                width: 100% !important;
+            }
+            
+            /* Menú hamburguesa visible */
+            .mobile-menu-toggle {
+                display: block !important;
+            }
+            
+            .nav-menu {
+                display: none !important;
+            }
+            
+            .nav-menu.show {
+                display: block !important;
+            }
+            
+            /* Grid de videos a 2 columnas */
+            .videos-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
+            
+            /* Shorts a 2 columnas */
+            .shorts-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
+            
+            /* Galería a 2 columnas */
+            .galeria-grid.grid-view {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            /* Padding en contenedores */
+            .main-with-sidebar {
+                padding: 0 1rem !important;
+            }
+            
+            /* Títulos más pequeños */
+            .page-title {
+                font-size: 2rem !important;
+            }
+            
+            /* Formularios */
+            .form-row {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Footer */
+            .footer-container {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Móviles muy pequeños: 1 columna */
+            .videos-grid,
+            .shorts-grid,
+            .galeria-grid.grid-view,
+            .categorias-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Padding más pequeño */
+            .main-with-sidebar {
+                padding: 0 0.8rem !important;
+            }
+            
+            /* Títulos más pequeños */
+            .page-title {
+                font-size: 1.5rem !important;
+            }
+            
+            /* Botones de acción apilados */
+            .action-buttons {
+                flex-wrap: wrap !important;
+            }
+            
+            .action-btn {
+                margin-bottom: 0.25rem !important;
+            }
+            
+            /* Tablas con scroll horizontal */
+            .table-responsive {
+                overflow-x: auto !important;
+            }
+            
+            .admin-table {
+                min-width: 600px !important;
+            }
+            
+            /* Paginación vertical */
+            .pagination {
+                flex-direction: column !important;
+                gap: 0.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="{% if session.get('theme') == 'dark' %}dark-mode{% endif %}">
+    <header>
+        <nav class="navbar" aria-label="Navegación principal">
+            <div class="nav-container">
+                <!-- Logo -->
+                <div class="nav-logo">
+                    <a href="{{ url_for('index') }}" aria-label="Ir a inicio">
+                        <i class="fas fa-fire-flame-curved" aria-hidden="true"></i>
+                        <span class="logo-text">Evangelista Jhonatan Danny Rivas</span>
+                        <span class="logo-short">J. Danny Rivas</span>
+                    </a>
+                </div>
+                
+                <!-- Buscador -->
+                <div class="nav-search" role="search">
+                    <form action="{{ url_for('buscar') }}" method="GET" novalidate>
+                        <input type="text" placeholder="Buscar..." name="q" value="{{ request.args.get('q', '') }}" required aria-label="Término de búsqueda">
+                        <button type="submit" aria-label="Buscar"><i class="fas fa-search"></i></button>
+                    </form>
+                </div>
+                
+                <!-- Acciones -->
+                <div class="nav-actions">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menú móvil">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    {% if current_user.is_authenticated and current_user.es_admin %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-icon" aria-label="Panel admin"><i class="fas fa-tachometer-alt"></i></a>
+                    {% endif %}
+                    
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('cerrar_sesion') }}" class="nav-icon" aria-label="Cerrar sesión"><i class="fas fa-sign-out-alt"></i></a>
+                    {% else %}
+                    <a href="{{ url_for('iniciar_sesion') }}" class="nav-icon" aria-label="Iniciar sesión"><i class="fas fa-sign-in-alt"></i></a>
+                    {% endif %}
+                    
+                    <button id="theme-toggle" class="nav-icon" aria-label="Modo oscuro">
+                        <i class="fas {% if session.get('theme') == 'dark' %}fa-sun{% else %}fa-moon{% endif %}"></i>
+                    </button>
+                    
+                    <div class="translator-wrapper"><div id="google_translate_element"></div></div>
+                </div>
+            </div>
+            
+            <!-- Menú principal -->
+            <div class="nav-menu" id="mainMenu">
+                <ul class="menu-items">
+                    <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li><a href="{{ url_for('oracion') }}" class="nav-link {% if request.endpoint == 'oracion' %}active{% endif %}"><i class="fas fa-pray"></i> Oración</a></li>
+                    <li><a href="{{ url_for('testimonio') }}" class="nav-link {% if request.endpoint == 'testimonio' %}active{% endif %}"><i class="fas fa-star"></i> Testimonio</a></li>
+                    <li><a href="{{ url_for('contacto') }}" class="nav-link {% if request.endpoint == 'contacto' %}active{% endif %}"><i class="fas fa-envelope"></i> Contacto</a></li>
+                    <li><a href="{{ url_for('nosotros') }}" class="nav-link {% if request.endpoint == 'nosotros' %}active{% endif %}"><i class="fas fa-info-circle"></i> Nosotros</a></li>
+                    <li><a href="{{ url_for('categoria') }}" class="nav-link {% if request.endpoint == 'categoria' %}active{% endif %}"><i class="fas fa-tags"></i> Categorías</a></li>
+                    <li><a href="{{ url_for('agenda') }}" class="nav-link {% if request.endpoint == 'agenda' %}active{% endif %}"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
+                    <li><a href="{{ url_for('video') }}" class="nav-link {% if request.endpoint == 'video' %}active{% endif %}"><i class="fas fa-video"></i> Videos</a></li>
+                    <li><a href="{{ url_for('short') }}" class="nav-link {% if request.endpoint == 'short' %}active{% endif %}"><i class="fas fa-film"></i> Shorts</a></li>
+                    <li><a href="{{ url_for('galeria') }}" class="nav-link {% if request.endpoint == 'galeria' %}active{% endif %}"><i class="fas fa-images"></i> Galería</a></li>
+                    <li><a href="{{ url_for('donar') }}" class="donate-link {% if request.endpoint == 'donar' %}active{% endif %}"><i class="fas fa-heart"></i> Donar</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    
+    <main class="main-with-sidebar">
+        <div class="content-wrapper">
+            <div class="main-content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-{{ category }}" role="alert">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+            
+            <!-- Sidebar -->
+            <aside class="sidebar" aria-label="Barra lateral">
+                <h2 class="sidebar-title">Explora más</h2>
+                
+                <div class="nav-cards">
+                    <a href="{{ url_for('index') }}" class="nav-card {% if request.endpoint == 'index' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-home"></i></div>
+                        <div class="card-content"><h3>Inicio</h3><p>Bienvenido a nuestro espacio de fe y comunidad.</p></div>
+                    </a>
+                    <a href="{{ url_for('oracion') }}" class="nav-card {% if request.endpoint == 'oracion' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-pray"></i></div>
+                        <div class="card-content"><h3>Oración</h3><p>Comparte tus peticiones y únete en oración.</p></div>
+                    </a>
+                    <a href="{{ url_for('testimonio') }}" class="nav-card {% if request.endpoint == 'testimonio' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-star"></i></div>
+                        <div class="card-content"><h3>Testimonio</h3><p>Historias de fe que inspiran y fortalecen.</p></div>
+                    </a>
+                    <a href="{{ url_for('contacto') }}" class="nav-card {% if request.endpoint == 'contacto' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="card-content"><h3>Contacto</h3><p>Comunícate con nosotros.</p></div>
+                    </a>
+                    <a href="{{ url_for('nosotros') }}" class="nav-card {% if request.endpoint == 'nosotros' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-info-circle"></i></div>
+                        <div class="card-content"><h3>Nosotros</h3><p>Conoce nuestra historia y misión.</p></div>
+                    </a>
+                    <a href="{{ url_for('categoria') }}" class="nav-card {% if request.endpoint == 'categoria' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-tags"></i></div>
+                        <div class="card-content"><h3>Categorías</h3><p>Explora contenido por temas.</p></div>
+                    </a>
+                    <a href="{{ url_for('agenda') }}" class="nav-card {% if request.endpoint == 'agenda' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="card-content"><h3>Agenda</h3><p>Próximos eventos y actividades.</p></div>
+                    </a>
+                    <a href="{{ url_for('video') }}" class="nav-card {% if request.endpoint == 'video' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-video"></i></div>
+                        <div class="card-content"><h3>Videos</h3><p>Predicaciones y estudios.</p></div>
+                    </a>
+                    <a href="{{ url_for('short') }}" class="nav-card {% if request.endpoint == 'short' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-film"></i></div>
+                        <div class="card-content"><h3>Shorts</h3><p>Mensajes cortos para tu día.</p></div>
+                    </a>
+                    <a href="{{ url_for('galeria') }}" class="nav-card {% if request.endpoint == 'galeria' %}active{% endif %}">
+                        <div class="card-icon"><i class="fas fa-images"></i></div>
+                        <div class="card-content"><h3>Galería</h3><p>Fotografías y momentos especiales.</p></div>
+                    </a>
+                </div>
+
+                <!-- Tarjeta EN VIVO -->
+                <div class="live-card">
+                    <div class="live-header">
+                        <div class="live-badge"><i class="fas fa-circle"></i><span>EN VIVO</span></div>
+                        <div class="live-time"><i class="far fa-clock"></i> 11:00 PM</div>
+                    </div>
+                    <div class="live-content">
+                        <div class="live-content-left">
+                            <h4 class="live-title">Reflexión Diaria</h4>
+                            <p class="live-description"><i class="fas fa-map-pin"></i> Todos los días - Hora dominicana</p>
+                        </div>
+                        <div class="live-profile">
+                            <img src="{{ url_for('static', filename='images/perfil.jpg') }}" alt="Jhonatan Danny Rivas" class="live-avatar" onerror="this.src='https://via.placeholder.com/80x80/1E3A5F/D4AF37?text=JD'">
+                            <span class="live-name">J. Danny Rivas</span>
+                        </div>
+                    </div>
+                    <div class="live-footer">
+                        {% set live_url = config.live_tiktok_url or config.tiktok_url %}
+                        <a href="{{ live_url or 'https://www.tiktok.com/@jhonatandannyrivas' }}" target="_blank" rel="noopener" class="live-button"><i class="fab fa-tiktok"></i> Ver en TikTok</a>
+                        <a href="#" class="live-button secondary"><i class="fas fa-bell"></i> Recordar</a>
+                    </div>
+                </div>
+
+                <!-- Versículo del día -->
+                <div class="verse-mini-card">
+                    <i class="fas fa-bible"></i>
+                    <p>"Porque yo sé los planes que tengo para vosotros"</p>
+                    <span>Jeremías 29:11</span>
+                </div>
+
+                <!-- Redes sociales sidebar -->
+                {% if config and (config.facebook_url or config.instagram_url or config.youtube_url or config.tiktok_url or config.twitter_url or config.linkedin_url) %}
+                <div class="sidebar-social">
+                    <h3 class="sidebar-social-title">Síguenos en redes</h3>
+                    <div class="sidebar-social-links">
+                        {% if config.facebook_url %}<a href="{{ config.facebook_url }}" class="social-link" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>{% endif %}
+                        {% if config.instagram_url %}<a href="{{ config.instagram_url }}" class="social-link" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>{% endif %}
+                        {% if config.youtube_url %}<a href="{{ config.youtube_url }}" class="social-link" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>{% endif %}
+                        {% if config.tiktok_url %}<a href="{{ config.tiktok_url }}" class="social-link" target="_blank" title="TikTok"><i class="fab fa-tiktok"></i></a>{% endif %}
+                        {% if config.twitter_url %}<a href="{{ config.twitter_url }}" class="social-link" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>{% endif %}
+                        {% if config.linkedin_url %}<a href="{{ config.linkedin_url }}" class="social-link" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>{% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </aside>
+        </div>
+    </main>
+    
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3 class="footer-title">Newsletter</h3>
+                <p class="footer-text">Suscríbete para recibir las últimas noticias.</p>
+                <form class="newsletter-form" action="{{ url_for('suscribir') }}" method="POST" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    <input type="email" name="email" placeholder="Tu email" required>
+                    <button type="submit"><i class="fas fa-paper-plane"></i> Suscribir</button>
+                </form>
+            </div>
+
+            <div class="footer-section">
+                <h3 class="footer-title">Contacto</h3>
+                <ul class="footer-links">
+                    <li><i class="fas fa-envelope"></i> <a href="mailto:info@jhonatandannyrivas.com">info@jhonatandannyrivas.com</a></li>
+                    <li><i class="fas fa-phone"></i> <a href="tel:+34123456789">+34 123 456 789</a></li>
+                    <li><i class="fas fa-map-marker-alt"></i> Madrid, España</li>
+                </ul>
+                <h3 class="footer-title footer-title-spaced">Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('terminos') }}"><i class="fas fa-file-contract"></i> Términos</a></li>
+                    <li><a href="{{ url_for('privacidad') }}"><i class="fas fa-shield-alt"></i> Privacidad</a></li>
+                    <li><a href="{{ url_for('cookies') }}"><i class="fas fa-cookie-bite"></i> Cookies</a></li>
+                    <li><a href="{{ url_for('aviso_legal') }}"><i class="fas fa-gavel"></i> Aviso Legal</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3 class="footer-title">Sígueme</h3>
+                <div class="social-links">
+                    {% if config.facebook_url %}<a href="{{ config.facebook_url }}" class="social-link" target="_blank"><i class="fab fa-facebook-f"></i></a>{% endif %}
+                    {% if config.instagram_url %}<a href="{{ config.instagram_url }}" class="social-link" target="_blank"><i class="fab fa-instagram"></i></a>{% endif %}
+                    {% if config.youtube_url %}<a href="{{ config.youtube_url }}" class="social-link" target="_blank"><i class="fab fa-youtube"></i></a>{% endif %}
+                    {% if config.tiktok_url %}<a href="{{ config.tiktok_url }}" class="social-link" target="_blank"><i class="fab fa-tiktok"></i></a>{% endif %}
+                    {% if config.twitter_url %}<a href="{{ config.twitter_url }}" class="social-link" target="_blank"><i class="fab fa-twitter"></i></a>{% endif %}
+                    {% if config.linkedin_url %}<a href="{{ config.linkedin_url }}" class="social-link" target="_blank"><i class="fab fa-linkedin-in"></i></a>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-bottom-container">
+                <div class="copyright">&copy; 2024-{{ now().year if now else '2025' }} Evangelista Jhonatan Danny Rivas. Todos los derechos reservados.</div>
+                <div class="legal-mini">
+                    <a href="{{ url_for('mapa_web') }}">Mapa Web</a><span class="separator">|</span>
+                    <a href="{{ url_for('faq') }}">FAQ</a><span class="separator">|</span>
+                    <a href="{{ url_for('accesibilidad') }}">Accesibilidad</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="floating-donate">
+        <a href="{{ url_for('donar') }}" title="Donar ahora"><i class="fas fa-heart"></i><span>Donar</span></a>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function googleTranslateElementInit() {
+            const container = document.getElementById('google_translate_element');
+            if (container) {
+                new google.translate.TranslateElement({
+                    pageLanguage: 'es',
+                    includedLanguages: 'en,fr,pt,de,it',
+                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                    autoDisplay: false
+                }, 'google_translate_element');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menú móvil
+            const toggle = document.getElementById('mobileMenuToggle');
+            const menu = document.getElementById('mainMenu');
+            if (toggle && menu) {
+                toggle.addEventListener('click', function() {
+                    menu.classList.toggle('show');
+                });
+            }
+        });
+    </script>
+
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

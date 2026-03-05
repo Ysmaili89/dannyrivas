@@ -1,0 +1,243 @@
+<!-- templates/admin/crear_categoria.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ 'Editar' if categoria else 'Crear' }} Categoría{% endblock %}
+
+{% block page_title %}{{ 'Editar Categoría' if categoria else 'Crear Nueva Categoría' }}{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST" class="admin-form" id="categoriaForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+        
+        <div class="form-grid">
+            <!-- Columna izquierda - Información básica -->
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="nombre">Nombre de la Categoría *</label>
+                    <input type="text" id="nombre" name="nombre" required 
+                           value="{{ categoria.nombre if categoria else '' }}"
+                           placeholder="Ej. Amor, Fe, Familia">
+                </div>
+
+                <div class="form-group">
+                    <label for="slug">Slug (URL) *</label>
+                    <input type="text" id="slug" name="slug" required 
+                           value="{{ categoria.slug if categoria else '' }}"
+                           placeholder="Ej. amor-fe-familia">
+                    <small class="form-hint">Se genera automáticamente desde el nombre</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" rows="4" 
+                              placeholder="Describe esta categoría...">{{ categoria.descripcion if categoria else '' }}</textarea>
+                </div>
+            </div>
+
+            <!-- Columna derecha - Icono automático -->
+            <div class="form-column">
+                <div class="form-section icon-section">
+                    <h3 class="section-subtitle">
+                        <i class="fas fa-icons"></i>
+                        Icono Automático
+                    </h3>
+                    <p class="section-hint">El icono se asigna automáticamente según el nombre</p>
+
+                    <!-- Vista previa del icono -->
+                    <div class="icon-preview-container">
+                        <div class="icon-preview" id="iconPreview">
+                            {% if categoria and categoria.icono %}
+                                <i class="{{ categoria.icono }}" id="iconDisplay"></i>
+                            {% else %}
+                                <i class="fas fa-folder" id="iconDisplay"></i>
+                            {% endif %}
+                        </div>
+                        <div class="icon-info">
+                            <span class="icon-name" id="iconName">
+                                {% if categoria and categoria.icono %}
+                                    {{ categoria.icono }}
+                                {% else %}
+                                    fas fa-folder
+                                {% endif %}
+                            </span>
+                            <span class="icon-suggestion" id="iconSuggestion"></span>
+                        </div>
+                    </div>
+
+                    <!-- Campo oculto para el icono -->
+                    <input type="hidden" id="icono" name="icono" 
+                           value="{{ categoria.icono if categoria else 'fas fa-folder' }}">
+
+                    <!-- Selector manual (opcional) -->
+                    <div class="manual-icon-section">
+                        <details class="manual-details">
+                            <summary class="manual-summary">
+                                <i class="fas fa-chevron-right"></i>
+                                Seleccionar icono manualmente
+                            </summary>
+                            <div class="manual-icons-grid" id="manualIcons">
+                                <div class="icon-option" data-icon="fas fa-heart"><i class="fas fa-heart"></i></div>
+                                <div class="icon-option" data-icon="fas fa-cross"><i class="fas fa-cross"></i></div>
+                                <div class="icon-option" data-icon="fas fa-bible"><i class="fas fa-bible"></i></div>
+                                <div class="icon-option" data-icon="fas fa-pray"><i class="fas fa-pray"></i></div>
+                                <div class="icon-option" data-icon="fas fa-star"><i class="fas fa-star"></i></div>
+                                <div class="icon-option" data-icon="fas fa-church"><i class="fas fa-church"></i></div>
+                                <div class="icon-option" data-icon="fas fa-dove"><i class="fas fa-dove"></i></div>
+                                <div class="icon-option" data-icon="fas fa-fish"><i class="fas fa-fish"></i></div>
+                                <div class="icon-option" data-icon="fas fa-bread-slice"><i class="fas fa-bread-slice"></i></div>
+                                <div class="icon-option" data-icon="fas fa-wine-bottle"><i class="fas fa-wine-bottle"></i></div>
+                                <div class="icon-option" data-icon="fas fa-hands-praying"><i class="fas fa-hands-praying"></i></div>
+                                <div class="icon-option" data-icon="fas fa-hand-holding-heart"><i class="fas fa-hand-holding-heart"></i></div>
+                                <div class="icon-option" data-icon="fas fa-crown"><i class="fas fa-crown"></i></div>
+                                <div class="icon-option" data-icon="fas fa-scroll"><i class="fas fa-scroll"></i></div>
+                                <div class="icon-option" data-icon="fas fa-lightbulb"><i class="fas fa-lightbulb"></i></div>
+                                <div class="icon-option" data-icon="fas fa-users"><i class="fas fa-users"></i></div>
+                                <div class="icon-option" data-icon="fas fa-home"><i class="fas fa-home"></i></div>
+                                <div class="icon-option" data-icon="fas fa-music"><i class="fas fa-music"></i></div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Color de la categoría (opcional) -->
+                <div class="form-section color-section">
+                    <h3 class="section-subtitle">
+                        <i class="fas fa-palette"></i>
+                        Color (opcional)
+                    </h3>
+                    <div class="color-options">
+                        <input type="color" id="color" name="color" 
+                               value="{{ categoria.color if categoria else '#D4AF37' }}">
+                        <span class="color-value" id="colorValue">{{ categoria.color if categoria else '#D4AF37' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+            <a href="{{ url_for('lista_categorias') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <i class="fas fa-save"></i> {{ 'Actualizar' if categoria else 'Guardar' }} Categoría
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+const iconMap = {
+    'amor': 'fas fa-heart', 'corazon': 'fas fa-heart',
+    'fe': 'fas fa-cross', 'cruz': 'fas fa-cross', 'jesús': 'fas fa-cross', 'cristo': 'fas fa-cross',
+    'biblia': 'fas fa-bible', 'palabra': 'fas fa-bible', 'escritura': 'fas fa-bible',
+    'oracion': 'fas fa-pray', 'orar': 'fas fa-pray', 'rezar': 'fas fa-pray',
+    'estrella': 'fas fa-star',
+    'familia': 'fas fa-users',
+    'hogar': 'fas fa-home',
+    'iglesia': 'fas fa-church', 'templo': 'fas fa-church',
+    'paz': 'fas fa-dove', 'paloma': 'fas fa-dove', 'espíritu': 'fas fa-dove', 'santo': 'fas fa-dove',
+    'música': 'fas fa-music', 'cantar': 'fas fa-music'
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const nombreInput = document.getElementById('nombre');
+    if (nombreInput) {
+        nombreInput.addEventListener('keyup', function() {
+            sugerirIcono(this.value);
+        });
+    }
+    
+    document.querySelectorAll('.icon-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const iconClass = this.dataset.icon;
+            if (iconClass) {
+                seleccionarIcono(iconClass);
+            }
+        });
+    });
+    
+    const colorInput = document.getElementById('color');
+    if (colorInput) {
+        colorInput.addEventListener('input', function(e) {
+            document.getElementById('colorValue').textContent = e.target.value;
+        });
+    }
+    
+    if (nombreInput && nombreInput.value) {
+        sugerirIcono(nombreInput.value);
+    }
+    
+    if (colorInput) {
+        document.getElementById('colorValue').textContent = colorInput.value;
+    }
+});
+
+function sugerirIcono(nombre) {
+    if (!nombre) return;
+    
+    const nombreLower = nombre.toLowerCase();
+    let iconoEncontrado = null;
+    
+    for (let [palabra, icono] of Object.entries(iconMap)) {
+        if (nombreLower.includes(palabra)) {
+            iconoEncontrado = icono;
+            break;
+        }
+    }
+    
+    if (!iconoEncontrado) {
+        iconoEncontrado = 'fas fa-folder';
+    }
+    
+    const iconDisplay = document.getElementById('iconDisplay');
+    const iconName = document.getElementById('iconName');
+    const iconInput = document.getElementById('icono');
+    
+    if (iconDisplay) iconDisplay.className = iconoEncontrado;
+    if (iconName) iconName.textContent = iconoEncontrado;
+    if (iconInput) iconInput.value = iconoEncontrado;
+    
+    const iconSuggestion = document.getElementById('iconSuggestion');
+    const palabrasEncontradas = Object.keys(iconMap).filter(p => nombreLower.includes(p));
+    
+    if (iconSuggestion) {
+        if (palabrasEncontradas.length > 0) {
+            iconSuggestion.textContent = `✓ Icono sugerido: ${iconoEncontrado}`;
+        } else {
+            iconSuggestion.textContent = '';
+        }
+    }
+    
+    generarSlug(nombre);
+}
+
+function generarSlug(texto) {
+    const slugInput = document.getElementById('slug');
+    if (!slugInput) return;
+    
+    if (!slugInput.value || slugInput.value.trim() === '') {
+        const slug = texto
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/--+/g, '-')
+            .trim();
+        slugInput.value = slug;
+    }
+}
+
+function seleccionarIcono(icono) {
+    const iconDisplay = document.getElementById('iconDisplay');
+    const iconName = document.getElementById('iconName');
+    const iconInput = document.getElementById('icono');
+    const iconSuggestion = document.getElementById('iconSuggestion');
+    
+    if (iconDisplay) iconDisplay.className = icono;
+    if (iconName) iconName.textContent = icono;
+    if (iconInput) iconInput.value = icono;
+    if (iconSuggestion) iconSuggestion.textContent = '✓ Icono seleccionado manualmente';
+}
+</script>
+{% endblock %}

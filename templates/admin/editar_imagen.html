@@ -1,0 +1,210 @@
+<!-- templates/admin/editar_imagen.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Editar Imagen{% endblock %}
+
+{% block page_title %}Editar Imagen{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST" enctype="multipart/form-data" class="admin-form" id="imagenForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+        
+        <div class="form-grid">
+            <!-- Columna izquierda - Información básica -->
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="titulo">Título de la imagen *</label>
+                    <input type="text" id="titulo" name="titulo" required 
+                           value="{{ imagen.titulo }}"
+                           placeholder="Ej. Conferencia 2024">
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" rows="4" 
+                              placeholder="Describe la imagen...">{{ imagen.descripcion or '' }}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="categoria">Categoría *</label>
+                        <select id="categoria" name="categoria" required>
+                            <option value="">Seleccionar categoría</option>
+                            <option value="eventos" {% if imagen.categoria == 'eventos' %}selected{% endif %}>Eventos</option>
+                            <option value="predicaciones" {% if imagen.categoria == 'predicaciones' %}selected{% endif %}>Predicaciones</option>
+                            <option value="campamentos" {% if imagen.categoria == 'campamentos' %}selected{% endif %}>Campamentos</option>
+                            <option value="misiones" {% if imagen.categoria == 'misiones' %}selected{% endif %}>Misiones</option>
+                            <option value="bautismos" {% if imagen.categoria == 'bautismos' %}selected{% endif %}>Bautismos</option>
+                            <option value="retiros" {% if imagen.categoria == 'retiros' %}selected{% endif %}>Retiros</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha">Fecha del evento</label>
+                        <input type="date" id="fecha" name="fecha" 
+                               value="{{ imagen.fecha_evento.strftime('%Y-%m-%d') if imagen.fecha_evento else '' }}">
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" id="destacada" name="destacada" 
+                           {% if imagen.destacada %}checked{% endif %}>
+                    <label for="destacada">Marcar como imagen destacada</label>
+                </div>
+            </div>
+
+            <!-- Columna derecha - Imagen actual y opciones -->
+            <div class="form-column">
+                <div class="form-section image-section">
+                    <h3 class="section-subtitle">
+                        <i class="fas fa-image"></i>
+                        Imagen Actual
+                    </h3>
+                    
+                    <div class="current-image-container">
+                        <img src="{{ url_for('static', filename='images/gallery/' + imagen.archivo) }}" 
+                             alt="{{ imagen.titulo }}"
+                             class="current-image">
+                        <p class="image-filename">
+                            <i class="fas fa-file-image"></i> {{ imagen.archivo }}
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="archivo">Reemplazar imagen (opcional)</label>
+                        <div class="file-upload">
+                            <input type="file" id="archivo" name="archivo" 
+                                   accept="image/jpeg,image/png,image/gif">
+                            <div class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Seleccionar nueva imagen</span>
+                                <small class="file-limits">Máx: 10MB</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista previa de la nueva imagen -->
+                    <div id="newImagePreview" class="new-image-preview" style="display: none;">
+                        <h4>Nueva imagen:</h4>
+                        <img id="previewImage" src="" alt="Vista previa">
+                        <button type="button" class="btn-remove-preview" onclick="removeNewImage()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="image-info">
+                        <h4>Información de la imagen:</h4>
+                        <ul class="info-list">
+                            <li><strong>Subida:</strong> {{ imagen.fecha_subida.strftime('%d/%m/%Y %H:%M') if imagen.fecha_subida else 'No disponible' }}</li>
+                            <li><strong>Categoría:</strong> {{ imagen.categoria|title if imagen.categoria else 'Sin categoría' }}</li>
+                            <li><strong>Destacada:</strong> {{ 'Sí' if imagen.destacada else 'No' }}</li>
+                            <li><strong>ID:</strong> {{ imagen.id }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+            <a href="{{ url_for('lista_galeria') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <i class="fas fa-save"></i> Actualizar Imagen
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+let formChanged = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Formulario de edición de imagen cargado');
+    
+    const fileInput = document.getElementById('archivo');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            previewNewImage(this);
+            validateFile(this);
+        });
+    }
+    
+    const formElements = document.querySelectorAll('#imagenForm input, #imagenForm textarea, #imagenForm select');
+    formElements.forEach(element => {
+        if (element.type !== 'file') {
+            element.addEventListener('change', function() {
+                formChanged = true;
+            });
+        }
+    });
+    
+    const form = document.getElementById('imagenForm');
+    if (form) {
+        form.addEventListener('submit', function() {
+            formChanged = false;
+        });
+    }
+});
+
+function previewNewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('newImagePreview');
+            const img = document.getElementById('previewImage');
+            if (preview && img) {
+                img.src = e.target.result;
+                preview.style.display = 'block';
+                formChanged = true;
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function validateFile(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    const maxSize = 10 * 1024 * 1024;
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    
+    if (file.size > maxSize) {
+        alert('❌ La imagen no puede ser mayor a 10MB');
+        input.value = '';
+        removeNewImage();
+        return false;
+    }
+    
+    if (!validTypes.includes(file.type)) {
+        alert('❌ Solo se permiten archivos JPG, PNG o GIF');
+        input.value = '';
+        removeNewImage();
+        return false;
+    }
+    
+    return true;
+}
+
+function removeNewImage() {
+    const preview = document.getElementById('newImagePreview');
+    const img = document.getElementById('previewImage');
+    const fileInput = document.getElementById('archivo');
+    
+    if (preview) preview.style.display = 'none';
+    if (img) img.src = '';
+    if (fileInput) fileInput.value = '';
+}
+
+window.addEventListener('beforeunload', function(e) {
+    if (formChanged) {
+        e.preventDefault();
+        e.returnValue = 'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?';
+        return e.returnValue;
+    }
+});
+</script>
+{% endblock %}

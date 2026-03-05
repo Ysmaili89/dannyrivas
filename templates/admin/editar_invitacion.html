@@ -1,0 +1,103 @@
+<!-- templates/admin/editar_invitacion.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Editar Invitación{% endblock %}
+
+{% block page_title %}Editar Invitación a Predicar{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+        
+        <div class="form-grid">
+            <!-- Campos de solo lectura (información del solicitante) -->
+            <div class="form-group full-width">
+                <h3 class="form-section-title">Información del Solicitante</h3>
+            </div>
+
+            <div class="form-group">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" value="{{ invitacion.nombre }}" disabled class="disabled-input">
+                <small class="form-text">Información proporcionada por el solicitante</small>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" value="{{ invitacion.email }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="text" id="telefono" value="{{ invitacion.telefono or 'No especificado' }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group">
+                <label for="iglesia">Iglesia</label>
+                <input type="text" id="iglesia" value="{{ invitacion.iglesia or 'No especificada' }}" disabled class="disabled-input">
+            </div>
+
+            <!-- Campos de solo lectura (detalles del evento) -->
+            <div class="form-group full-width">
+                <h3 class="form-section-title">Detalles del Evento</h3>
+            </div>
+
+            <div class="form-group">
+                <label for="fecha_evento">Fecha del evento</label>
+                <input type="text" id="fecha_evento" value="{{ invitacion.fecha_evento.strftime('%d/%m/%Y') if invitacion.fecha_evento else 'No especificada' }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group">
+                <label for="hora">Horario</label>
+                <input type="text" id="hora" value="{{ dict({'manana': 'Mañana', 'tarde': 'Tarde', 'noche': 'Noche', 'madrugada': 'Madrugada', 'cualquier': 'Cualquier horario'}).get(invitacion.hora, invitacion.hora|title) if invitacion.hora else 'No especificado' }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group">
+                <label for="lugar">Lugar</label>
+                <input type="text" id="lugar" value="{{ invitacion.lugar }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group">
+                <label for="tipo_evento">Tipo de evento</label>
+                <input type="text" id="tipo_evento" value="{{ dict({'culto': 'Culto', 'cruzada': 'Cruzada', 'retiro': 'Retiro', 'conferencia': 'Conferencia', 'celula': 'Célula', 'calle': 'Calle', 'otro': 'Otro'}).get(invitacion.tipo_evento, invitacion.tipo_evento|title) if invitacion.tipo_evento else 'No especificado' }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group">
+                <label for="personas">Asistentes aproximados</label>
+                <input type="text" id="personas" value="{{ invitacion.personas or 'No especificado' }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="expectativas">Expectativas o tema deseado</label>
+                <textarea id="expectativas" rows="4" disabled class="disabled-input">{{ invitacion.expectativas or 'No especificadas' }}</textarea>
+            </div>
+
+            <!-- Campos editables por el administrador -->
+            <div class="form-group full-width">
+                <h3 class="form-section-title">Gestión de la Invitación</h3>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="confirmada" name="confirmada" {% if invitacion.confirmada %}checked{% endif %}>
+                <label for="confirmada">Confirmar invitación</label>
+                <small class="form-text">Marca esta casilla para confirmar la participación en el evento</small>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="notas_admin">Notas internas</label>
+                <textarea id="notas_admin" name="notas_admin" rows="4" placeholder="Añade notas internas sobre esta invitación...">{{ invitacion.notas_admin or '' }}</textarea>
+                <small class="form-text">Estas notas solo son visibles para administradores</small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('lista_invitaciones') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

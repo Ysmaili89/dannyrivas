@@ -1,0 +1,210 @@
+<!-- templates/ver_video.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ video.titulo }} - Ministerio Jhonatan Danny Rivas{% endblock %}
+
+{% block content %}
+<div class="video-page-container">
+    <div class="breadcrumb">
+        <a href="{{ url_for('index') }}">Inicio</a>
+        <i class="fas fa-chevron-right"></i>
+        <a href="{{ url_for('video') }}">Videos</a>
+        <i class="fas fa-chevron-right"></i>
+        {% if video.categoria_rel %}
+        <a href="{{ url_for('categoria_detalle', slug=video.categoria_rel.slug) }}">
+            {{ video.categoria_rel.nombre }}
+        </a>
+        <i class="fas fa-chevron-right"></i>
+        {% endif %}
+        <span>{{ video.titulo|truncate(30) }}</span>
+    </div>
+
+    <div class="video-main">
+        <div class="video-player-wrapper">
+            {% if video.youtube_url %}
+                {% if 'v=' in video.youtube_url %}
+                    {% set video_id = video.youtube_url.split('v=')[1].split('&')[0] %}
+                {% else %}
+                    {% set video_id = video.youtube_url.split('/')[-1] %}
+                {% endif %}
+                <iframe 
+                    src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1"
+                    title="{{ video.titulo }}"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            {% elif video.archivo %}
+                <video controls autoplay>
+                    <source src="{{ url_for('static', filename='videos/' + video.archivo) }}" type="video/mp4">
+                </video>
+            {% else %}
+                <div class="no-video">
+                    <i class="fas fa-video-slash"></i>
+                    <p>Video no disponible</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="video-info-section" 
+             id="video-data" 
+             data-authenticated="{% if current_user.is_authenticated %}true{% else %}false{% endif %}">
+            
+            <h1 class="video-title">{{ video.titulo }}</h1>
+            
+            <div class="video-meta">
+                <div class="meta-left">
+                    <span class="video-views">
+                        <i class="fas fa-eye"></i> {{ video.vistas|default(0) }} vistas
+                    </span>
+                    <span class="video-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        {{ video.fecha_publicacion.strftime('%d/%m/%Y') if video.fecha_publicacion else 'Fecha no disponible' }}
+                    </span>
+                    {% if video.duracion %}
+                    <span class="video-duration-badge">
+                        <i class="fas fa-clock"></i> {{ video.duracion }}
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <div class="meta-right">
+                    {% if video.categoria_rel %}
+                    <a href="{{ url_for('categoria_detalle', slug=video.categoria_rel.slug) }}" class="video-category-badge">
+                        <i class="{{ video.categoria_rel.icono|default('fas fa-folder') }}"></i>
+                        {{ video.categoria_rel.nombre }}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="video-actions-bar">
+                <button class="action-btn" id="btn-share">
+                    <i class="fas fa-share-alt"></i> Compartir
+                </button>
+                <button class="action-btn" id="btn-save" data-id="{{ video.id }}">
+                    <i class="far fa-bookmark"></i> Guardar
+                </button>
+            </div>
+
+            {% if video.descripcion %}
+            <div class="video-description">
+                <h3>Descripción</h3>
+                <p>{{ video.descripcion|replace('\n', '<br>')|safe }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if relacionados %}
+    <div class="related-videos">
+        <h2 class="related-title">
+            <i class="fas fa-play-circle"></i> Videos relacionados
+        </h2>
+        <div class="related-grid">
+            {% for rel in relacionados %}
+            <div class="related-card" data-url="{{ url_for('ver_video', id=rel.id) }}">
+                <div class="related-thumbnail">
+                    {% if rel.thumbnail %}
+                        <img src="{{ url_for('static', filename='images/' + rel.thumbnail) }}" alt="{{ rel.titulo }}">
+                    {% elif rel.thumbnail_url %}
+                        <img src="{{ rel.thumbnail_url }}" alt="{{ rel.titulo }}">
+                    {% elif rel.youtube_url %}
+                        {% if 'v=' in rel.youtube_url %}
+                            {% set vid = rel.youtube_url.split('v=')[1].split('&')[0] %}
+                        {% else %}
+                            {% set vid = rel.youtube_url.split('/')[-1] %}
+                        {% endif %}
+                        <img src="https://img.youtube.com/vi/{{ vid }}/mqdefault.jpg" alt="{{ rel.titulo }}">
+                    {% endif %}
+                </div>
+                <div class="related-info">
+                    <h4>{{ rel.titulo|truncate(40) }}</h4>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Compartir video</h3>
+            <button class="modal-close" id="close-modal">×</button>
+        </div>
+        <div class="modal-body">
+            <p class="share-url">{{ request.url }}</p>
+            <div class="share-buttons">
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" target="_blank" class="share-btn facebook">f</a>
+                <a href="https://wa.me/?text={{ video.titulo|urlencode }}%20{{ request.url|urlencode }}" target="_blank" class="share-btn whatsapp">w</a>
+            </div>
+            <button class="copy-link-btn" id="btn-copy">
+                <i class="fas fa-copy"></i> Copiar enlace
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    "use strict";
+
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Elementos principales
+        const modal = document.getElementById('shareModal');
+        const videoDataContainer = document.getElementById('video-data');
+        
+        // 1. Lógica de Compartir
+        const btnShare = document.getElementById('btn-share');
+        if (btnShare) {
+            btnShare.addEventListener('click', () => modal.classList.add('show'));
+        }
+
+        const btnClose = document.getElementById('close-modal');
+        if (btnClose) {
+            btnClose.addEventListener('click', () => modal.classList.remove('show'));
+        }
+
+        const btnCopy = document.getElementById('btn-copy');
+        if (btnCopy) {
+            btnCopy.addEventListener('click', function() {
+                const url = document.querySelector('.share-url').textContent;
+                navigator.clipboard.writeText(url).then(() => alert('¡Enlace copiado!'));
+            });
+        }
+
+        // 2. Lógica de Guardar
+        const btnSave = document.getElementById('btn-save');
+        if (btnSave && videoDataContainer) {
+            btnSave.addEventListener('click', function() {
+                const isAuth = videoDataContainer.getAttribute('data-authenticated') === 'true';
+                const videoId = this.getAttribute('data-id');
+
+                if (isAuth) {
+                    alert('Video ' + videoId + ' guardado.');
+                } else {
+                    alert('Inicia sesión para guardar videos');
+                    window.location.href = "{{ url_for('iniciar_sesion') }}";
+                }
+            });
+        }
+
+        // 3. Navegación de relacionados
+        document.querySelectorAll('.related-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const url = this.getAttribute('data-url');
+                if (url) window.location.href = url;
+            });
+        });
+
+        // 4. Cerrar modal al hacer clic fuera
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('show');
+        });
+    });
+})();
+</script>
+{% endblock %}

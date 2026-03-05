@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+
+# Flask
+instance/
+.webassets-cache
+.env
+.flaskenv
+.env.local
+.env.production
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+app.db
+
+# Uploads
+/static/uploads/*
+!/static/uploads/.gitkeep
+/static/uploads/videos/*
+!/static/uploads/videos/.gitkeep
+/static/uploads/images/*
+!/static/uploads/images/.gitkeep
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Logs & Testing
+*.log
+.cache/
+pytest_cache/
+.coverage
+
+# Package build
+*.egg-info/
+build/
+dist/
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Secretos
+.secrets
+*.pem
+*.key
+*.crt

@@ -1,0 +1,270 @@
+<!-- templates/admin/lista_usuarios.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Administrar Usuarios{% endblock %}
+
+{% block page_title %}Usuarios del Sistema{% endblock %}
+
+{% block content %}
+<div class="usuarios-admin-container">
+    <!-- Cabecera con acciones -->
+    <div class="admin-section-header">
+        <h2>Lista de Usuarios</h2>
+        <a href="{{ url_for('crear_usuario') }}" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            Nuevo Usuario
+        </a>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchUsuario" placeholder="Buscar usuarios...">
+        </div>
+        <div class="filter-options">
+            <select id="filterRol">
+                <option value="">Todos los roles</option>
+                <option value="admin">Administrador</option>
+                <option value="editor">Editor</option>
+                <option value="usuario">Usuario</option>
+            </select>
+            <select id="filterEstado">
+                <option value="">Todos los estados</option>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="table-responsive">
+        <table class="admin-table" id="usuariosTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Último acceso</th>
+                    <th>Fecha registro</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if usuarios %}
+                    {% for usuario in usuarios %}
+                    {% set usuario_id = usuario.id|string %}
+                    {% set avatar_color = usuario.color or '#D4AF37' %}
+                    <tr class="usuario-row" 
+                        data-rol="{{ 'admin' if usuario.es_admin else 'editor' if usuario.es_editor else 'usuario' }}" 
+                        data-estado="{{ 'activo' if usuario.activo else 'inactivo' }}">
+                        <td>{{ usuario.id }}</td>
+                        <td>
+                            <!-- CORREGIDO: Usando variables CSS para evitar errores del linter -->
+                            <div class="usuario-info" style="display:flex; align-items:center; gap:0.75rem;">
+                                <div class="usuario-avatar" data-color="{{ avatar_color }}" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:1.1rem;">
+                                    <script>
+                                        (function(el) {
+                                            el.style.backgroundColor = el.dataset.color;
+                                        })(this);
+                                    </script>
+                                    {{ usuario.username[0]|upper }}
+                                </div>
+                                <div>
+                                    <strong>{{ usuario.username }}</strong>
+                                    {% if usuario.id == current_user.id %}
+                                    <span class="badge-current">Tú</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ usuario.email }}</td>
+                        <td>
+                            <span class="badge-rol {{ 'admin' if usuario.es_admin else 'editor' if usuario.es_editor else 'usuario' }}">
+                                {% if usuario.es_admin %}
+                                    Administrador
+                                {% elif usuario.es_editor %}
+                                    Editor
+                                {% else %}
+                                    Usuario
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge-estado {{ 'activo' if usuario.activo else 'inactivo' }}">
+                                {{ 'Activo' if usuario.activo else 'Inactivo' }}
+                            </span>
+                        </td>
+                        <td>{{ usuario.ultimo_acceso.strftime('%d/%m/%Y %H:%M') if usuario.ultimo_acceso else 'Nunca' }}</td>
+                        <td>{{ usuario.fecha_registro.strftime('%d/%m/%Y') if usuario.fecha_registro else 'Sin fecha' }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('editar_usuario', id=usuario.id) }}" 
+                                   class="action-btn edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if usuario.id != current_user.id %}
+                                <button class="action-btn delete" 
+                                        onclick="confirmarEliminacion('{{ usuario.id }}')"
+                                        title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="action-btn toggle-status" 
+                                        onclick="toggleUsuario('{{ usuario.id }}')"
+                                        title="{{ 'Desactivar' if usuario.activo else 'Activar' }}">
+                                    <i class="fas fa-{{ 'ban' if usuario.activo else 'check-circle' }}"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <h3>No hay usuarios registrados</h3>
+                                <p>Comienza creando el primer usuario</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Eliminación</h3>
+            <button class="modal-close" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <i class="fas fa-exclamation-triangle" style="color:#f59e0b; font-size:3rem; margin-bottom:1rem;"></i>
+            <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+            <p class="warning-text" style="color:#6b7280; font-size:0.9rem; margin-top:0.5rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <form id="deleteForm" method="POST" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Token oculto para AJAX -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let usuarioIdEliminar = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Panel de usuarios cargado');
+    
+    // Aplicar colores a los avatares
+    document.querySelectorAll('.usuario-avatar').forEach(function(avatar) {
+        const color = avatar.dataset.color;
+        if (color) {
+            avatar.style.backgroundColor = color;
+        }
+    });
+    
+    const searchInput = document.getElementById('searchUsuario');
+    const rolSelect = document.getElementById('filterRol');
+    const estadoSelect = document.getElementById('filterEstado');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterUsuarios);
+    }
+    
+    if (rolSelect) {
+        rolSelect.addEventListener('change', filterUsuarios);
+    }
+    
+    if (estadoSelect) {
+        estadoSelect.addEventListener('change', filterUsuarios);
+    }
+});
+
+function filterUsuarios() {
+    const searchTerm = document.getElementById('searchUsuario')?.value.toLowerCase() || '';
+    const rol = document.getElementById('filterRol')?.value || '';
+    const estado = document.getElementById('filterEstado')?.value || '';
+    
+    const rows = document.querySelectorAll('.usuario-row');
+    
+    rows.forEach(row => {
+        const username = row.querySelector('.usuario-info strong')?.textContent.toLowerCase() || '';
+        const email = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+        const rowRol = row.dataset.rol || '';
+        const rowEstado = row.dataset.estado || '';
+        
+        const matchesSearch = username.includes(searchTerm) || email.includes(searchTerm);
+        const matchesRol = !rol || rowRol === rol;
+        const matchesEstado = !estado || rowEstado === estado;
+        
+        row.style.display = (matchesSearch && matchesRol && matchesEstado) ? '' : 'none';
+    });
+}
+
+function confirmarEliminacion(id) {
+    if (!id) return;
+    
+    usuarioIdEliminar = id;
+    
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    
+    if (modal && form) {
+        form.action = '/admin/usuarios/' + id + '/eliminar';
+        modal.classList.add('show');
+    }
+}
+
+function toggleUsuario(id) {
+    if (!id) return;
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    if (confirm('¿Cambiar el estado de este usuario?')) {
+        setTimeout(() => {
+            alert('Funcionalidad en desarrollo');
+        }, 500);
+    }
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    usuarioIdEliminar = null;
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});
+</script>
+{% endblock %}

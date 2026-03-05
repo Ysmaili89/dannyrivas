@@ -1,0 +1,263 @@
+<!-- templates/admin/lista_videos.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Administrar Videos{% endblock %}
+
+{% block page_title %}Videos{% endblock %}
+
+{% block content %}
+<div class="videos-admin-container">
+    <div class="admin-section-header">
+        <h2>Lista de Videos</h2>
+        <a href="{{ url_for('crear_video') }}" class="btn-primary">
+            <i class="fas fa-plus"></i> Nuevo Video
+        </a>
+    </div>
+
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchVideo" placeholder="Buscar videos...">
+        </div>
+        <div class="filter-options">
+            <select id="filterCategoria">
+                <option value="">Todas las categorías</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+                {% endfor %}
+            </select>
+            <select id="filterEstado">
+                <option value="">Todos los estados</option>
+                <option value="publicado">Publicado</option>
+                <option value="borrador">Borrador</option>
+            </select>
+            <select id="filterDestacado">
+                <option value="">Todos</option>
+                <option value="destacado">Destacados</option>
+                <option value="normal">Normales</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Miniatura</th>
+                    <th>Título</th>
+                    <th>Categoría</th>
+                    <th>Duración</th>
+                    <th>Vistas</th>
+                    <th>Estado</th>
+                    <th>Destacado</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if videos %}
+                    {% for video in videos %}
+                    <tr data-categoria="{{ video.categoria_id }}" data-estado="{{ video.estado }}" data-destacado="{{ 'si' if video.destacado else 'no' }}">
+                        <td>{{ video.id }}</td>
+                        <td>
+                            {% if video.thumbnail %}
+                                <img src="{{ url_for('static', filename='images/' + video.thumbnail) }}" alt="{{ video.titulo }}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                            {% elif video.thumbnail_url %}
+                                <img src="{{ video.thumbnail_url }}" alt="{{ video.titulo }}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                            {% elif video.youtube_url %}
+                                {% if 'v=' in video.youtube_url %}
+                                    {% set video_id = video.youtube_url.split('v=')[1].split('&')[0] %}
+                                {% else %}
+                                    {% set video_id = video.youtube_url.split('/')[-1] %}
+                                {% endif %}
+                                <img src="https://img.youtube.com/vi/{{ video_id }}/default.jpg" alt="{{ video.titulo }}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                            {% else %}
+                                <div style="width: 60px; height: 40px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                                    <i class="fas fa-video" style="color: #9ca3af;"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ video.titulo }}</strong>
+                            <br>
+                            <small>{{ video.descripcion[:40] }}{% if video.descripcion and video.descripcion|length > 40 %}...{% endif %}</small>
+                        </td>
+                        <td>
+                            {% if video.categoria_rel %}
+                                <span class="badge-categoria">{{ video.categoria_rel.nombre }}</span>
+                            {% else %}
+                                <span class="badge-categoria none">Sin categoría</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ video.duracion or '00:00' }}</td>
+                        <td>{{ video.vistas|default(0) }}</td>
+                        <td>
+                            <span class="badge-estado {{ video.estado }}">
+                                {{ video.estado|title }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if video.destacado %}
+                                <i class="fas fa-star" style="color: #f59e0b;"></i>
+                            {% else %}
+                                <i class="far fa-star" style="color: #9ca3af;"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ video.fecha_publicacion.strftime('%d/%m/%Y') if video.fecha_publicacion else 'Sin fecha' }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('editar_video', id=video.id) }}" class="action-btn edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="action-btn delete" 
+                                        onclick="confirmarEliminacion('{{ video.id }}')"
+                                        title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <a href="{{ url_for('ver_video', id=video.id) }}" target="_blank" class="action-btn view" title="Ver en sitio">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center">No hay videos</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if total_paginas is defined and total_paginas > 1 %}
+    <div class="pagination">
+        {% if pagina_actual > 1 %}
+            <a href="?page={{ pagina_actual - 1 }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        {% endif %}
+        
+        <span class="page-info">Página {{ pagina_actual }} de {{ total_paginas }}</span>
+        
+        {% if pagina_actual < total_paginas %}
+            <a href="?page={{ pagina_actual + 1 }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Eliminación</h3>
+            <button class="modal-close" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>¿Eliminar este video?</p>
+            <p class="warning-text" style="color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn-danger">Eliminar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+
+<script>
+let videoIdEliminar = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchVideo');
+    const categoriaSelect = document.getElementById('filterCategoria');
+    const estadoSelect = document.getElementById('filterEstado');
+    const destacadoSelect = document.getElementById('filterDestacado');
+    
+    if (searchInput) searchInput.addEventListener('keyup', filterVideos);
+    if (categoriaSelect) categoriaSelect.addEventListener('change', filterVideos);
+    if (estadoSelect) estadoSelect.addEventListener('change', filterVideos);
+    if (destacadoSelect) destacadoSelect.addEventListener('change', filterVideos);
+});
+
+function filterVideos() {
+    const searchTerm = document.getElementById('searchVideo')?.value.toLowerCase() || '';
+    const categoria = document.getElementById('filterCategoria')?.value || '';
+    const estado = document.getElementById('filterEstado')?.value || '';
+    const destacado = document.getElementById('filterDestacado')?.value || '';
+    
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        if (row.querySelector('td[colspan]')) return;
+        
+        const titulo = row.querySelector('td:nth-child(3) strong')?.textContent.toLowerCase() || '';
+        const descripcion = row.querySelector('td:nth-child(3) small')?.textContent.toLowerCase() || '';
+        const rowCategoria = row.dataset.categoria || '';
+        const rowEstado = row.dataset.estado || '';
+        const rowDestacado = row.dataset.destacado || '';
+        
+        const matchesSearch = titulo.includes(searchTerm) || descripcion.includes(searchTerm);
+        const matchesCategoria = !categoria || rowCategoria === categoria;
+        const matchesEstado = !estado || rowEstado === estado;
+        const matchesDestacado = !destacado || 
+            (destacado === 'destacado' && rowDestacado === 'si') ||
+            (destacado === 'normal' && rowDestacado === 'no');
+        
+        row.style.display = (matchesSearch && matchesCategoria && matchesEstado && matchesDestacado) ? '' : 'none';
+    });
+}
+
+function confirmarEliminacion(id) {
+    videoIdEliminar = id;
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    form.action = '/admin/videos/' + id + '/eliminar';
+    modal.classList.add('show');
+}
+
+function cerrarModal() {
+    document.getElementById('deleteModal').classList.remove('show');
+    videoIdEliminar = null;
+}
+
+function cambiarPagina(direccion) {
+    const url = new URL(window.location.href);
+    const currentPage = parseInt(url.searchParams.get('page') || '1');
+    
+    if (direccion === 'prev' && currentPage > 1) {
+        url.searchParams.set('page', currentPage - 1);
+        window.location.href = url.toString();
+    } else if (direccion === 'next') {
+        url.searchParams.set('page', currentPage + 1);
+        window.location.href = url.toString();
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarModal();
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) cerrarModal();
+});
+</script>
+{% endblock %}

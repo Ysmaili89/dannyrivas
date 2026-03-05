@@ -1,0 +1,283 @@
+<!-- templates/admin/lista_newsletter.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Administrar Newsletter{% endblock %}
+
+{% block page_title %}Suscriptores del Newsletter{% endblock %}
+
+{% block content %}
+<div class="newsletter-admin-container">
+    <!-- Cabecera con estadísticas -->
+    <div class="admin-section-header">
+        <h2>Lista de Suscriptores</h2>
+        <div class="header-stats">
+            <span class="stat-badge">
+                <i class="fas fa-envelope"></i> Total: {{ suscriptores|length if suscriptores else 0 }}
+            </span>
+            <span class="stat-badge active">
+                <i class="fas fa-check-circle"></i> Activos: {{ suscriptores|selectattr('activo', 'equalto', true)|list|length if suscriptores else 0 }}
+            </span>
+            <span class="stat-badge inactive">
+                <i class="fas fa-times-circle"></i> Inactivos: {{ suscriptores|selectattr('activo', 'equalto', false)|list|length if suscriptores else 0 }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchSuscriptor" placeholder="Buscar por email...">
+        </div>
+        <div class="filter-options">
+            <select id="filterEstado">
+                <option value="">Todos los estados</option>
+                <option value="activo">Activos</option>
+                <option value="inactivo">Inactivos</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Tabla de suscriptores -->
+    <div class="table-responsive">
+        <table class="admin-table" id="suscriptoresTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Fecha de Suscripción</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if suscriptores %}
+                    {% for suscriptor in suscriptores %}
+                    <tr class="suscriptor-row" data-estado="{{ 'activo' if suscriptor.activo else 'inactivo' }}">
+                        <td>{{ suscriptor.id }}</td>
+                        <td>
+                            <div class="email-cell">
+                                <i class="fas fa-envelope" style="color: #6b7280; margin-right: 0.5rem;"></i>
+                                {{ suscriptor.email }}
+                            </div>
+                        </td>
+                        <td>{{ suscriptor.fecha_suscripcion.strftime('%d/%m/%Y %H:%M') if suscriptor.fecha_suscripcion else 'Sin fecha' }}</td>
+                        <td>
+                            <span class="badge-estado {{ 'activo' if suscriptor.activo else 'inactivo' }}">
+                                {{ 'Activo' if suscriptor.activo else 'Inactivo' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn toggle-status {{ 'warning' if suscriptor.activo else 'success' }}" 
+                                        onclick="toggleSuscriptor('{{ suscriptor.id }}')"
+                                        title="{{ 'Desactivar' if suscriptor.activo else 'Activar' }}">
+                                    <i class="fas fa-{{ 'ban' if suscriptor.activo else 'check-circle' }}"></i>
+                                </button>
+                                <button class="action-btn delete" 
+                                        onclick="confirmarEliminacion('{{ suscriptor.id }}')"
+                                        title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            <div class="empty-state">
+                                <i class="fas fa-envelope-open"></i>
+                                <h3>No hay suscriptores</h3>
+                                <p>Los emails que se suscriban al newsletter aparecerán aquí</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Botón para exportar -->
+    <div class="export-section">
+        <button class="btn-secondary" onclick="exportarCSV()">
+            <i class="fas fa-file-csv"></i>
+            Exportar a CSV
+        </button>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Eliminación</h3>
+            <button class="modal-close" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>¿Estás seguro de que deseas eliminar este suscriptor?</p>
+            <p class="warning-text" style="color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Token oculto para AJAX -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let suscriptorIdEliminar = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Panel de newsletter cargado');
+    
+    const searchInput = document.getElementById('searchSuscriptor');
+    const estadoSelect = document.getElementById('filterEstado');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterSuscriptores);
+    }
+    
+    if (estadoSelect) {
+        estadoSelect.addEventListener('change', filterSuscriptores);
+    }
+});
+
+function filterSuscriptores() {
+    const searchTerm = document.getElementById('searchSuscriptor')?.value.toLowerCase() || '';
+    const estado = document.getElementById('filterEstado')?.value || '';
+    
+    const rows = document.querySelectorAll('.suscriptor-row');
+    
+    rows.forEach(row => {
+        const emailCell = row.querySelector('.email-cell');
+        if (!emailCell) return;
+        
+        const email = emailCell.textContent.toLowerCase();
+        const rowEstado = row.dataset.estado || '';
+        
+        const matchesSearch = email.includes(searchTerm);
+        const matchesEstado = !estado || rowEstado === estado;
+        
+        row.style.display = (matchesSearch && matchesEstado) ? '' : 'none';
+    });
+}
+
+function toggleSuscriptor(id) {
+    if (!id) return;
+    
+    if (confirm('¿Cambiar el estado de este suscriptor?')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        fetch('/admin/newsletter/' + id + '/toggle', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error al cambiar el estado del suscriptor');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cambiar el estado del suscriptor');
+        });
+    }
+}
+
+function confirmarEliminacion(id) {
+    if (!id) return;
+    
+    suscriptorIdEliminar = id;
+    
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    
+    if (modal && form) {
+        form.action = '/admin/newsletter/' + id + '/eliminar';
+        modal.classList.add('show');
+    }
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    suscriptorIdEliminar = null;
+}
+
+function exportarCSV() {
+    const rows = document.querySelectorAll('.suscriptor-row');
+    let csvContent = "ID,Email,Fecha de Suscripción,Estado\n";
+    let exportCount = 0;
+    
+    rows.forEach(row => {
+        if (row.style.display !== 'none' && row.cells && row.cells.length >= 4) {
+            const id = row.cells[0]?.textContent.trim() || '';
+            const emailCell = row.querySelector('.email-cell');
+            const email = emailCell ? emailCell.textContent.trim() : '';
+            const fecha = row.cells[2]?.textContent.trim() || '';
+            const estadoBadge = row.querySelector('.badge-estado');
+            const estado = estadoBadge ? estadoBadge.textContent.trim() : '';
+            
+            const escapedEmail = email.replace(/"/g, '""');
+            
+            csvContent += `${id},"${escapedEmail}",${fecha},${estado}\n`;
+            exportCount++;
+        }
+    });
+    
+    if (exportCount === 0) {
+        alert('No hay datos para exportar');
+        return;
+    }
+    
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    const fecha = new Date().toISOString().slice(0,10);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `suscriptores_${fecha}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    alert(`✅ Exportados ${exportCount} suscriptores correctamente`);
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});
+</script>
+{% endblock %}

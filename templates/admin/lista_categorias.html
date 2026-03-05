@@ -1,0 +1,138 @@
+<!-- templates/admin/lista_categorias.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Administrar Categorías{% endblock %}
+
+{% block page_title %}Categorías{% endblock %}
+
+{% block content %}
+<div class="categorias-admin-container">
+    <!-- Cabecera con acciones -->
+    <div class="admin-section-header">
+        <h2>Lista de Categorías</h2>
+        <a href="{{ url_for('crear_categoria') }}" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            Nueva Categoría
+        </a>
+    </div>
+
+    <!-- Grid de categorías -->
+    <div class="categorias-grid" id="categoriasGrid">
+        {% if categorias %}
+            {% for categoria in categorias %}
+            {% set categoria_id = categoria.id|string %}
+            {% set categoria_icono = categoria.icono or 'fas fa-folder' %}
+            {% set color_index = loop.index % 10 + 1 %}
+            <div class="categoria-card" data-id="{{ categoria_id }}">
+                <div class="categoria-icon categoria-color-{{ color_index }}">
+                    <i class="{{ categoria_icono }}"></i>
+                </div>
+                <div class="categoria-info">
+                    <h3 class="categoria-nombre">{{ categoria.nombre }}</h3>
+                    <p class="categoria-slug">{{ categoria.slug }}</p>
+                    {% if categoria.descripcion %}
+                    <p class="categoria-descripcion">{{ categoria.descripcion[:60] }}{% if categoria.descripcion|length > 60 %}...{% endif %}</p>
+                    {% endif %}
+                    <div class="categoria-meta">
+                        <span class="categoria-videos">
+                            <i class="fas fa-video"></i> {{ categoria.total_videos_publicados }} videos publicados
+                        </span>
+                    </div>
+                </div>
+                <div class="categoria-actions">
+                    <a href="{{ url_for('editar_categoria', id=categoria.id) }}" 
+                       class="action-btn edit" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="action-btn delete" 
+                            onclick="confirmarEliminacion('{{ categoria.id }}')"
+                            {% if categoria.total_videos_publicados > 0 %}disabled title="No se puede eliminar: tiene videos asociados"{% endif %}
+                            title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-tags" style="font-size: 3rem; color: #9ca3af; margin-bottom: 1rem;"></i>
+                <h3 style="color: #374151; margin-bottom: 0.5rem;">No hay categorías aún</h3>
+                <p style="color: #6b7280; margin-bottom: 1.5rem;">Crea tu primera categoría para organizar los videos</p>
+                <a href="{{ url_for('crear_categoria') }}" class="btn-primary">
+                    Crear Categoría
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Eliminación</h3>
+            <button class="modal-close" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>¿Estás seguro de que deseas eliminar esta categoría?</p>
+            <p class="warning-text" style="color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Token oculto para AJAX -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let categoriaIdEliminar = null;
+
+function confirmarEliminacion(id) {
+    if (!id) return;
+    
+    categoriaIdEliminar = id;
+    
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    
+    if (modal && form) {
+        form.action = '/admin/categorias/' + id + '/eliminar';
+        modal.classList.add('show');
+    }
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    categoriaIdEliminar = null;
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});
+</script>
+{% endblock %}

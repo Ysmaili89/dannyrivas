@@ -1,0 +1,274 @@
+<!-- templates/admin/lista_contactos.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Administrar Contactos{% endblock %}
+
+{% block page_title %}Mensajes de Contacto{% endblock %}
+
+{% block content %}
+<div class="contactos-admin-container">
+    <div class="admin-section-header">
+        <h2>Lista de Contactos</h2>
+        <div class="header-stats">
+            <span class="stat-badge">
+                <i class="fas fa-envelope"></i> Total: {{ contactos.total if contactos else 0 }}
+            </span>
+            <span class="stat-badge unread">
+                <i class="fas fa-envelope-open"></i> No leídos: {{ no_leidos_count if no_leidos_count else 0 }}
+            </span>
+        </div>
+    </div>
+
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchContacto" placeholder="Buscar contactos...">
+        </div>
+        <div class="filter-options">
+            <select id="filterAsunto">
+                <option value="">Todos los asuntos</option>
+                <option value="oracion">Oración</option>
+                <option value="invitacion">Invitación</option>
+                <option value="consulta">Consulta</option>
+                <option value="testimonio">Testimonio</option>
+                <option value="donacion">Donación</option>
+            </select>
+            <select id="filterLeido">
+                <option value="">Todos</option>
+                <option value="leido">Leído</option>
+                <option value="no-leido">No leído</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="contactos-grid">
+        {% if contactos and contactos.items %}
+            {% for contacto in contactos.items %}
+            <div class="contacto-card {{ 'no-leido' if not contacto.leido }}" data-asunto="{{ contacto.asunto }}" data-leido="{{ 'leido' if contacto.leido else 'no-leido' }}">
+                <div class="contacto-header">
+                    <div class="contacto-avatar">
+                        {{ contacto.nombre[0]|upper if contacto.nombre else '?' }}
+                    </div>
+                    <div class="contacto-info">
+                        <h3 class="contacto-nombre">{{ contacto.nombre }}</h3>
+                        <div class="contacto-meta">
+                            <span><i class="fas fa-envelope"></i> {{ contacto.email }}</span>
+                            {% if contacto.telefono %}
+                            <span><i class="fas fa-phone"></i> {{ contacto.telefono }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if not contacto.leido %}
+                    <span class="badge-no-leido">Nuevo</span>
+                    {% endif %}
+                </div>
+
+                <div class="contacto-asunto">
+                    <i class="fas fa-tag"></i>
+                    <strong>{{ contacto.asunto_mostrar if contacto.asunto_mostrar else contacto.asunto|title if contacto.asunto else 'Sin asunto' }}</strong>
+                </div>
+
+                <div class="contacto-mensaje">
+                    {{ contacto.mensaje }}
+                </div>
+
+                <div class="contacto-footer">
+                    <span class="contacto-fecha">
+                        <i class="fas fa-calendar"></i> {{ contacto.fecha.strftime('%d/%m/%Y %H:%M') if contacto.fecha else 'Sin fecha' }}
+                    </span>
+                    <div class="contacto-actions">
+                        <a href="{{ url_for('editar_contacto', id=contacto.id) }}" class="action-btn view" title="Ver detalles">
+                            <i class="fas fa-eye"></i>
+                        </a>
+
+                        <button class="action-btn delete" 
+                                onclick="confirmarEliminacion('{{ contacto.id }}')"
+                                title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+
+                        {% if not contacto.leido %}
+                        <button class="action-btn mark-read" 
+                                onclick="marcarLeido('{{ contacto.id }}')"
+                                title="Marcar como leído">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-envelope-open" style="font-size: 3rem; color: #9ca3af; margin-bottom: 1rem;"></i>
+                <h3 style="color: #374151; margin-bottom: 0.5rem;">No hay mensajes de contacto</h3>
+                <p style="color: #6b7280;">Los mensajes del formulario de contacto aparecerán aquí</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if contactos and contactos.pages > 1 %}
+    <div class="pagination">
+        {% if contactos.page > 1 %}
+            <a href="?page={{ contactos.page - 1 }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        {% endif %}
+        
+        <span class="page-info">Página {{ contactos.page }} de {{ contactos.pages }}</span>
+        
+        {% if contactos.page < contactos.pages %}
+            <a href="?page={{ contactos.page + 1 }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal de confirmación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Eliminación</h3>
+            <button class="modal-close" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>¿Estás seguro de que deseas eliminar este mensaje?</p>
+            <p class="warning-text" style="color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Token oculto para AJAX -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let contactoIdEliminar = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Panel de contactos cargado');
+    
+    const searchInput = document.getElementById('searchContacto');
+    const asuntoSelect = document.getElementById('filterAsunto');
+    const leidoSelect = document.getElementById('filterLeido');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterContactos);
+    }
+    
+    if (asuntoSelect) {
+        asuntoSelect.addEventListener('change', filterContactos);
+    }
+    
+    if (leidoSelect) {
+        leidoSelect.addEventListener('change', filterContactos);
+    }
+});
+
+function filterContactos() {
+    const searchTerm = document.getElementById('searchContacto')?.value.toLowerCase() || '';
+    const asunto = document.getElementById('filterAsunto')?.value || '';
+    const leido = document.getElementById('filterLeido')?.value || '';
+    
+    const cards = document.querySelectorAll('.contacto-card');
+    
+    cards.forEach(card => {
+        const nombre = card.querySelector('.contacto-nombre')?.textContent.toLowerCase() || '';
+        const emailSpan = card.querySelector('.contacto-meta span:first-child');
+        const email = emailSpan ? emailSpan.textContent.toLowerCase() : '';
+        const mensaje = card.querySelector('.contacto-mensaje')?.textContent.toLowerCase() || '';
+        const cardAsunto = card.dataset.asunto || '';
+        const cardLeido = card.dataset.leido || '';
+        
+        const matchesSearch = nombre.includes(searchTerm) || email.includes(searchTerm) || mensaje.includes(searchTerm);
+        const matchesAsunto = !asunto || cardAsunto === asunto;
+        const matchesLeido = !leido || cardLeido === leido;
+        
+        card.style.display = (matchesSearch && matchesAsunto && matchesLeido) ? '' : 'none';
+    });
+}
+
+function confirmarEliminacion(id) {
+    if (!id) return;
+    
+    contactoIdEliminar = id;
+    
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    
+    if (modal && form) {
+        form.action = '/admin/contactos/' + id + '/eliminar';
+        modal.classList.add('show');
+    }
+}
+
+function marcarLeido(id) {
+    if (!id) return;
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    fetch('/admin/contactos/' + id + '/leer', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert('Error al marcar como leído');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al marcar como leído');
+    });
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    contactoIdEliminar = null;
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});
+</script>
+{% endblock %}

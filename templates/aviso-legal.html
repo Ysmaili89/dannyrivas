@@ -1,0 +1,291 @@
+<!-- templates/aviso-legal.html -->
+{% extends "base.html" %}
+
+{% block title %}Aviso Legal - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"ASÍ QUE, CADA UNO DE NOSOTROS DARÁ A DIOS CUENTA DE SÍ"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">ROMANOS 14:12</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado -->
+    <div class="legal-header">
+        <h1 class="page-title">Aviso Legal</h1>
+        <p class="page-subtitle">Información general y términos de uso</p>
+    </div>
+
+    <!-- Contenido legal - CORREGIDO: Todo el texto visible -->
+    <div class="legal-content">
+        
+        <!-- SECCIÓN 1: IDENTIFICACIÓN -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important;">
+                <i class="fas fa-user" style="color: #D4AF37;"></i>
+                1. Identificación del Titular
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important; margin-bottom: 1.5rem;">
+                En cumplimiento con el deber de información, se identifican los datos del titular del sitio web:
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                <div style="background: white; border-radius: 16px; padding: 1.5rem; text-align: center; border: 1px solid #D4AF37; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <i class="fas fa-user-tie" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; font-size: 1.2rem; margin-bottom: 0.5rem;">Nombre</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">Evangelista Jhonatan Danny Rivas</p>
+                </div>
+                <div style="background: white; border-radius: 16px; padding: 1.5rem; text-align: center; border: 1px solid #D4AF37; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <i class="fas fa-church" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; font-size: 1.2rem; margin-bottom: 0.5rem;">Ministerio</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">Evangelista Jhonatan Danny Rivas</p>
+                </div>
+                <div style="background: white; border-radius: 16px; padding: 1.5rem; text-align: center; border: 1px solid #D4AF37; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <i class="fas fa-map-marker-alt" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; font-size: 1.2rem; margin-bottom: 0.5rem;">Dirección</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">Santo Domingo, República Dominicana</p>
+                </div>
+                <div style="background: white; border-radius: 16px; padding: 1.5rem; text-align: center; border: 1px solid #D4AF37; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <i class="fas fa-envelope" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; font-size: 1.2rem; margin-bottom: 0.5rem;">Email</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">
+                        <a href="mailto:info@jhonatandannyrivas.com" style="color: #D4AF37; text-decoration: none;">info@jhonatandannyrivas.com</a>
+                    </p>
+                </div>
+                <div style="background: white; border-radius: 16px; padding: 1.5rem; text-align: center; border: 1px solid #D4AF37; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <i class="fas fa-phone" style="font-size: 2rem; color: #D4AF37; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #0F2A44 !important; font-size: 1.2rem; margin-bottom: 0.5rem;">Teléfono</h3>
+                    <p style="color: #2C4B6E !important; margin: 0;">
+                        <a href="tel:+18095551234" style="color: #D4AF37; text-decoration: none;">+1 809-555-1234</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: FINALIDAD -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important;">
+                <i class="fas fa-bullseye" style="color: #D4AF37;"></i>
+                2. Finalidad del Sitio Web
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important; margin-bottom: 1rem;">
+                Este sitio web tiene fines informativos y de difusión del mensaje cristiano. Ofrece contenido de edificación espiritual, incluyendo:
+            </p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem;">
+                <span style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; background: #FFF9E6; border: 1px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; font-size: 0.9rem;">
+                    <i class="fas fa-cross" style="color: #D4AF37;"></i> Predicaciones
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; background: #FFF9E6; border: 1px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; font-size: 0.9rem;">
+                    <i class="fas fa-bible" style="color: #D4AF37;"></i> Estudios bíblicos
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; background: #FFF9E6; border: 1px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; font-size: 0.9rem;">
+                    <i class="fas fa-pray" style="color: #D4AF37;"></i> Devocionales
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; background: #FFF9E6; border: 1px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; font-size: 0.9rem;">
+                    <i class="fas fa-star" style="color: #D4AF37;"></i> Testimonios
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; background: #FFF9E6; border: 1px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; font-size: 0.9rem;">
+                    <i class="fas fa-calendar-alt" style="color: #D4AF37;"></i> Eventos
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; background: #FFF9E6; border: 1px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; font-size: 0.9rem;">
+                    <i class="fas fa-hand-holding-heart" style="color: #D4AF37;"></i> Donaciones
+                </span>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: PROPIEDAD INTELECTUAL -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important;">
+                <i class="fas fa-copyright" style="color: #D4AF37;"></i>
+                3. Propiedad Intelectual e Industrial
+            </h2>
+            <div style="background: #FFF9E6; border-left: 4px solid #D4AF37; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 1rem;">
+                <i class="fas fa-exclamation-triangle" style="color: #D4AF37; font-size: 1.5rem;"></i>
+                <p style="color: #0F2A44 !important; margin: 0; line-height: 1.5;">
+                    Todos los derechos de propiedad intelectual del contenido de este sitio web, incluyendo diseño, logos, textos, imágenes y videos, pertenecen al Evangelista Jhonatan Danny Rivas, salvo indicación contraria.
+                </p>
+            </div>
+            <p class="section-text" style="color: #2C4B6E !important;">
+                Queda prohibida la reproducción, distribución o modificación del contenido sin autorización expresa del titular.
+            </p>
+        </div>
+
+        <!-- SECCIÓN 4: EXENCIÓN DE RESPONSABILIDAD -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important;">
+                <i class="fas fa-shield-alt" style="color: #D4AF37;"></i>
+                4. Exención de Responsabilidad
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important; margin-bottom: 1rem;">
+                El titular no se hace responsable de:
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="background: white; border-radius: 12px; padding: 1rem; border: 1px solid #D4AF37; text-align: center;">
+                    <i class="fas fa-exclamation-circle" style="color: #D4AF37; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <h4 style="color: #0F2A44 !important; font-size: 1rem; margin-bottom: 0.3rem;">Errores u omisiones</h4>
+                    <p style="color: #2C4B6E !important; font-size: 0.9rem; margin: 0;">En el contenido del sitio</p>
+                </div>
+                <div style="background: white; border-radius: 12px; padding: 1rem; border: 1px solid #D4AF37; text-align: center;">
+                    <i class="fas fa-exclamation-circle" style="color: #D4AF37; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <h4 style="color: #0F2A44 !important; font-size: 1rem; margin-bottom: 0.3rem;">Daños derivados</h4>
+                    <p style="color: #2C4B6E !important; font-size: 0.9rem; margin: 0;">Del uso del sitio</p>
+                </div>
+                <div style="background: white; border-radius: 12px; padding: 1rem; border: 1px solid #D4AF37; text-align: center;">
+                    <i class="fas fa-exclamation-circle" style="color: #D4AF37; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <h4 style="color: #0F2A44 !important; font-size: 1rem; margin-bottom: 0.3rem;">Enlaces externos</h4>
+                    <p style="color: #2C4B6E !important; font-size: 0.9rem; margin: 0;">Contenido de sitios terceros</p>
+                </div>
+                <div style="background: white; border-radius: 12px; padding: 1rem; border: 1px solid #D4AF37; text-align: center;">
+                    <i class="fas fa-exclamation-circle" style="color: #D4AF37; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <h4 style="color: #0F2A44 !important; font-size: 1rem; margin-bottom: 0.3rem;">Mal funcionamiento</h4>
+                    <p style="color: #2C4B6E !important; font-size: 0.9rem; margin: 0;">Técnico del sitio</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 5: LEGISLACIÓN -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important;">
+                <i class="fas fa-gavel" style="color: #D4AF37;"></i>
+                5. Legislación Aplicable
+            </h2>
+            <div style="background: #E6F3FF; border-left: 4px solid #D4AF37; padding: 1.5rem; border-radius: 8px; display: flex; align-items: flex-start; gap: 1rem;">
+                <i class="fas fa-scale-balanced" style="color: #D4AF37; font-size: 1.5rem;"></i>
+                <p style="color: #0F2A44 !important; margin: 0; line-height: 1.5;">
+                    Este aviso legal se rige por la legislación de la República Dominicana. Para cualquier controversia que pudiera derivarse del acceso o uso del sitio, las partes se someterán a los juzgados y tribunales de Santo Domingo.
+                </p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 6: CONDICIONES DE USO -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important;">
+                <i class="fas fa-hand" style="color: #D4AF37;"></i>
+                6. Condiciones de Uso
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important; margin-bottom: 1rem;">
+                El usuario se compromete a hacer un uso adecuado del contenido y servicios ofrecidos, y a no emplearlos para:
+            </p>
+            
+            <ul style="list-style: none; padding-left: 0;">
+                <li style="color: #B71C1C !important; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-times-circle" style="color: #D4AF37;"></i>
+                    Realizar actividades ilícitas o contrarias a la buena fe
+                </li>
+                <li style="color: #B71C1C !important; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-times-circle" style="color: #D4AF37;"></i>
+                    Difundir contenido discriminatorio o violento
+                </li>
+                <li style="color: #B71C1C !important; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-times-circle" style="color: #D4AF37;"></i>
+                    Dañar los sistemas informáticos del titular
+                </li>
+                <li style="color: #B71C1C !important; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-times-circle" style="color: #D4AF37;"></i>
+                    Vulnerar derechos de terceros
+                </li>
+            </ul>
+        </div>
+
+        <!-- SECCIÓN 7: MODIFICACIONES -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important;">
+                <i class="fas fa-clock" style="color: #D4AF37;"></i>
+                7. Modificaciones
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important;">
+                El titular se reserva el derecho de modificar el contenido del sitio, así como este aviso legal, en cualquier momento y sin previo aviso.
+            </p>
+        </div>
+
+        <!-- SECCIÓN 8: DATOS PERSONALES -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important;">
+                <i class="fas fa-lock" style="color: #D4AF37;"></i>
+                8. Datos Personales
+            </h2>
+            <div style="background: #E8F5E9; border-left: 4px solid #2E7D32; padding: 1.5rem; border-radius: 8px; display: flex; align-items: flex-start; gap: 1rem;">
+                <i class="fas fa-shield-halved" style="color: #2E7D32; font-size: 1.5rem;"></i>
+                <p style="color: #1B5E20 !important; margin: 0; line-height: 1.5;">
+                    El tratamiento de datos personales se realiza conforme a nuestra <a href="{{ url_for('privacidad') }}" style="color: #D4AF37; font-weight: 600; text-decoration: none;">Política de Privacidad</a>. Al utilizar el sitio, aceptas dicho tratamiento.
+                </p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 9: CONTACTO -->
+        <div class="accessibility-section" style="margin-bottom: 2.5rem;">
+            <h2 class="section-title" style="color: #0F2A44 !important;">
+                <i class="fas fa-headset" style="color: #D4AF37;"></i>
+                9. Contacto
+            </h2>
+            <p class="section-text" style="color: #2C4B6E !important; margin-bottom: 1rem;">
+                Para cualquier consulta relacionada con este aviso legal, puedes contactarnos en:
+            </p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                <a href="mailto:info@jhonatandannyrivas.com" style="flex: 1; min-width: 250px; display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border: 1px solid #D4AF37; border-radius: 12px; text-decoration: none;">
+                    <i class="fas fa-envelope" style="color: #D4AF37; font-size: 1.2rem;"></i>
+                    <div>
+                        <h4 style="color: #0F2A44 !important; margin: 0 0 0.2rem 0; font-size: 1rem;">Email</h4>
+                        <p style="color: #2C4B6E !important; margin: 0;">info@jhonatandannyrivas.com</p>
+                    </div>
+                </a>
+                <a href="tel:+18095551234" style="flex: 1; min-width: 250px; display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border: 1px solid #D4AF37; border-radius: 12px; text-decoration: none;">
+                    <i class="fas fa-phone" style="color: #D4AF37; font-size: 1.2rem;"></i>
+                    <div>
+                        <h4 style="color: #0F2A44 !important; margin: 0 0 0.2rem 0; font-size: 1rem;">Teléfono</h4>
+                        <p style="color: #2C4B6E !important; margin: 0;">+1 809-555-1234</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer legal -->
+    <div style="background: #E6F3FF; border-radius: 12px; padding: 1.5rem; margin: 2rem 0; text-align: center; border: 1px solid #D4AF37;">
+        <i class="fas fa-gavel" style="color: #D4AF37; margin-right: 0.5rem;"></i>
+        <p style="color: #0F2A44 !important; margin: 0;">Este aviso legal tiene carácter informativo y no sustituye asesoramiento legal profesional.</p>
+    </div>
+
+    <!-- Enlaces relacionados -->
+    <div style="margin: 3rem 0; text-align: center;">
+        <h3 style="color: #0F2A44 !important; margin-bottom: 1rem;">Documentos relacionados:</h3>
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+            <a href="{{ url_for('terminos') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: white; border: 2px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; text-decoration: none; transition: all 0.3s;">
+                <i class="fas fa-file-contract" style="color: #D4AF37;"></i>
+                Términos
+            </a>
+            <a href="{{ url_for('privacidad') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: white; border: 2px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; text-decoration: none; transition: all 0.3s;">
+                <i class="fas fa-shield-alt" style="color: #D4AF37;"></i>
+                Privacidad
+            </a>
+            <a href="{{ url_for('cookies') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: white; border: 2px solid #D4AF37; border-radius: 50px; color: #0F2A44 !important; text-decoration: none; transition: all 0.3s;">
+                <i class="fas fa-cookie-bite" style="color: #D4AF37;"></i>
+                Cookies
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

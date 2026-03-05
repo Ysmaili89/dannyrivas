@@ -1,0 +1,236 @@
+<!-- templates/oracion.html -->
+{% extends "base.html" %}
+
+{% block title %}Oración - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/oracion.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"ORAD SIN CESAR"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">1 TESALONICENSES 5:17</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <div class="oracion-header">
+        <h1 class="page-title">Oración</h1>
+        <p class="page-subtitle">Porque donde están dos o tres congregados en mi nombre, allí estoy yo en medio de ellos</p>
+        <p class="page-subtitle-reference">Mateo 18:20</p>
+    </div>
+
+    <div class="oracion-grid">
+        <div class="peticiones-container">
+            <h2 class="section-title">Envia tu petición de oración</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="alert-message alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <!-- FORMULARIO CORREGIDO: con CSRF token -->
+            <form method="POST" action="{{ url_for('oracion') }}" class="oracion-form" id="oracionForm">
+                <!-- CSRF Token - OBLIGATORIO -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                
+                <div class="form-group">
+                    <label for="nombre">
+                        <i class="fas fa-user"></i>
+                        Tu nombre *
+                    </label>
+                    <input type="text" id="nombre" name="nombre" required 
+                           placeholder="Ej. Juan Pérez" minlength="2" maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        Tu email *
+                    </label>
+                    <input type="email" id="email" name="email" required 
+                           placeholder="correo@ejemplo.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="pais">
+                        <i class="fas fa-globe"></i>
+                        País / Ciudad
+                    </label>
+                    <input type="text" id="pais" name="pais" 
+                           placeholder="Ej. Santo Domingo, RD" maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="peticion">
+                        <i class="fas fa-pray"></i>
+                        Tu petición de oración *
+                    </label>
+                    <textarea id="peticion" name="peticion" rows="6" required
+                              placeholder="Escribe aquí tu petición..." minlength="5" maxlength="2000"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="urgencia">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Nivel de urgencia
+                    </label>
+                    <select id="urgencia" name="urgencia">
+                        <option value="normal">🟢 Normal</option>
+                        <option value="urgente">🟠 Urgente</option>
+                        <option value="muy-urgente">🔴 Muy urgente</option>
+                    </select>
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" id="anonimo" name="anonimo">
+                    <label for="anonimo">Deseo permanecer anónimo</label>
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" id="compartir" name="compartir">
+                    <label for="compartir">Acepto que mi petición sea compartida para que otros oren</label>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    Enviar petición
+                </button>
+            </form>
+
+            <div class="oracion-note">
+                <i class="fas fa-info-circle"></i>
+                <p>Todas las peticiones son tratadas con confidencialidad.</p>
+            </div>
+        </div>
+
+        <div class="informacion-container">
+            <div class="info-card">
+                <h3 class="card-title">
+                    <i class="fas fa-clock"></i>
+                    Oramos 24/7
+                </h3>
+                <div class="badge-247-container">
+                    <span class="badge-247-large">24/7</span>
+                </div>
+                <p class="card-text">
+                    Disponibles en todo momento para interceder por ti y tus necesidades.
+                </p>
+            </div>
+
+            <div class="versiculo-card">
+                <i class="fas fa-quote-left"></i>
+                <p class="versiculo-texto">"Pedid, y se os dará; buscad, y hallaréis; llamad, y se os abrirá."</p>
+                <p class="versiculo-ref">Mateo 7:7</p>
+                <i class="fas fa-quote-right"></i>
+            </div>
+
+            <div class="contacto-directo">
+                <h3>¿Necesitas hablar con alguien?</h3>
+                <p>Disponibles para orar contigo personalmente</p>
+                <!-- ENLACE CORREGIDO: usa url_for -->
+                <a href="{{ url_for('contacto') }}" class="contacto-btn">
+                    <i class="fas fa-envelope"></i>
+                    Contactar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <section class="oracion-closing">
+        <div class="closing-content">
+            <h2>"La oración eficaz del justo puede mucho"</h2>
+            <p>Santiago 5:16</p>
+            <div class="closing-particles">
+                <span></span><span></span><span></span><span></span>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('oracionForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Validación básica
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const peticion = document.getElementById('peticion').value.trim();
+            
+            if (!nombre || !email || !peticion) {
+                e.preventDefault();
+                alert('❌ Por favor completa todos los campos obligatorios.');
+                return false;
+            }
+            
+            // Validar email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('❌ Por favor ingresa un email válido.');
+                return false;
+            }
+            
+            // Deshabilitar botón para evitar doble envío
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            }
+            
+            return true;
+        });
+    }
+
+    // Animaciones al hacer scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.info-card, .versiculo-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}

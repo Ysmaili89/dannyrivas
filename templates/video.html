@@ -1,0 +1,121 @@
+<!-- templates/video.html -->
+{% extends "base.html" %}
+
+{% block title %}Videos - Ministerio Jhonatan Danny Rivas{% endblock %}
+
+{% block content %}
+<div class="videos-page-container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-play-circle"></i>
+            Videos
+        </h1>
+        <p class="page-subtitle">Predicaciones, estudios bíblicos y contenido espiritual</p>
+    </div>
+
+    <section class="videos-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-video"></i>
+                Todos los Videos
+            </h2>
+            <div class="header-actions">
+                <span class="items-count">{{ videos|length }} videos</span>
+            </div>
+        </div>
+
+        <div class="videos-grid">
+            {% if videos and videos|length > 0 %}
+                {% for video in videos %}
+                <div class="video-card" 
+                     data-url="{{ url_for('ver_video', id=video.id) }}" 
+                     onclick="window.location.href=this.dataset.url">
+                    <div class="video-thumbnail">
+                        {% if video.thumbnail %}
+                            <img src="{{ url_for('static', filename='images/' + video.thumbnail) }}" alt="{{ video.titulo }}" loading="lazy">
+                        {% elif video.thumbnail_url %}
+                            <img src="{{ video.thumbnail_url }}" alt="{{ video.titulo }}" loading="lazy">
+                        {% elif video.youtube_url %}
+                            {% if 'v=' in video.youtube_url %}
+                                {% set video_id = video.youtube_url.split('v=')[1].split('&')[0] %}
+                            {% else %}
+                                {% set video_id = video.youtube_url.split('/')[-1] %}
+                            {% endif %}
+                            {% set youtube_thumb = 'https://img.youtube.com/vi/' + video_id + '/mqdefault.jpg' %}
+                            {% set youtube_fallback = 'https://img.youtube.com/vi/' + video_id + '/default.jpg' %}
+                            <img src="{{ youtube_thumb }}" 
+                                 alt="{{ video.titulo }}"
+                                 loading="lazy"
+                                 onerror="this.onerror=null; this.src='{{ youtube_fallback }}'">
+                        {% else %}
+                            <div class="no-thumbnail">
+                                <i class="fas fa-video"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="video-overlay">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        
+                        {% if video.duracion %}
+                        <span class="video-duration">{{ video.duracion }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="video-info">
+                        <h3>{{ video.titulo|truncate(60) }}</h3>
+                        <div class="video-meta">
+                            <span class="video-views">
+                                <i class="fas fa-eye"></i> {{ video.vistas|default(0) }}
+                            </span>
+                            {% if video.categoria_rel %}
+                            <span class="video-categoria">
+                                <i class="{{ video.categoria_rel.icono|default('fas fa-folder') }}"></i>
+                                {{ video.categoria_rel.nombre|truncate(15) }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-content-message">
+                    <i class="fas fa-video fa-3x"></i>
+                    <p>No hay videos disponibles</p>
+                    <small>Agrega videos desde el panel de administración</small>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if total_paginas_videos and total_paginas_videos > 1 %}
+        <div class="pagination-controls">
+            {% if pagina_videos > 1 %}
+                <a href="{{ url_for('video', page_videos=pagina_videos-1) }}" class="pagination-btn">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </a>
+            {% else %}
+                <span class="pagination-btn disabled">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </span>
+            {% endif %}
+            
+            <span class="pagination-info">
+                Página {{ pagina_videos }} de {{ total_paginas_videos }}
+            </span>
+            
+            {% if pagina_videos < total_paginas_videos %}
+                <a href="{{ url_for('video', page_videos=pagina_videos+1) }}" class="pagination-btn">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </a>
+            {% else %}
+                <span class="pagination-btn disabled">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+
+{% endblock %}

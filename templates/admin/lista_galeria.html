@@ -1,0 +1,317 @@
+<!-- templates/admin/lista_galeria.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Administrar Galería{% endblock %}
+
+{% block page_title %}Galería de Fotos{% endblock %}
+
+{% block content %}
+<div class="galeria-admin-container">
+    <!-- Cabecera con acciones -->
+    <div class="admin-section-header">
+        <h2>Lista de Imágenes</h2>
+        <a href="{{ url_for('crear_imagen') }}" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            Subir Nueva Imagen
+        </a>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchImagen" placeholder="Buscar imágenes...">
+        </div>
+        <div class="filter-options">
+            <select id="filterCategoria">
+                <option value="">Todas las categorías</option>
+                <option value="eventos">Eventos</option>
+                <option value="predicaciones">Predicaciones</option>
+                <option value="campamentos">Campamentos</option>
+                <option value="misiones">Misiones</option>
+                <option value="bautismos">Bautismos</option>
+                <option value="retiros">Retiros</option>
+                <option value="conferencias">Conferencias</option>
+                <option value="otros">Otros</option>
+            </select>
+            <select id="filterDestacada">
+                <option value="">Todas</option>
+                <option value="destacada">Destacadas</option>
+                <option value="normal">Normales</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Grid de imágenes -->
+    <div class="galeria-grid" id="galeriaGrid">
+        {% if imagenes %}
+            {% for imagen in imagenes %}
+            <div class="galeria-item" data-categoria="{{ imagen.categoria }}" data-destacada="{{ 'si' if imagen.destacada else 'no' }}">
+                <div class="imagen-preview">
+                    <img src="{% if imagen.es_url %}{{ imagen.url_externa }}{% else %}{{ url_for('static', filename='images/gallery/' + imagen.archivo) }}{% endif %}" 
+                         alt="{{ imagen.titulo }}">
+                    {% if imagen.destacada %}
+                    <span class="badge-destacada">
+                        <i class="fas fa-star"></i> Destacada
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="imagen-info">
+                    <h3 class="imagen-titulo">{{ imagen.titulo }}</h3>
+                    <p class="imagen-descripcion">{{ imagen.descripcion[:50] }}{% if imagen.descripcion and imagen.descripcion|length > 50 %}...{% endif %}</p>
+                    <div class="imagen-meta">
+                        <span class="imagen-categoria">
+                            <i class="fas fa-tag"></i> {{ imagen.categoria_mostrar if imagen.categoria_mostrar else imagen.categoria|title }}
+                        </span>
+                        <span class="imagen-fecha">
+                            <i class="fas fa-calendar"></i> {{ imagen.fecha_subida.strftime('%d/%m/%Y') if imagen.fecha_subida else 'Sin fecha' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="imagen-actions">
+                    <a href="{{ url_for('editar_imagen', id=imagen.id) }}" class="action-btn edit" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </a>
+
+                    <button class="action-btn delete" 
+                            onclick="confirmarEliminacion('{{ imagen.id }}')" 
+                            title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+
+                    {% if not imagen.destacada %}
+                    <button class="action-btn star" 
+                            onclick="destacarImagen('{{ imagen.id }}')" 
+                            title="Destacar">
+                        <i class="fas fa-star"></i>
+                    </button>
+                    {% else %}
+                    <button class="action-btn unstar" 
+                            onclick="quitarDestacado('{{ imagen.id }}')" 
+                            title="Quitar destacado">
+                        <i class="fas fa-star-half-alt"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="fas fa-images" style="font-size: 3rem; color: #9ca3af; margin-bottom: 1rem;"></i>
+                <h3 style="color: #374151; margin-bottom: 0.5rem;">No hay imágenes en la galería</h3>
+                <p style="color: #6b7280; margin-bottom: 1.5rem;">Sube tu primera imagen para comenzar</p>
+                <a href="{{ url_for('crear_imagen') }}" class="btn-primary">
+                    Subir Imagen
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Paginación -->
+    {% if total_paginas is defined and total_paginas > 1 %}
+    <div class="pagination">
+        {% if pagina_actual > 1 %}
+            <a href="?page={{ pagina_actual - 1 }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        {% endif %}
+        
+        <span class="page-info">Página {{ pagina_actual }} de {{ total_paginas }}</span>
+        
+        {% if pagina_actual < total_paginas %}
+            <a href="?page={{ pagina_actual + 1 }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Eliminación</h3>
+            <button class="modal-close" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>¿Estás seguro de que deseas eliminar esta imagen?</p>
+            <p class="warning-text" style="color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Token oculto para AJAX -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let imagenIdEliminar = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Panel de galería cargado');
+    
+    const searchInput = document.getElementById('searchImagen');
+    const categoriaSelect = document.getElementById('filterCategoria');
+    const destacadaSelect = document.getElementById('filterDestacada');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterImagenes);
+    }
+    
+    if (categoriaSelect) {
+        categoriaSelect.addEventListener('change', filterImagenes);
+    }
+    
+    if (destacadaSelect) {
+        destacadaSelect.addEventListener('change', filterImagenes);
+    }
+});
+
+function filterImagenes() {
+    const searchTerm = document.getElementById('searchImagen')?.value.toLowerCase() || '';
+    const categoria = document.getElementById('filterCategoria')?.value || '';
+    const destacada = document.getElementById('filterDestacada')?.value || '';
+    
+    const items = document.querySelectorAll('.galeria-item');
+    
+    items.forEach(item => {
+        const titulo = item.querySelector('.imagen-titulo')?.textContent.toLowerCase() || '';
+        const descripcion = item.querySelector('.imagen-descripcion')?.textContent.toLowerCase() || '';
+        const itemCategoria = item.dataset.categoria || '';
+        const itemDestacada = item.dataset.destacada || '';
+        
+        const matchesSearch = titulo.includes(searchTerm) || descripcion.includes(searchTerm);
+        const matchesCategoria = !categoria || itemCategoria === categoria;
+        const matchesDestacada = !destacada || 
+            (destacada === 'destacada' && itemDestacada === 'si') ||
+            (destacada === 'normal' && itemDestacada === 'no');
+        
+        item.style.display = (matchesSearch && matchesCategoria && matchesDestacada) ? '' : 'none';
+    });
+}
+
+function confirmarEliminacion(id) {
+    if (!id) return;
+    
+    imagenIdEliminar = id;
+    
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    
+    if (modal && form) {
+        form.action = '/admin/galeria/' + id + '/eliminar';
+        modal.classList.add('show');
+    }
+}
+
+function destacarImagen(id) {
+    if (!id) return;
+    
+    if (confirm('¿Destacar esta imagen?')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        fetch('/admin/galeria/' + id + '/destacar', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error al destacar la imagen');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al destacar la imagen');
+        });
+    }
+}
+
+function quitarDestacado(id) {
+    if (!id) return;
+    
+    if (confirm('¿Quitar destacado de esta imagen?')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        fetch('/admin/galeria/' + id + '/quitar-destacado', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error al quitar destacado');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al quitar destacado');
+        });
+    }
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    imagenIdEliminar = null;
+}
+
+function cambiarPagina(direccion) {
+    const url = new URL(window.location.href);
+    const currentPage = parseInt(url.searchParams.get('page') || '1');
+    
+    if (direccion === 'prev' && currentPage > 1) {
+        url.searchParams.set('page', currentPage - 1);
+        window.location.href = url.toString();
+    } else if (direccion === 'next') {
+        url.searchParams.set('page', currentPage + 1);
+        window.location.href = url.toString();
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,189 @@
+<!-- templates/categoria_detalle.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ categoria.nombre }} - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/categoria_detalle.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner de la categoría -->
+    <section class="category-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="category-banner-content">
+            <div class="category-banner-icon">
+                <i class="{{ categoria.icono or 'fas fa-folder' }}"></i>
+            </div>
+            <div class="category-banner-text">
+                <h1 class="category-banner-title">{{ categoria.nombre }}</h1>
+                <p class="category-banner-description">{{ categoria.descripcion or 'Explora nuestros videos en esta categoría' }}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filtros y controles -->
+    <div class="category-controls">
+        <div class="view-options">
+            <button class="view-btn active" onclick="cambiarVista('grid')" title="Vista cuadrícula">
+                <i class="fas fa-th-large"></i>
+            </button>
+            <button class="view-btn" onclick="cambiarVista('list')" title="Vista lista">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+        
+        <div class="sort-options">
+            <select id="sortSelect" onchange="ordenarVideos(this.value)">
+                <option value="reciente">📅 Más reciente</option>
+                <option value="vistas">👁️ Más visto</option>
+                <option value="titulo">🔤 Título</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Grid de videos -->
+    <div class="videos-grid" id="videosGrid">
+        {% for video in videos %}
+        <div class="video-card" 
+             data-titulo="{{ video.titulo }}" 
+             data-vistas="{{ video.vistas or 0 }}" 
+             data-fecha="{{ video.fecha_publicacion.strftime('%Y-%m-%d') if video.fecha_publicacion else '2024-01-01' }}">
+            <a href="{{ url_for('ver_video', id=video.id) }}">
+                <div class="video-thumbnail">
+                    {% if video.thumbnail_url %}
+                        <img src="{{ video.thumbnail_url }}" alt="{{ video.titulo }}">
+                    {% elif video.thumbnail %}
+                        <img src="{{ url_for('static', filename='images/' + video.thumbnail) }}" alt="{{ video.titulo }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default-video.jpg') }}" alt="{{ video.titulo }}">
+                    {% endif %}
+                    <span class="video-duration">{{ video.duracion or '00:00' }}</span>
+                </div>
+                <div class="video-info">
+                    <h3>{{ video.titulo }}</h3>
+                    <p class="video-views">
+                        <i class="fas fa-eye"></i> {{ video.vistas or 0 }} vistas
+                    </p>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Mensaje si no hay videos -->
+    {% if not videos %}
+    <div class="no-videos">
+        <i class="fas fa-video-slash"></i>
+        <h3>No hay videos en esta categoría</h3>
+        <p>Pronto añadiremos contenido en {{ categoria.nombre }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Paginación -->
+    {% if total_paginas and total_paginas > 1 %}
+    <div class="pagination">
+        {% if pagina_actual > 1 %}
+            <a href="?page={{ pagina_actual - 1 }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        {% endif %}
+        
+        <div class="page-numbers">
+            {% for i in range(1, total_paginas + 1) %}
+                {% if i == pagina_actual %}
+                    <span class="page-number active">{{ i }}</span>
+                {% elif i <= 3 or i > total_paginas - 3 or (i >= pagina_actual - 2 and i <= pagina_actual + 2) %}
+                    <a href="?page={{ i }}" class="page-number">{{ i }}</a>
+                {% elif i == 4 and pagina_actual > 5 %}
+                    <span class="page-dots">...</span>
+                {% elif i == total_paginas - 3 and pagina_actual < total_paginas - 4 %}
+                    <span class="page-dots">...</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if pagina_actual < total_paginas %}
+            <a href="?page={{ pagina_actual + 1 }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Volver a categorías -->
+    <div class="back-to-categories">
+        <a href="{{ url_for('categoria') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Volver a categorías
+        </a>
+    </div>
+</div>
+
+<script>
+// Cambiar vista
+function cambiarVista(vista) {
+    const grid = document.getElementById('videosGrid');
+    const viewBtns = document.querySelectorAll('.view-btn');
+    
+    if (vista === 'grid') {
+        grid.className = 'videos-grid';
+        viewBtns[0].classList.add('active');
+        viewBtns[1].classList.remove('active');
+    } else {
+        grid.className = 'videos-grid list-view';
+        viewBtns[1].classList.add('active');
+        viewBtns[0].classList.remove('active');
+    }
+    
+    try {
+        localStorage.setItem('categoriaVista', vista);
+    } catch(e) {
+        console.log('LocalStorage no disponible');
+    }
+}
+
+// Ordenar videos
+function ordenarVideos(criterio) {
+    const grid = document.getElementById('videosGrid');
+    const videos = Array.from(grid.children);
+    
+    videos.sort((a, b) => {
+        if (criterio === 'titulo') {
+            return a.dataset.titulo.localeCompare(b.dataset.titulo);
+        } else if (criterio === 'vistas') {
+            return parseInt(b.dataset.vistas) - parseInt(a.dataset.vistas);
+        } else { // reciente
+            return b.dataset.fecha.localeCompare(a.dataset.fecha);
+        }
+    });
+    
+    grid.innerHTML = '';
+    videos.forEach(video => grid.appendChild(video));
+}
+
+// Cargar preferencia de vista
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const vistaGuardada = localStorage.getItem('categoriaVista');
+        if (vistaGuardada) {
+            cambiarVista(vistaGuardada);
+        }
+    } catch(e) {
+        console.log('LocalStorage no disponible');
+    }
+});
+</script>
+{% endblock %}

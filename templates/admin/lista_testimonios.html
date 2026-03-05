@@ -1,0 +1,313 @@
+<!-- templates/admin/lista_testimonios.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Administrar Testimonios{% endblock %}
+
+{% block page_title %}Testimonios{% endblock %}
+
+{% block content %}
+<div class="testimonios-admin-container">
+    <!-- Cabecera con estadísticas -->
+    <div class="admin-section-header">
+        <h2>Lista de Testimonios</h2>
+        <div class="header-stats">
+            <span class="stat-badge">
+                <i class="fas fa-star"></i> Total: {{ testimonios.total if testimonios else 0 }}
+            </span>
+            <span class="stat-badge pending">
+                <i class="fas fa-clock"></i> Pendientes: {{ testimonios_pendientes if testimonios_pendientes else 0 }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchTestimonio" placeholder="Buscar testimonios...">
+        </div>
+        <div class="filter-options">
+            <select id="filterStatus">
+                <option value="">Todos los estados</option>
+                <option value="publicado">Publicado</option>
+                <option value="pendiente">Pendiente</option>
+            </select>
+            <select id="filterDate">
+                <option value="">Todas las fechas</option>
+                <option value="hoy">Hoy</option>
+                <option value="semana">Esta semana</option>
+                <option value="mes">Este mes</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Grid de testimonios -->
+    <div class="testimonios-grid" id="testimoniosGrid">
+        {% if testimonios and testimonios.items %}
+            {% for testimonio in testimonios.items %}
+            <div class="testimonio-card" data-status="{{ 'publicado' if testimonio.publicado else 'pendiente' }}" data-fecha="{{ testimonio.fecha.isoformat() if testimonio.fecha else '' }}">
+                <div class="testimonio-header">
+                    <div class="testimonio-avatar">
+                        {% if testimonio.nombre %}
+                            <span>{{ testimonio.nombre[0]|upper }}</span>
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <div class="testimonio-titles">
+                        <h3 class="testimonio-titulo">{{ testimonio.titulo or 'Sin título' }}</h3>
+                        <div class="testimonio-meta">
+                            <span class="testimonio-autor">
+                                <i class="fas fa-user"></i> {{ testimonio.nombre_mostrar if testimonio.nombre_mostrar else (testimonio.nombre or 'Anónimo') }}
+                            </span>
+                            {% if testimonio.ciudad %}
+                            <span class="testimonio-ciudad">
+                                <i class="fas fa-map-marker-alt"></i> {{ testimonio.ciudad }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="testimonio-status {{ 'publicado' if testimonio.publicado else 'pendiente' }}">
+                        {{ 'Publicado' if testimonio.publicado else 'Pendiente' }}
+                    </span>
+                </div>
+
+                <div class="testimonio-body">
+                    <p class="testimonio-texto">{{ testimonio.texto }}</p>
+                </div>
+
+                <div class="testimonio-footer">
+                    <div class="testimonio-date">
+                        <i class="fas fa-calendar"></i>
+                        {{ testimonio.fecha.strftime('%d/%m/%Y %H:%M') if testimonio.fecha else 'Sin fecha' }}
+                    </div>
+                    <div class="testimonio-actions">
+                        <a href="{{ url_for('editar_testimonio', id=testimonio.id) }}" 
+                           class="action-btn edit" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="action-btn delete" 
+                                onclick="confirmarEliminacion('{{ testimonio.id }}')"
+                                title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        {% if not testimonio.publicado %}
+                        <button class="action-btn publish" 
+                                onclick="publicarTestimonio('{{ testimonio.id }}')"
+                                title="Publicar">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="fas fa-star" style="font-size: 3rem; color: #9ca3af; margin-bottom: 1rem;"></i>
+                <h3 style="color: #374151; margin-bottom: 0.5rem;">No hay testimonios</h3>
+                <p style="color: #6b7280;">Los testimonios que los usuarios envíen aparecerán aquí</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Paginación -->
+    {% if testimonios and testimonios.pages > 1 %}
+    <div class="pagination">
+        {% if testimonios.page > 1 %}
+            <a href="?page={{ testimonios.page - 1 }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        {% endif %}
+        
+        <span class="page-info">Página {{ testimonios.page }} de {{ testimonios.pages }}</span>
+        
+        {% if testimonios.page < testimonios.pages %}
+            <a href="?page={{ testimonios.page + 1 }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Eliminación</h3>
+            <button class="modal-close" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>¿Estás seguro de que deseas eliminar este testimonio?</p>
+            <p class="warning-text" style="color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn-danger">Eliminar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Token oculto para AJAX -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let testimonioIdEliminar = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Panel de testimonios cargado');
+    
+    const searchInput = document.getElementById('searchTestimonio');
+    const statusSelect = document.getElementById('filterStatus');
+    const dateSelect = document.getElementById('filterDate');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterTestimonios);
+    }
+    
+    if (statusSelect) {
+        statusSelect.addEventListener('change', filterTestimonios);
+    }
+    
+    if (dateSelect) {
+        dateSelect.addEventListener('change', filterTestimonios);
+    }
+});
+
+function filterTestimonios() {
+    const searchTerm = document.getElementById('searchTestimonio')?.value.toLowerCase() || '';
+    const status = document.getElementById('filterStatus')?.value || '';
+    const dateFilter = document.getElementById('filterDate')?.value || '';
+    
+    const cards = document.querySelectorAll('.testimonio-card');
+    
+    cards.forEach(card => {
+        const titulo = card.querySelector('.testimonio-titulo')?.textContent.toLowerCase() || '';
+        const autor = card.querySelector('.testimonio-autor')?.textContent.toLowerCase() || '';
+        const texto = card.querySelector('.testimonio-texto')?.textContent.toLowerCase() || '';
+        const cardStatus = card.dataset.status || '';
+        
+        const matchesSearch = titulo.includes(searchTerm) || 
+                             autor.includes(searchTerm) || 
+                             texto.includes(searchTerm);
+        const matchesStatus = !status || cardStatus === status;
+        
+        let matchesDate = true;
+        if (dateFilter && card.dataset.fecha) {
+            try {
+                const fecha = new Date(card.dataset.fecha);
+                const hoy = new Date();
+                
+                if (dateFilter === 'hoy') {
+                    matchesDate = fecha.toDateString() === hoy.toDateString();
+                } else if (dateFilter === 'semana') {
+                    const semanaAtras = new Date();
+                    semanaAtras.setDate(semanaAtras.getDate() - 7);
+                    matchesDate = fecha >= semanaAtras;
+                } else if (dateFilter === 'mes') {
+                    const mesAtras = new Date();
+                    mesAtras.setMonth(mesAtras.getMonth() - 1);
+                    matchesDate = fecha >= mesAtras;
+                }
+            } catch (e) {
+                console.warn('Error parsing date:', e);
+            }
+        }
+        
+        card.style.display = (matchesSearch && matchesStatus && matchesDate) ? '' : 'none';
+    });
+}
+
+function confirmarEliminacion(id) {
+    if (!id) return;
+    
+    testimonioIdEliminar = id;
+    
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    
+    if (modal && form) {
+        form.action = '/admin/testimonios/' + id + '/eliminar';
+        modal.classList.add('show');
+    }
+}
+
+function publicarTestimonio(id) {
+    if (!id) return;
+    
+    if (confirm('¿Publicar este testimonio?')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        fetch('/admin/testimonios/' + id + '/publicar', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error al publicar el testimonio');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al publicar el testimonio');
+        });
+    }
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    testimonioIdEliminar = null;
+}
+
+function cambiarPagina(direccion) {
+    const url = new URL(window.location.href);
+    const currentPage = parseInt(url.searchParams.get('page') || '1');
+    
+    if (direccion === 'prev' && currentPage > 1) {
+        url.searchParams.set('page', currentPage - 1);
+        window.location.href = url.toString();
+    } else if (direccion === 'next') {
+        url.searchParams.set('page', currentPage + 1);
+        window.location.href = url.toString();
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});
+</script>
+{% endblock %}

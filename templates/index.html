@@ -1,0 +1,189 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Inicio · Jhonatan Danny Rivas{% endblock %}
+
+{% block content %}
+<!-- BANNER PRINCIPAL -->
+<section class="hero-principal">
+    <div class="hero-contenido">
+        <div class="hero-izquierda">
+            <img src="{{ url_for('static', filename='images/perfil.jpg') }}" 
+                 alt="Jhonatan Danny Rivas"
+                 onerror="this.src='https://via.placeholder.com/160/1E3A5F/D4AF37?text=JDR'">
+        </div>
+        
+        <div class="hero-derecha">
+            <h1 class="hero-titulo">Jhonatan Danny Rivas</h1>
+            <p class="hero-subtitulo">
+                <i class="fas fa-circle"></i>
+                Evangelista
+            </p>
+            
+            <div class="hero-mensaje">
+                <p>"Una comunidad de fe en tus manos. Donde dos o tres se reúnen en mi nombre, allí estoy yo."</p>
+                <span>Mateo 18:20</span>
+            </div>
+            
+            <!-- ✅ CORREGIDO: configuracion → config -->
+            <div class="hero-social">
+                {% if config and config.facebook_url %}
+                <a href="{{ config.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                {% endif %}
+                
+                {% if config and config.instagram_url %}
+                <a href="{{ config.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                {% endif %}
+                
+                {% if config and config.youtube_url %}
+                <a href="{{ config.youtube_url }}" target="_blank" rel="noopener" aria-label="YouTube">
+                    <i class="fab fa-youtube"></i>
+                </a>
+                {% endif %}
+                
+                {% if config and config.tiktok_url %}
+                <a href="{{ config.tiktok_url }}" target="_blank" rel="noopener" aria-label="TikTok">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+                {% endif %}
+                
+                {% if config and config.linkedin_url %}
+                <a href="{{ config.linkedin_url }}" target="_blank" rel="noopener" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ÚLTIMOS VIDEOS -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-titulo">
+            <i class="fas fa-video"></i>
+            Últimos videos
+        </h2>
+        <a href="{{ url_for('video') }}" class="section-link">
+            Ver todos <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    
+    <div class="grid grid-3">
+        {% if videos and videos|length > 0 %}
+            {% for video in videos[:3] %}
+            <article class="card video-card">
+                <a href="{{ url_for('ver_video', id=video.id) }}" class="card-image">
+                    {% if video.thumbnail %}
+                        <img src="{{ url_for('static', filename='images/' + video.thumbnail) }}" alt="{{ video.titulo }}">
+                    {% elif video.thumbnail_url %}
+                        <img src="{{ video.thumbnail_url }}" alt="{{ video.titulo }}">
+                    {% elif video.youtube_url %}
+                        {% if 'v=' in video.youtube_url %}
+                            {% set video_id = video.youtube_url.split('v=')[1].split('&')[0] %}
+                        {% else %}
+                            {% set video_id = video.youtube_url.split('/')[-1] %}
+                        {% endif %}
+                        <img src="https://img.youtube.com/vi/{{ video_id }}/mqdefault.jpg" alt="{{ video.titulo }}">
+                    {% else %}
+                        <div class="card-placeholder">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    {% endif %}
+                    {% if video.duracion %}
+                    <span class="card-badge">{{ video.duracion }}</span>
+                    {% endif %}
+                </a>
+                <div class="card-body">
+                    <h3><a href="{{ url_for('ver_video', id=video.id) }}">{{ video.titulo }}</a></h3>
+                    <div class="card-meta">
+                        <i class="far fa-eye"></i>
+                        <span>{{ video.vistas or 0 }} vistas</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="no-content-message">
+                <i class="fas fa-video"></i>
+                <p>No hay videos disponibles</p>
+                <small>Agrega videos desde el panel de administración</small>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- SHORTS -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-titulo">
+            <i class="fas fa-film"></i>
+            Shorts
+        </h2>
+        <a href="{{ url_for('short') }}" class="section-link">
+            Ver todos <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    
+    <div class="grid grid-4">
+        {% if shorts and shorts|length > 0 %}
+            {% for short in shorts[:4] %}
+            <article class="card short-card">
+                <a href="{{ url_for('ver_short', id=short.id) }}" class="card-image">
+                    {% if short.thumbnail %}
+                        <img src="{{ url_for('static', filename='images/' + short.thumbnail) }}" alt="{{ short.titulo }}">
+                    {% elif short.thumbnail_url %}
+                        <img src="{{ short.thumbnail_url }}" alt="{{ short.titulo }}">
+                    {% elif short.youtube_url %}
+                        {% if 'shorts/' in short.youtube_url %}
+                            {% set video_id = short.youtube_url.split('shorts/')[1].split('?')[0] %}
+                        {% elif 'v=' in short.youtube_url %}
+                            {% set video_id = short.youtube_url.split('v=')[1].split('&')[0] %}
+                        {% else %}
+                            {% set video_id = short.youtube_url.split('/')[-1] %}
+                        {% endif %}
+                        <img src="https://img.youtube.com/vi/{{ video_id }}/mqdefault.jpg" alt="{{ short.titulo }}">
+                    {% else %}
+                        <div class="card-placeholder">
+                            <i class="fas fa-film"></i>
+                        </div>
+                    {% endif %}
+                    {% if short.duracion %}
+                    <span class="card-badge">{{ short.duracion }}</span>
+                    {% endif %}
+                </a>
+                <div class="card-body">
+                    <h3><a href="{{ url_for('ver_short', id=short.id) }}">{{ short.titulo }}</a></h3>
+                    <div class="card-meta">
+                        <i class="far fa-eye"></i>
+                        <span>{{ short.vistas or 0 }} vistas</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="no-content-message">
+                <i class="fas fa-film"></i>
+                <p>No hay shorts disponibles</p>
+                <small>Agrega shorts desde el panel de administración</small>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-footer-style">
+    <div class="cta-texto">
+        <h3>Apoya este ministerio</h3>
+        <p>Ayúdanos a seguir compartiendo esperanza</p>
+    </div>
+    <a href="{{ url_for('donar') }}" class="cta-boton">
+        <i class="fas fa-heart"></i>
+        Hacer una donación
+    </a>
+</section>
+{% endblock %}

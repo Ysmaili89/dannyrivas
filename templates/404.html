@@ -1,0 +1,138 @@
+<!-- templates/404.html -->
+{% extends "base.html" %}
+
+{% block title %}Página no encontrada - Error 404{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="verse-content">
+            <div class="verse-icon"><i class="fas fa-scroll"></i></div>
+            <div class="verse-text">
+                <h2 class="verse">"PORQUE YO SÉ LOS PENSAMIENTOS QUE TENGO ACERCA DE VOSOTROS, DICE JEHOVÁ, PENSAMIENTOS DE PAZ"</h2>
+                <div class="verse-divider">
+                    <span class="verse-line"></span>
+                    <i class="fas fa-star"></i>
+                    <span class="verse-line"></span>
+                </div>
+                <p class="verse-reference">JEREMÍAS 29:11</p>
+            </div>
+            <div class="verse-icon"><i class="fas fa-crown"></i></div>
+        </div>
+    </section>
+
+    <!-- Contenido principal del error 404 -->
+    <div class="error-container">
+        <div class="error-content">
+            
+            <!-- Número de error -->
+            <div class="error-number">
+                <span class="error-digit">4</span>
+                <div class="error-symbol"><i class="fas fa-cross"></i></div>
+                <span class="error-digit">4</span>
+            </div>
+
+            <h1 class="error-title">Página no encontrada</h1>
+            
+            <div class="error-divider">
+                <span class="divider-line"></span>
+                <i class="fas fa-star"></i>
+                <span class="divider-line"></span>
+            </div>
+
+            <div class="error-description">
+                <p class="error-message">La página que buscas no existe o ha sido movida.</p>
+                <p class="error-consuelo">Pero no te preocupes, así como el Buen Pastor busca a la oveja perdida, nosotros te ayudaremos a encontrar lo que necesitas.</p>
+            </div>
+
+            <!-- Versículo de ánimo -->
+            <div class="error-verse">
+                <i class="fas fa-quote-left"></i>
+                <blockquote>"Clama a mí, y yo te responderé, y te enseñaré cosas grandes y ocultas que tú no conoces."</blockquote>
+                <cite>Jeremías 33:3</cite>
+                <i class="fas fa-quote-right"></i>
+            </div>
+
+            <!-- Opciones de navegación -->
+            <div class="error-actions">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Ir al Inicio
+                </a>
+                
+                <a href="{{ url_for('video') }}" class="btn btn-secondary">
+                    <i class="fas fa-video"></i> Ver Videos
+                </a>
+                
+                <button id="goBackBtn" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Página Anterior
+                </button>
+            </div>
+
+            <!-- Buscador rápido -->
+            <div class="error-search">
+                <h3 class="search-title">¿Buscabas algo específico?</h3>
+                <form action="{{ url_for('buscar') }}" method="GET" class="search-form">
+                    <div class="search-wrapper">
+                        <div class="search-input-group">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="q" placeholder="Buscar en el sitio..." required>
+                        </div>
+                        <button type="submit" class="search-btn">Buscar</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Enlaces útiles -->
+            <div class="error-links">
+                <h3 class="links-title">Páginas que podrían interesarte:</h3>
+                <div class="links-grid">
+                    <a href="{{ url_for('oracion') }}" class="link-item">
+                        <i class="fas fa-pray"></i> Oración
+                    </a>
+                    <a href="{{ url_for('testimonio') }}" class="link-item">
+                        <i class="fas fa-star"></i> Testimonios
+                    </a>
+                    <a href="{{ url_for('agenda') }}" class="link-item">
+                        <i class="fas fa-calendar-alt"></i> Agenda
+                    </a>
+                    <a href="{{ url_for('galeria') }}" class="link-item">
+                        <i class="fas fa-images"></i> Galería
+                    </a>
+                    <a href="{{ url_for('donar') }}" class="link-item link-donate">
+                        <i class="fas fa-heart"></i> Donar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const backButton = document.getElementById('goBackBtn');
+    if (backButton) {
+        backButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (document.referrer) {
+                window.history.back();
+            } else {
+                window.location.href = "{{ url_for('index') }}";
+            }
+        });
+    }
+
+    const searchForm = document.querySelector('.search-form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            const input = this.querySelector('input[name="q"]');
+            if (!input.value.trim()) {
+                e.preventDefault();
+                input.style.borderColor = '#ff4444';
+                setTimeout(() => input.style.borderColor = '#D4AF37', 1000);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

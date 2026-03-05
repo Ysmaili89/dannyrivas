@@ -1,0 +1,119 @@
+<!-- templates/terminos.html -->
+{% extends "base.html" %}
+
+{% block title %}Términos y Condiciones - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"SEPULTA CON ÉL EN EL BAUTISMO, EN EL CUAL FUISTEIS TAMBIÉN RESUCITADOS CON ÉL"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">COLOSENSES 2:12</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado -->
+    <div class="legal-header">
+        <h1 class="page-title">Términos y Condiciones</h1>
+        <p class="page-subtitle">Última actualización: {{ now().strftime('%d de %B de %Y') if now else '18 de febrero de 2026' }}</p>
+    </div>
+
+    <!-- Contenido legal -->
+    <div class="legal-content">
+        <div class="legal-section">
+            <h2 class="legal-section-title">1. Aceptación de los Términos</h2>
+            <p class="legal-text">Al acceder y utilizar este sitio web, aceptas cumplir y estar sujeto a estos Términos y Condiciones de Uso. Si no estás de acuerdo con alguna parte de estos términos, no podrás acceder al sitio.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">2. Uso del Sitio Web</h2>
+            <p class="legal-text">Este sitio web tiene como propósito compartir contenido de edificación cristiana, incluyendo videos, artículos, devocionales y materiales relacionados con el ministerio del Evangelista Jhonatan Danny Rivas.</p>
+            <p class="legal-text">El usuario se compromete a utilizar el contenido de manera respetuosa y acorde a los valores cristianos que promovemos.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">3. Propiedad Intelectual</h2>
+            <p class="legal-text">Todo el contenido publicado en este sitio web, incluyendo pero no limitado a textos, gráficos, logos, imágenes, videos y audio, es propiedad del Evangelista Jhonatan Danny Rivas o de los respectivos propietarios del contenido, y está protegido por las leyes de derechos de autor.</p>
+            <p class="legal-text">No está permitida la reproducción, distribución o transmisión del contenido sin autorización previa por escrito.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">4. Conducta del Usuario</h2>
+            <p class="legal-text">Como usuario, aceptas:</p>
+            <ul class="legal-list">
+                <li>No utilizar el sitio para fines ilegales o prohibidos</li>
+                <li>No publicar contenido ofensivo, difamatorio o que promueva el odio</li>
+                <li>No intentar acceder a áreas restringidas del sitio</li>
+                <li>No interferir con la seguridad o funcionalidad del sitio</li>
+                <li>Respetar los derechos de propiedad intelectual</li>
+            </ul>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">5. Donaciones y Contribuciones</h2>
+            <p class="legal-text">Las donaciones realizadas a través del sitio son voluntarias y se destinan al sostenimiento del ministerio. No se realizan reembolsos, a menos que exista un error comprobado en la transacción.</p>
+            <p class="legal-text">Al realizar una donación, confirmas que eres mayor de edad y que tienes la autoridad para usar el método de pago seleccionado.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">6. Enlaces a Terceros</h2>
+            <p class="legal-text">Este sitio puede contener enlaces a sitios web de terceros (YouTube, redes sociales, etc.). No tenemos control sobre el contenido o prácticas de estos sitios y no asumimos responsabilidad por ellos.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">7. Limitación de Responsabilidad</h2>
+            <p class="legal-text">El contenido de este sitio se proporciona "tal cual", sin garantías de ningún tipo. No garantizamos que el sitio esté libre de errores o virus, ni que el contenido sea aplicable a todas las situaciones personales.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">8. Modificaciones</h2>
+            <p class="legal-text">Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación en el sitio.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">9. Ley Aplicable</h2>
+            <p class="legal-text">Estos términos se rigen por las leyes de la República Dominicana. Cualquier disputa relacionada con el sitio será resuelta en los tribunales competentes de Santo Domingo.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">10. Contacto</h2>
+            <p class="legal-text">Si tienes preguntas sobre estos términos, puedes contactarnos a través de:</p>
+            <ul class="legal-list">
+                {% if config.email_contacto %}
+                <li>Email: <a href="mailto:{{ config.email_contacto }}" style="color: #D4AF37;">{{ config.email_contacto }}</a></li>
+                {% endif %}
+                {% if config.telefono %}
+                <li>Teléfono: <a href="tel:{{ config.telefono }}" style="color: #D4AF37;">{{ config.telefono }}</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('contacto') }}" style="color: #D4AF37;">Formulario de contacto</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Fecha de vigencia -->
+    <div class="legal-footer">
+        <p><i class="fas fa-gavel"></i> Estos términos y condiciones están vigentes a partir del {{ now().strftime('%d de %B de %Y') if now else '18 de febrero de 2026' }}</p>
+    </div>
+</div>
+
+<!-- Enlace al archivo CSS externo -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/terminos.css') }}">
+{% endblock %}

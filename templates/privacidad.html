@@ -1,0 +1,142 @@
+<!-- templates/privacidad.html -->
+{% extends "base.html" %}
+
+{% block title %}Política de Privacidad - Evangelista Jhonatan Danny Rivas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"EL QUE ANDA EN INTEGRIDAD ANDA SEGURO"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">PROVERBIOS 10:9</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado -->
+    <div class="legal-header">
+        <h1 class="page-title">Política de Privacidad</h1>
+        <p class="page-subtitle">Última actualización: {{ now().strftime('%d de %B de %Y') if now else '18 de febrero de 2026' }}</p>
+    </div>
+
+    <!-- Contenido legal -->
+    <div class="legal-content">
+        <div class="legal-section">
+            <h2 class="legal-section-title">1. Introducción</h2>
+            <p class="legal-text">En el ministerio del Evangelista Jhonatan Danny Rivas, valoramos tu privacidad y nos comprometemos a proteger tus datos personales. Esta política de privacidad explica cómo recopilamos, usamos y protegemos tu información cuando visitas nuestro sitio web.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">2. Información que Recopilamos</h2>
+            <p class="legal-text">Podemos recopilar los siguientes tipos de información:</p>
+            <ul class="legal-list">
+                <li><strong>Información de contacto:</strong> Nombre, dirección de email, número de teléfono cuando te suscribes o nos contactas</li>
+                <li><strong>Información de pago:</strong> Procesada de forma segura por PayPal u otros proveedores (nosotros no almacenamos datos de tarjetas)</li>
+                <li><strong>Peticiones de oración:</strong> Los testimonios y peticiones que compartes voluntariamente</li>
+                <li><strong>Datos de navegación:</strong> Dirección IP, tipo de navegador, páginas visitadas, tiempo de visita</li>
+            </ul>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">3. Cómo Usamos tu Información</h2>
+            <p class="legal-text">Utilizamos tu información para:</p>
+            <ul class="legal-list">
+                <li>Responder a tus consultas y peticiones de oración</li>
+                <li>Enviar boletines y actualizaciones (con tu consentimiento)</li>
+                <li>Procesar donaciones</li>
+                <li>Mejorar nuestro sitio web y contenido</li>
+                <li>Cumplir con obligaciones legales</li>
+            </ul>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">4. Protección de Datos</h2>
+            <p class="legal-text">Implementamos medidas de seguridad técnicas y organizativas para proteger tu información contra acceso no autorizado, pérdida o alteración. Sin embargo, ninguna transmisión por internet es 100% segura.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">5. Compartir Información</h2>
+            <p class="legal-text">No vendemos, alquilamos ni compartimos tu información personal con terceros, excepto:</p>
+            <ul class="legal-list">
+                <li>Cuando sea necesario para procesar pagos (PayPal)</li>
+                <li>Para cumplir con obligaciones legales</li>
+                <li>Con tu consentimiento explícito</li>
+            </ul>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">6. Tus Derechos</h2>
+            <p class="legal-text">Tienes derecho a:</p>
+            <ul class="legal-list">
+                <li>Acceder a tus datos personales</li>
+                <li>Corregir datos inexactos</li>
+                <li>Solicitar la eliminación de tus datos</li>
+                <li>Oponerte al procesamiento de tus datos</li>
+                <li>Retirar tu consentimiento en cualquier momento</li>
+            </ul>
+            <p class="legal-text">Para ejercer estos derechos, contáctanos en 
+            {% if config.email_contacto %}
+                <a href="mailto:{{ config.email_contacto }}" style="color: #D4AF37;">{{ config.email_contacto }}</a>
+            {% else %}
+                info@jhonatandannyrivas.com
+            {% endif %}
+            </p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">7. Cookies</h2>
+            <p class="legal-text">Utilizamos cookies para mejorar tu experiencia en el sitio. Puedes configurar tu navegador para rechazar cookies, aunque esto puede afectar la funcionalidad del sitio. Para más información, consulta nuestra <a href="{{ url_for('cookies') }}" style="color: #D4AF37;">Política de Cookies</a>.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">8. Menores de Edad</h2>
+            <p class="legal-text">Nuestro sitio no está dirigido a menores de 13 años. No recopilamos intencionalmente información de menores. Si eres padre o tutor y crees que tu hijo nos ha proporcionado información, contáctanos.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">9. Cambios a esta Política</h2>
+            <p class="legal-text">Podemos actualizar esta política periódicamente. Te notificaremos cualquier cambio publicando la nueva política en esta página con la fecha de actualización.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2 class="legal-section-title">10. Contacto</h2>
+            <p class="legal-text">Para preguntas sobre esta política de privacidad:</p>
+            <ul class="legal-list">
+                {% if config.email_contacto %}
+                <li>Email: <a href="mailto:{{ config.email_contacto }}" style="color: #D4AF37;">{{ config.email_contacto }}</a></li>
+                {% endif %}
+                {% if config.telefono %}
+                <li>Teléfono: <a href="tel:{{ config.telefono }}" style="color: #D4AF37;">{{ config.telefono }}</a></li>
+                {% endif %}
+                {% if config.direccion %}
+                <li>Dirección: {{ config.direccion }}</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="legal-footer">
+        <p><i class="fas fa-shield-alt"></i> Tu privacidad es importante para nosotros. Tratamos tus datos con el mayor respeto y cuidado.</p>
+    </div>
+</div>
+
+<!-- Enlace al archivo CSS externo -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/privacidad.css') }}">
+{% endblock %}

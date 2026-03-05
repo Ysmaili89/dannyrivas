@@ -1,0 +1,88 @@
+<!-- templates/admin/editar_contacto.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Editar Contacto{% endblock %}
+
+{% block page_title %}Editar Mensaje de Contacto{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+        
+        <div class="form-grid">
+            <!-- Sección: Información del remitente (solo lectura) -->
+            <div class="form-group full-width">
+                <h3 class="form-section-title">
+                    <i class="fas fa-user"></i> Información del Remitente
+                </h3>
+            </div>
+
+            <div class="form-group">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" value="{{ contacto.nombre }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" value="{{ contacto.email }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="text" id="telefono" value="{{ contacto.telefono or 'No especificado' }}" disabled class="disabled-input">
+            </div>
+
+            <!-- Sección: Detalles del mensaje (solo lectura) -->
+            <div class="form-group full-width">
+                <h3 class="form-section-title">
+                    <i class="fas fa-envelope"></i> Detalles del Mensaje
+                </h3>
+            </div>
+
+            <div class="form-group">
+                <label for="asunto">Asunto</label>
+                <input type="text" id="asunto" value="{{ contacto.asunto|title if contacto.asunto else 'Sin asunto' }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group">
+                <label for="fecha">Fecha de envío</label>
+                <input type="text" id="fecha" value="{{ contacto.fecha.strftime('%d/%m/%Y %H:%M') if contacto.fecha else 'Fecha no disponible' }}" disabled class="disabled-input">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="mensaje">Mensaje</label>
+                <textarea id="mensaje" rows="8" disabled class="disabled-input">{{ contacto.mensaje }}</textarea>
+            </div>
+
+            <!-- Sección: Gestión del mensaje (editable por admin) -->
+            <div class="form-group full-width">
+                <h3 class="form-section-title">
+                    <i class="fas fa-cog"></i> Gestión del Mensaje
+                </h3>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="leido" name="leido" {% if contacto.leido %}checked{% endif %}>
+                <label for="leido">Marcar como leído</label>
+                <small class="form-text">Los mensajes marcados como leídos aparecerán en la sección de "Leídos"</small>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="notas_admin">Notas internas</label>
+                <textarea id="notas_admin" name="notas_admin" rows="4" placeholder="Añade notas internas sobre este contacto...">{{ contacto.notas_admin or '' }}</textarea>
+                <small class="form-text">Estas notas solo son visibles para administradores</small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('lista_contactos') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

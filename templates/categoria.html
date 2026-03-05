@@ -1,0 +1,171 @@
+<!-- templates/categoria.html -->
+{% extends "base.html" %}
+
+{% block title %}Categorías - Contenido por Temas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/categoria.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner con versículo -->
+    <section class="verse-banner">
+        <div class="banner-glow"></div>
+        <div class="banner-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="verse-content">
+            <div class="verse-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="verse-text">
+                <h2 class="verse">"LÁMPARA ES A MIS PIES TU PALABRA, Y LUZ PARA MI CAMINO"</h2>
+                <div class="verse-divider">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
+                <p class="verse-reference">SALMO 119:105</p>
+            </div>
+            <div class="verse-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Encabezado con título y selector de vista -->
+    <div class="categories-header">
+        <h1 class="page-title">Categorías</h1>
+        <div class="view-options">
+            <button class="view-btn {% if vista == 'grid' %}active{% endif %}" onclick="cambiarVista('grid')" title="Vista cuadrícula">
+                <i class="fas fa-th-large"></i>
+            </button>
+            <button class="view-btn {% if vista == 'list' %}active{% endif %}" onclick="cambiarVista('list')" title="Vista lista">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid/Lista de categorías -->
+    <div class="categories-container {% if vista == 'list' %}list-view{% else %}grid-view{% endif %}" id="categoriesContainer">
+        {% if categorias %}
+            {% for categoria in categorias %}
+            <a href="{{ url_for('categoria_detalle', slug=categoria.slug) }}" class="category-card-link">
+                <div class="category-card" data-categoria="{{ categoria.nombre|lower }}">
+                    <div class="category-icon">
+                        <i class="{{ categoria.icono or 'fas fa-folder' }}"></i>
+                    </div>
+                    <div class="category-content">
+                        <h2 class="category-title">{{ categoria.nombre }}</h2>
+                        <p class="category-description">{{ categoria.descripcion or 'Explora contenido en esta categoría' }}</p>
+                    </div>
+                    <div class="category-footer">
+                        <span class="category-link">
+                            Ver contenido <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div class="no-categories">
+                <i class="fas fa-folder-open"></i>
+                <h3>No hay categorías disponibles</h3>
+                <p>Pronto añadiremos nuevo contenido organizado por temas.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Paginación -->
+    {% if total_paginas and total_paginas > 1 %}
+    <div class="pagination">
+        {% if pagina_actual > 1 %}
+            <a href="?page={{ pagina_actual - 1 }}&vista={{ vista }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        {% endif %}
+        
+        <div class="page-numbers">
+            {% for i in range(1, total_paginas + 1) %}
+                {% if i == pagina_actual %}
+                    <span class="page-number active">{{ i }}</span>
+                {% elif i <= 3 or i > total_paginas - 3 or (i >= pagina_actual - 2 and i <= pagina_actual + 2) %}
+                    <a href="?page={{ i }}&vista={{ vista }}" class="page-number">{{ i }}</a>
+                {% elif i == 4 and pagina_actual > 5 %}
+                    <span class="page-dots">...</span>
+                {% elif i == total_paginas - 3 and pagina_actual < total_paginas - 4 %}
+                    <span class="page-dots">...</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if pagina_actual < total_paginas %}
+            <a href="?page={{ pagina_actual + 1 }}&vista={{ vista }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <button class="page-btn" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+let vistaActual = '{{ vista|default("grid") }}';
+
+function cambiarVista(vista) {
+    if (vista === vistaActual) return;
+    
+    vistaActual = vista;
+    const container = document.getElementById('categoriesContainer');
+    const viewBtns = document.querySelectorAll('.view-btn');
+    
+    const url = new URL(window.location.href);
+    url.searchParams.set('vista', vista);
+    window.history.replaceState({}, '', url);
+    
+    container.className = 'categories-container ' + (vista === 'grid' ? 'grid-view' : 'list-view');
+    
+    viewBtns.forEach(btn => btn.classList.remove('active'));
+    
+    if (vista === 'grid') {
+        viewBtns[0].classList.add('active');
+    } else {
+        viewBtns[1].classList.add('active');
+    }
+    
+    try {
+        localStorage.setItem('categoriaVista', vista);
+    } catch(e) {
+        console.log('LocalStorage no disponible');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const vistaGuardada = localStorage.getItem('categoriaVista');
+        if (vistaGuardada && vistaGuardada !== vistaActual) {
+            cambiarVista(vistaGuardada);
+        }
+    } catch(e) {
+        console.log('LocalStorage no disponible');
+    }
+    
+    const viewBtns = document.querySelectorAll('.view-btn');
+    if (vistaActual === 'grid') {
+        viewBtns[0].classList.add('active');
+        viewBtns[1].classList.remove('active');
+    } else {
+        viewBtns[1].classList.add('active');
+        viewBtns[0].classList.remove('active');
+    }
+});
+</script>
+{% endblock %}

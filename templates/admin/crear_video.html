@@ -1,0 +1,452 @@
+<!-- templates/admin/crear_video.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ 'Editar' if video else 'Crear' }} Video{% endblock %}
+
+{% block page_title %}{{ 'Editar Video' if video else 'Crear Nuevo Video' }}{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST" enctype="multipart/form-data" class="admin-form" id="videoForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+        
+        <div class="form-grid">
+            <!-- Columna izquierda - Información básica -->
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="titulo">Título del Video *</label>
+                    <input type="text" id="titulo" name="titulo" required 
+                           value="{{ video.titulo if video else '' }}"
+                           placeholder="Ej. La Fe que Mueve Montañas">
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" rows="4" 
+                              placeholder="Describe el contenido del video...">{{ video.descripcion if video else '' }}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="categoria">Categoría *</label>
+                        <select id="categoria" name="categoria" required>
+                            <option value="">Seleccionar categoría</option>
+                            {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}" 
+                                    {% if video and video.categoria_id == categoria.id %}selected{% endif %}>
+                                {{ categoria.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="estado">Estado</label>
+                        <select id="estado" name="estado">
+                            <option value="publicado" {% if not video or video.estado == 'publicado' %}selected{% endif %}>
+                                Publicado
+                            </option>
+                            <option value="borrador" {% if video and video.estado == 'borrador' %}selected{% endif %}>
+                                Borrador
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" id="destacado" name="destacado" 
+                           {% if video and video.destacado %}checked{% endif %}>
+                    <label for="destacado">Marcar como video destacado</label>
+                </div>
+            </div>
+
+            <!-- Columna derecha - Fuente del video y miniatura -->
+            <div class="form-column">
+                <!-- SECCIÓN 1: URL de YouTube (Opción principal) -->
+                <div class="form-section youtube-section">
+                    <h3 class="section-subtitle">
+                        <i class="fab fa-youtube youtube-icon"></i>
+                        Opción 1: URL de YouTube
+                    </h3>
+                    <p class="section-hint">Recomendado: ahorra espacio, miniatura automática</p>
+                    
+                    <div class="form-group">
+                        <div class="url-input-wrapper">
+                            <input type="url" id="youtube_url" name="youtube_url" 
+                                   value="{{ video.youtube_url if video else '' }}"
+                                   placeholder="https://youtube.com/watch?v=..."
+                                   class="youtube-input">
+                            <button type="button" class="btn-verify" id="verifyBtn">
+                                <i class="fas fa-sync-alt"></i>
+                                Verificar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Vista previa de YouTube -->
+                    <div id="youtubePreview" class="youtube-preview" style="display: none;">
+                        <img id="youtubeThumbnail" src="" alt="Miniatura de YouTube">
+                        <div class="preview-info">
+                            <span id="youtubeTitle"></span>
+                            <span id="youtubeDuration"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: Subir video manual -->
+                <div class="form-section upload-section">
+                    <h3 class="section-subtitle">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Opción 2: Subir archivo
+                    </h3>
+                    <p class="section-hint">Ocupa espacio en el servidor</p>
+                    
+                    <div class="form-group">
+                        <div class="file-upload">
+                            <input type="file" id="video_file" name="video_file" 
+                                   accept="video/mp4,video/webm">
+                            <div class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Seleccionar archivo MP4</span>
+                                <small class="file-limits">Máx: 500MB</small>
+                            </div>
+                        </div>
+                        {% if video and video.archivo %}
+                        <div class="file-info">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Video actual: {{ video.archivo }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: Miniatura (FLEXIBLE) -->
+                <div class="form-section thumbnail-section">
+                    <h3 class="section-subtitle">
+                        <i class="fas fa-image"></i>
+                        Miniatura del Video
+                    </h3>
+                    <p class="section-hint">Elige cómo quieres la miniatura</p>
+
+                    <!-- Opciones de miniatura -->
+                    <div class="thumbnail-options">
+                        <label class="radio-option">
+                            <input type="radio" name="thumbnail_option" value="auto" 
+                                   {% if not video or video.thumbnail_auto %}checked{% endif %}>
+                            <span>Automática (desde YouTube)</span>
+                        </label>
+                        
+                        <label class="radio-option">
+                            <input type="radio" name="thumbnail_option" value="url" 
+                                   {% if video and video.thumbnail_url %}checked{% endif %}>
+                            <span>URL personalizada</span>
+                        </label>
+                        
+                        <label class="radio-option">
+                            <input type="radio" name="thumbnail_option" value="upload" 
+                                   {% if video and video.thumbnail_upload %}checked{% endif %}>
+                            <span>Subir imagen</span>
+                        </label>
+                    </div>
+
+                    <!-- Opción URL -->
+                    <div id="thumbnailUrlOption" class="thumbnail-option-field" style="display: none;">
+                        <div class="form-group">
+                            <label for="thumbnail_url">URL de la miniatura</label>
+                            <input type="url" id="thumbnail_url" name="thumbnail_url" 
+                                   value="{{ video.thumbnail_url if video else '' }}"
+                                   placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                    </div>
+
+                    <!-- Opción Subida -->
+                    <div id="thumbnailUploadOption" class="thumbnail-option-field" style="display: none;">
+                        <div class="form-group">
+                            <div class="file-upload small">
+                                <input type="file" id="thumbnail" name="thumbnail" 
+                                       accept="image/*">
+                                <div class="file-upload-label">
+                                    <i class="fas fa-image"></i>
+                                    <span>Subir miniatura</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista previa de miniatura -->
+                    <div id="thumbnailPreview" class="thumbnail-preview" style="display: none;">
+                        <img id="previewImage" src="" alt="Vista previa">
+                        <button type="button" class="btn-remove-preview" onclick="removeThumbnail()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    {% if video and video.thumbnail %}
+                    <div class="current-image" id="currentThumbnail">
+                        <img src="{{ url_for('static', filename='images/' + video.thumbnail) }}" 
+                             alt="Miniatura actual">
+                        <p>Miniatura actual</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Duración automática -->
+                <input type="hidden" id="duracion" name="duracion" value="{{ video.duracion if video else '' }}">
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+            <a href="{{ url_for('lista_videos') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <i class="fas fa-save"></i> {{ 'Actualizar' if video else 'Guardar' }} Video
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+(function() {
+    "use strict";
+
+    let currentThumbnailOption = 'auto';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Formulario de video cargado');
+        
+        const verifyBtn = document.getElementById('verifyBtn');
+        if (verifyBtn) {
+            verifyBtn.addEventListener('click', fetchYouTubeData);
+        }
+        
+        const youtubeUrl = document.getElementById('youtube_url');
+        if (youtubeUrl) {
+            youtubeUrl.addEventListener('input', function() {
+                detectYouTubeURL(this.value);
+            });
+        }
+        
+        const videoFile = document.getElementById('video_file');
+        if (videoFile) {
+            videoFile.addEventListener('change', function() {
+                handleVideoUpload(this);
+            });
+        }
+        
+        const thumbnailOptions = document.querySelectorAll('input[name="thumbnail_option"]');
+        thumbnailOptions.forEach(option => {
+            option.addEventListener('change', toggleThumbnailOptions);
+        });
+        
+        const thumbnailUrl = document.getElementById('thumbnail_url');
+        if (thumbnailUrl) {
+            thumbnailUrl.addEventListener('change', function() {
+                previewThumbnailFromUrl(this.value);
+            });
+        }
+        
+        const thumbnailFile = document.getElementById('thumbnail');
+        if (thumbnailFile) {
+            thumbnailFile.addEventListener('change', function() {
+                previewThumbnail(this);
+            });
+        }
+        
+        const form = document.getElementById('videoForm');
+        if (form) {
+            form.addEventListener('submit', validateForm);
+        }
+        
+        const existingUrl = document.getElementById('youtube_url').value;
+        if (existingUrl) {
+            setTimeout(fetchYouTubeData, 500);
+        }
+        
+        toggleThumbnailOptions();
+    });
+
+    function detectYouTubeURL(url) {
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=)([^&]+)/,
+            /(?:youtu\.be\/)([^?]+)/,
+            /(?:youtube\.com\/embed\/)([^?]+)/
+        ];
+        
+        for (let pattern of patterns) {
+            const match = url.match(pattern);
+            if (match) return match[1];
+        }
+        return null;
+    }
+
+    function fetchYouTubeData() {
+        const url = document.getElementById('youtube_url').value;
+        const videoId = detectYouTubeURL(url);
+        
+        if (!videoId) {
+            alert('URL de YouTube no válida');
+            return;
+        }
+        
+        const verifyBtn = document.getElementById('verifyBtn');
+        verifyBtn.classList.add('loading');
+        
+        try {
+            const preview = document.getElementById('youtubePreview');
+            document.getElementById('youtubeThumbnail').src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+            preview.style.display = 'flex';
+            
+            document.getElementById('duracion').value = '15:00';
+            
+            if (currentThumbnailOption === 'auto') {
+                showThumbnailPreview(`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`);
+            }
+            
+        } catch (error) {
+            alert('Error al obtener datos del video');
+            console.error(error);
+        } finally {
+            verifyBtn.classList.remove('loading');
+        }
+    }
+
+    function handleVideoUpload(input) {
+        if (input.files && input.files[0]) {
+            if (input.files[0].size > 500 * 1024 * 1024) {
+                alert('El archivo no puede ser mayor a 500MB');
+                input.value = '';
+                return;
+            }
+            
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            
+            video.onloadedmetadata = function() {
+                const minutes = Math.floor(video.duration / 60);
+                const seconds = Math.floor(video.duration % 60);
+                document.getElementById('duracion').value = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                URL.revokeObjectURL(video.src);
+            };
+            
+            video.onerror = function() {
+                console.warn('No se pudo obtener la duración del video');
+                document.getElementById('duracion').value = '00:00';
+            };
+            
+            video.src = URL.createObjectURL(input.files[0]);
+        }
+    }
+
+    function toggleThumbnailOptions() {
+        const option = document.querySelector('input[name="thumbnail_option"]:checked');
+        if (!option) return;
+        
+        currentThumbnailOption = option.value;
+        
+        const urlOption = document.getElementById('thumbnailUrlOption');
+        const uploadOption = document.getElementById('thumbnailUploadOption');
+        const currentThumbnail = document.getElementById('currentThumbnail');
+        
+        if (urlOption) {
+            urlOption.style.display = option.value === 'url' ? 'block' : 'none';
+        }
+        
+        if (uploadOption) {
+            uploadOption.style.display = option.value === 'upload' ? 'block' : 'none';
+        }
+        
+        if (currentThumbnail) {
+            if (option.value !== 'auto') {
+                currentThumbnail.style.display = 'none';
+            } else {
+                currentThumbnail.style.display = '';
+            }
+        }
+    }
+
+    function previewThumbnailFromUrl(url) {
+        if (url) {
+            showThumbnailPreview(url);
+        }
+    }
+
+    function previewThumbnail(input) {
+        if (input.files && input.files[0]) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(input.files[0].type)) {
+                alert('Solo se permiten imágenes JPG, PNG, GIF o WEBP');
+                input.value = '';
+                return;
+            }
+            
+            if (input.files[0].size > 5 * 1024 * 1024) {
+                alert('La imagen no puede ser mayor a 5MB');
+                input.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                showThumbnailPreview(e.target.result);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function showThumbnailPreview(src) {
+        const preview = document.getElementById('thumbnailPreview');
+        const img = document.getElementById('previewImage');
+        if (preview && img) {
+            img.src = src;
+            preview.style.display = 'block';
+        }
+        
+        const current = document.getElementById('currentThumbnail');
+        if (current) {
+            current.style.display = 'none';
+        }
+    }
+
+    function removeThumbnail() {
+        const preview = document.getElementById('thumbnailPreview');
+        const img = document.getElementById('previewImage');
+        const thumbnailUrl = document.getElementById('thumbnail_url');
+        const thumbnailFile = document.getElementById('thumbnail');
+        
+        if (preview) preview.style.display = 'none';
+        if (img) img.src = '';
+        if (thumbnailUrl) thumbnailUrl.value = '';
+        if (thumbnailFile) thumbnailFile.value = '';
+    }
+
+    function validateForm(e) {
+        const youtubeUrl = document.getElementById('youtube_url').value;
+        const videoFile = document.getElementById('video_file').files.length;
+        const titulo = document.getElementById('titulo').value;
+        
+        if (!titulo) {
+            e.preventDefault();
+            alert('❌ El título es obligatorio');
+            return false;
+        }
+        
+        if (!youtubeUrl && !videoFile) {
+            e.preventDefault();
+            alert('❌ Debes proporcionar una URL de YouTube o subir un archivo de video');
+            return false;
+        }
+        
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        }
+        
+        return true;
+    }
+})();
+</script>
+{% endblock %}

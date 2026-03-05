@@ -1,0 +1,60 @@
+<!-- templates/admin/editar_testimonio.html -->
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Editar Testimonio{% endblock %}
+
+{% block page_title %}Editar Testimonio{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+        
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label for="nombre">Nombre *</label>
+                <input type="text" id="nombre" name="nombre" value="{{ testimonio.nombre }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" value="{{ testimonio.email }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="ciudad">Ciudad / País</label>
+                <input type="text" id="ciudad" name="ciudad" value="{{ testimonio.ciudad or '' }}">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="titulo">Título del testimonio *</label>
+                <input type="text" id="titulo" name="titulo" value="{{ testimonio.titulo }}" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="texto">Testimonio *</label>
+                <textarea id="texto" name="texto" rows="8" required>{{ testimonio.texto }}</textarea>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="publicado" name="publicado" {% if testimonio.publicado %}checked{% endif %}>
+                <label for="publicado">Publicado</label>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="anonimo" name="anonimo" {% if testimonio.anonimo %}checked{% endif %}>
+                <label for="anonimo">Mantener anónimo</label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('lista_testimonios') }}" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i> Actualizar Testimonio
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
