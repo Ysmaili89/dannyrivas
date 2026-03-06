@@ -1222,3 +1222,33 @@ img, video, iframe {
         font-size: 0.8rem !important;
     }
 }
+
+
+
+/* Alineación horizontal de redes sociales en el sidebar */
+.sidebar-social-links {
+    display: flex;       /* Alinea los elementos en fila */
+    flex-wrap: wrap;    /* Si hay muchos, bajan a la siguiente línea en vez de salirse */
+    gap: 15px;          /* Espacio entre cada icono */
+    justify-content: center; /* Centra los iconos horizontalmente */
+    margin-top: 10px;
+}
+
+.sidebar-social-links .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;        /* Tamaño del círculo */
+    height: 40px;
+    border-radius: 50%; /* Los hace redondos */
+    background: rgba(212, 175, 55, 0.1); /* Fondo suave (color dorado del sitio) */
+    color: #D4AF37;     /* Color del icono */
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.sidebar-social-links .social-link:hover {
+    background: #D4AF37; /* El fondo se vuelve dorado al pasar el mouse */
+    color: #fff;         /* El icono se vuelve blanco */
+    transform: translateY(-3px); /* Pequeño salto hacia arriba */
+}

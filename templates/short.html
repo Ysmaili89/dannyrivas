@@ -1,10 +1,11 @@
-<!-- templates/short.html -->
 {% extends "base.html" %}
 
 {% block title %}Shorts - Ministerio Jhonatan Danny Rivas{% endblock %}
 
 {% block content %}
 <div class="videos-page-container">
+    
+    <!-- BANNER MODERNO -->
     <div class="page-header">
         <h1 class="page-title">
             <i class="fas fa-film"></i>
@@ -13,142 +14,134 @@
         <p class="page-subtitle">Videos cortos para tu crecimiento espiritual</p>
     </div>
 
-    <section class="shorts-section">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-film"></i>
+    <section class="accessibility-section">
+        <!-- Header de Sección -->
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 class="section-title" style="font-size: 1.5rem; font-weight: 700; color: var(--primary-dark);">
+                <i class="fas fa-bolt" style="color: var(--secondary-color); margin-right: 10px;"></i>
                 Todos los Shorts
             </h2>
             <div class="header-actions">
-                <span class="items-count">{{ shorts|length }} shorts</span>
+                <span class="video-categoria" style="background: var(--primary-dark); color: white; border: none;">
+                    {{ shorts|length }} shorts
+                </span>
             </div>
         </div>
 
-        <div class="shorts-grid">
+        <!-- GRID DE VIDEOS -->
+        <div class="videos-grid">
             {% if shorts %}
                 {% for short in shorts %}
-                <div class="short-card" data-url="{{ url_for('ver_short', id=short.id) }}">
-                    <div class="short-video">
+                <div class="video-card" data-url="{{ url_for('ver_short', id=short.id) }}">
+                    
+                    <!-- Miniatura y Overlay -->
+                    <div class="video-thumbnail">
                         {% if short.video %}
                             <video src="{{ url_for('static', filename='videos/' + short.video) }}" 
-                                   loop muted class="preview-video">
+                                   loop muted playsinline class="preview-video">
                             </video>
                         {% elif short.youtube_url %}
+                            {# Lógica completa de extracción de ID #}
                             {% if 'v=' in short.youtube_url %}
                                 {% set video_id = short.youtube_url.split('v=')[1].split('&')[0] %}
                             {% elif '/shorts/' in short.youtube_url %}
                                 {% set video_id = short.youtube_url.split('/shorts/')[1].split('?')[0] %}
                             {% else %}
-                                {% set video_id = short.youtube_url.split('/')[-1] %}
+                                {% set video_id = short.youtube_url.split('/')[-1].split('?')[0] %}
                             {% endif %}
-                            <img src="https://img.youtube.com/vi/{{ video_id }}/hqdefault.jpg" 
-                                 alt="{{ short.titulo }}">
+                            <img src="https://img.youtube.com/vi/{{ video_id }}/hqdefault.jpg" alt="{{ short.titulo }}">
                         {% else %}
-                            <div class="no-thumbnail">
-                                <i class="fas fa-film"></i>
+                            <div class="no-thumbnail" style="height:100%; display:flex; align-items:center; justify-content:center; background:#1a1a1a;">
+                                <i class="fas fa-video-slash fa-2x" style="color: #444;"></i>
                             </div>
                         {% endif %}
                         
-                        <div class="short-overlay">
-                            <button class="short-play-btn">
-                                <i class="fas fa-play"></i>
-                            </button>
+                        <!-- Overlay de Play -->
+                        <div class="video-overlay">
+                            <i class="fas fa-play-circle"></i>
                         </div>
-                        
+
+                        <!-- Duración -->
                         {% if short.duracion %}
-                        <span class="short-duration">{{ short.duracion }}</span>
+                        <span class="video-duration">
+                            {{ short.duracion }}
+                        </span>
                         {% endif %}
                     </div>
                     
-                    <div class="short-info">
-                        <h4>{{ short.titulo|truncate(40) }}</h4>
-                        <div class="short-meta">
-                            <span class="short-views">
-                                <i class="fas fa-eye"></i> {{ short.vistas|default(0) }}
+                    <!-- Información de la Tarjeta -->
+                    <div class="video-info">
+                        <h3>{{ short.titulo|truncate(45) }}</h3>
+                        
+                        <div class="video-meta">
+                            <span class="video-views">
+                                <i class="fas fa-eye" style="margin-right: 5px;"></i> 
+                                {{ short.vistas|default(0) }} vistas
+                            </span>
+                            <span class="video-categoria">
+                                Short
                             </span>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="no-content-message">
-                    <i class="fas fa-film fa-3x"></i>
-                    <p>No hay shorts disponibles</p>
+                <div class="no-content-message" style="grid-column: 1/-1; text-align: center; padding: 100px 0; background: var(--bg-card); border-radius: 24px; border: 1px solid rgba(0,0,0,0.05);">
+                    <i class="fas fa-film fa-4x" style="color: var(--text-muted); opacity: 0.3; margin-bottom: 20px;"></i>
+                    <p style="margin-top: 20px; color: var(--text-muted); font-size: 1.1rem;">No hay shorts disponibles en este momento.</p>
                 </div>
             {% endif %}
         </div>
 
+        <!-- PAGINACIÓN -->
         {% if total_paginas and total_paginas > 1 %}
-        <div class="pagination-controls">
+        <div class="pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 50px;">
             {% if pagina_actual > 1 %}
-                <a href="{{ url_for('short', page=pagina_actual-1) }}" class="pagination-btn">
-                    <i class="fas fa-chevron-left"></i> Anterior
+                <a href="{{ url_for('short', page=pagina_actual-1) }}" class="nav-icon" style="text-decoration: none; padding: 10px 20px; background: var(--bg-card); border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                    <i class="fas fa-chevron-left" style="color: var(--primary-dark);"></i>
                 </a>
-            {% else %}
-                <span class="pagination-btn disabled">
-                    <i class="fas fa-chevron-left"></i> Anterior
-                </span>
             {% endif %}
             
-            <span class="pagination-info">
-                Página {{ pagina_actual }} de {{ total_paginas }}
+            <span style="font-weight: 700; color: var(--primary-dark); background: var(--bg-card); padding: 10px 20px; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                {{ pagina_actual }} de {{ total_paginas }}
             </span>
             
             {% if pagina_actual < total_paginas %}
-                <a href="{{ url_for('short', page=pagina_actual+1) }}" class="pagination-btn">
-                    Siguiente <i class="fas fa-chevron-right"></i>
+                <a href="{{ url_for('short', page=pagina_actual+1) }}" class="nav-icon" style="text-decoration: none; padding: 10px 20px; background: var(--bg-card); border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                    <i class="fas fa-chevron-right" style="color: var(--primary-dark);"></i>
                 </a>
-            {% else %}
-                <span class="pagination-btn disabled">
-                    Siguiente <i class="fas fa-chevron-right"></i>
-                </span>
             {% endif %}
         </div>
         {% endif %}
     </section>
 </div>
 
-
 <script>
 (function() {
     "use strict";
-
     document.addEventListener('DOMContentLoaded', function() {
-        
-        // 1. Manejo de navegación (clic en tarjeta)
-        document.querySelectorAll('.short-card').forEach(card => {
+        // Navegación a la página del short
+        document.querySelectorAll('.video-card').forEach(card => {
             card.addEventListener('click', function(e) {
-                if (e.target.closest('.short-play-btn')) {
-                    e.stopPropagation();
-                    return;
-                }
+                // Evitar navegación si se hace clic en elementos interactivos si los hubiera
+                if (e.target.closest('.video-overlay')) return;
+                
                 const url = this.getAttribute('data-url');
                 if (url) window.location.href = url;
             });
         });
 
-        // 2. Efecto Hover para videos
+        // Hover para video local (autoplay al pasar el mouse)
         document.querySelectorAll('.preview-video').forEach(video => {
-            const card = video.closest('.short-card');
-            if (card) {
-                card.addEventListener('mouseenter', () => {
-                    video.play().catch(err => console.log("Auto-play bloqueado"));
-                });
-                
-                card.addEventListener('mouseleave', () => {
-                    video.pause();
-                    video.currentTime = 0;
-                });
-            }
-        });
-
-        // 3. Botones de play individuales
-        document.querySelectorAll('.short-play-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const card = this.closest('.short-card');
-                const url = card.getAttribute('data-url');
-                if (url) window.location.href = url;
+            const card = video.closest('.video-card');
+            
+            card.addEventListener('mouseenter', () => {
+                video.play().catch(e => console.log('Autoplay bloqueado por navegador'));
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                video.pause();
+                video.currentTime = 0;
             });
         });
     });
