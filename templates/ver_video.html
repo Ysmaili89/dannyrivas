@@ -4,127 +4,93 @@
 {% block title %}{{ video.titulo }} - Ministerio Jhonatan Danny Rivas{% endblock %}
 
 {% block content %}
-<div class="video-page-container">
-    <!-- Breadcrumb con diseño mejorado -->
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-        <a href="{{ url_for('index') }}" class="breadcrumb-link">
-            <i class="fas fa-home"></i>
-            <span>Inicio</span>
+
+
+<div class="short-view-container">
+    <!-- Navegación estilo "Shorts" -->
+    <nav class="short-nav">
+        <a href="{{ url_for('video') }}" class="back-to-shorts">
+            <i class="fas fa-arrow-left"></i>
+            <span>Volver a Videos</span>
         </a>
-        <i class="fas fa-chevron-right breadcrumb-separator"></i>
-        <a href="{{ url_for('video') }}" class="breadcrumb-link">Videos</a>
-        <i class="fas fa-chevron-right breadcrumb-separator"></i>
-        {% if video.categoria_rel %}
-        <a href="{{ url_for('categoria_detalle', slug=video.categoria_rel.slug) }}" class="breadcrumb-link">
-            {{ video.categoria_rel.nombre }}
-        </a>
-        <i class="fas fa-chevron-right breadcrumb-separator"></i>
-        {% endif %}
-        <span class="breadcrumb-current">{{ video.titulo|truncate(30) }}</span>
     </nav>
 
-    <div class="video-main">
-        <!-- Reproductor con borde dorado y glow -->
-        <div class="video-player-wrapper">
-            {% if video.youtube_url %}
-                {% if 'v=' in video.youtube_url %}
-                    {% set video_id = video.youtube_url.split('v=')[1].split('&')[0] %}
+    <div class="short-view-grid">
+        <!-- Reproductor Cinematográfico -->
+        <div class="short-player-section">
+            <div class="short-player-wrapper">
+                {% if video.youtube_url %}
+                    {% if 'v=' in video.youtube_url %}
+                        {% set video_id = video.youtube_url.split('v=')[1].split('&')[0] %}
+                    {% else %}
+                        {% set video_id = video.youtube_url.split('/')[-1] %}
+                    {% endif %}
+                    <iframe 
+                        class="short-iframe"
+                        src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1"
+                        title="{{ video.titulo }}"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                {% elif video.archivo %}
+                    <video class="short-player" controls autoplay>
+                        <source src="{{ url_for('static', filename='videos/' + video.archivo) }}" type="video/mp4">
+                    </video>
                 {% else %}
-                    {% set video_id = video.youtube_url.split('/')[-1] %}
+                    <div class="no-video">
+                        <i class="fas fa-video-slash"></i>
+                        <p>Video no disponible</p>
+                    </div>
                 {% endif %}
-                <iframe 
-                    src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1"
-                    title="{{ video.titulo }}"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-                </iframe>
-            {% elif video.archivo %}
-                <video controls autoplay>
-                    <source src="{{ url_for('static', filename='videos/' + video.archivo) }}" type="video/mp4">
-                </video>
-            {% else %}
-                <div class="no-video">
-                    <i class="fas fa-video-slash"></i>
-                    <p>Video no disponible</p>
-                </div>
-            {% endif %}
-            
-            <!-- Badge de categoría flotante (solo para móvil/tablet) -->
-            {% if video.categoria_rel %}
-            <div class="video-category-float">
-                <i class="{{ video.categoria_rel.icono|default('fas fa-folder') }}"></i>
-                {{ video.categoria_rel.nombre }}
             </div>
-            {% endif %}
         </div>
 
-        <!-- Sección de información con diseño mejorado -->
-        <div class="video-info-section" 
-             id="video-data" 
-             data-authenticated="{% if current_user.is_authenticated %}true{% else %}false{% endif %}">
+        <!-- Sección de Información Estilo Glass -->
+        <div class="short-info-section">
+            <h1 class="short-title">{{ video.titulo }}</h1>
             
-            <div class="video-header">
-                <h1 class="video-title">{{ video.titulo }}</h1>
-                
-                <!-- Stats en tarjetas -->
-                <div class="video-stats-grid">
-                    <div class="stat-card">
-                        <i class="fas fa-eye stat-icon"></i>
-                        <div class="stat-info">
-                            <span class="stat-value">{{ video.vistas|default(0) }}</span>
-                            <span class="stat-label">vistas</span>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <i class="fas fa-calendar-alt stat-icon"></i>
-                        <div class="stat-info">
-                            <span class="stat-value">{{ video.fecha_publicacion.strftime('%d/%m/%Y') if video.fecha_publicacion else '--/--/----' }}</span>
-                            <span class="stat-label">publicado</span>
-                        </div>
-                    </div>
-                    
-                    {% if video.duracion %}
-                    <div class="stat-card">
-                        <i class="fas fa-clock stat-icon"></i>
-                        <div class="stat-info">
-                            <span class="stat-value">{{ video.duracion }}</span>
-                            <span class="stat-label">duración</span>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
+            <!-- Stats -->
+            <div class="short-stats">
+                <span>
+                    <i class="fas fa-eye"></i>
+                    {{ video.vistas|default(0) }} vistas
+                </span>
+                <span>
+                    <i class="fas fa-calendar-alt"></i>
+                    {{ video.fecha_publicacion.strftime('%d/%m/%Y') if video.fecha_publicacion else '--/--/----' }}
+                </span>
+                {% if video.duracion %}
+                <span>
+                    <i class="fas fa-clock"></i>
+                    {{ video.duracion }}
+                </span>
+                {% endif %}
             </div>
 
-            <!-- Barra de acciones premium -->
-            <div class="video-actions-bar">
-                <button class="action-btn action-btn-primary" id="btn-share">
+            <!-- Acciones -->
+            <div class="short-actions">
+                <button class="short-action-btn" id="btn-share">
                     <i class="fas fa-share-alt"></i>
                     <span>Compartir</span>
                 </button>
-                <button class="action-btn action-btn-secondary" id="btn-save" data-id="{{ video.id }}">
+                <button class="short-action-btn" id="btn-save" data-id="{{ video.id }}">
                     <i class="far fa-bookmark"></i>
                     <span>Guardar</span>
                 </button>
             </div>
 
+            <!-- Descripción -->
             {% if video.descripcion %}
-            <!-- Descripción con diseño mejorado -->
-            <div class="video-description-card">
-                <div class="description-header">
-                    <i class="fas fa-align-left"></i>
-                    <h3>Descripción</h3>
-                </div>
-                <div class="description-content">
-                    {{ video.descripcion|replace('\n', '<br>')|safe }}
-                </div>
+            <div class="short-description">
+                <h3>Descripción</h3>
+                <p>{{ video.descripcion|replace('\n', '<br>')|safe }}</p>
             </div>
             {% endif %}
         </div>
     </div>
 
-    <!-- Videos relacionados con diseño mejorado -->
+    <!-- Videos Relacionados (Manteniendo estructura original pero adaptada al tema oscuro) -->
     {% if relacionados %}
     <section class="related-videos">
         <h2 class="related-title">
@@ -164,7 +130,7 @@
     {% endif %}
 </div>
 
-<!-- Modal de compartir mejorado -->
+<!-- Modal de compartir (Manteniendo estructura original) -->
 <div id="shareModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -283,6 +249,5 @@
     });
 })();
 </script>
-
 
 {% endblock %}

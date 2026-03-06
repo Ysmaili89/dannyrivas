@@ -10381,3 +10381,131 @@ body.dark-mode .page-header {
     .page-subtitle { font-size: 1.1rem; }
     .video-card:hover { transform: translateY(-5px); }
 }
+
+
+  /* OVERRIDES PARA TAMAÑO GRANDE - ESTILO VER SHORT */
+    .short-view-container {
+        max-width: 1400px !important;
+        padding: 40px 20px !important;
+    }
+
+    .short-nav {
+        padding: 0 20px 40px 20px !important;
+    }
+
+    .back-to-shorts {
+        padding: 16px 32px !important;
+        font-size: 1.1rem !important;
+        border-radius: 16px !important;
+    }
+
+    .short-view-grid {
+        margin: 0 20px !important;
+        border-radius: 32px !important;
+    }
+
+    .short-player-section {
+        padding: 0 !important;
+    }
+
+    .short-player-wrapper {
+        border-radius: 24px !important;
+        overflow: hidden !important;
+    }
+
+    .short-info-section {
+        padding: 60px 50px !important;
+        background: linear-gradient(180deg, #0f2a44 0%, #0a1929 100%) !important;
+    }
+
+    .short-title {
+        font-size: clamp(2.2rem, 6vw, 3.5rem) !important;
+        margin-bottom: 20px !important;
+        line-height: 1.2 !important;
+    }
+
+    .short-stats {
+        margin-bottom: 35px !important;
+    }
+
+    .short-stats span {
+        padding: 10px 24px !important;
+        font-size: 1.1rem !important;
+        border-radius: 60px !important;
+        gap: 12px !important;
+    }
+
+    .short-actions {
+        margin-bottom: 40px !important;
+        padding-top: 35px !important;
+        gap: 20px !important;
+    }
+
+    .short-action-btn {
+        padding: 16px 32px !important;
+        font-size: 1.1rem !important;
+        border-radius: 18px !important;
+        gap: 12px !important;
+    }
+
+    .short-description {
+        padding: 35px !important;
+        border-radius: 24px !important;
+    }
+
+    .short-description h3 {
+        font-size: 1.3rem !important;
+        margin-bottom: 15px !important;
+    }
+
+    .short-description p {
+        font-size: 1.2rem !important;
+        line-height: 1.8 !important;
+    }
+
+    /* Related Videos Larger */
+    .related-videos {
+        margin-top: 60px !important;
+        padding: 40px 20px !important;
+    }
+
+    .related-title {
+        font-size: 2.5rem !important;
+        margin-bottom: 30px !important;
+    }
+
+    .related-card {
+        border-radius: 24px !important;
+        overflow: hidden !important;
+    }
+
+    .related-info h4 {
+        font-size: 1.2rem !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Modal Larger */
+    .modal-content {
+        max-width: 600px !important;
+        border-radius: 32px !important;
+    }
+
+    .modal-header {
+        padding: 25px !important;
+    }
+
+    .modal-body {
+        padding: 30px !important;
+    }
+
+    .share-btn {
+        padding: 16px 32px !important;
+        font-size: 1.1rem !important;
+        border-radius: 16px !important;
+    }
+
+    .copy-link-btn {
+        padding: 16px 32px !important;
+        font-size: 1.1rem !important;
+        border-radius: 16px !important;
+    }
