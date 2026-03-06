@@ -1,31 +1,18 @@
-"""
-app.py - Aplicación principal del Ministerio Jhonatan Danny Rivas
-VERSIÓN COMPLETA PARA PYTHONANYWHERE CON SQLITE
-"""
+import os
+import sys
+import json
+import re
+import time
+import platform
+import traceback
+from datetime import datetime, timedelta
+from functools import wraps
+from urllib.parse import urlparse
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta
-import os
-import sys
-import platform
-import json
-import re
-import traceback
-from functools import wraps
-from urllib.parse import urlparse
-import time
-
-# Verificar dependencias
-try:
-    from flask_sqlalchemy import SQLAlchemy
-    from flask_wtf.csrf import CSRFProtect
-except ImportError as e:
-    print(f"❌ Error: {e}")
-    print("Instala: pip install -r requirements.txt")
-    sys.exit(1)
 
 # ==================== CONFIGURACIÓN DE LA APP ====================
 app = Flask(__name__)
@@ -33,57 +20,42 @@ app = Flask(__name__)
 # Directorio base
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# --- DETERMINAR RUTA DE BASE DE DATOS ---
+# --- RUTA DE BASE DE DATOS ---
 if 'PYTHONANYWHERE_DOMAIN' in os.environ:
-    # Ruta absoluta para PythonAnywhere
     db_path = '/home/Ysmailin89/dannyrivas/instance/app.db'
 else:
-    # Ruta relativa para PC local
     instance_path = os.path.join(basedir, 'instance')
     os.makedirs(instance_path, exist_ok=True)
     db_path = os.path.join(instance_path, 'app.db')
 
-# --- CARGAR CONFIGURACIONES ---
+# --- CONFIGURACIONES ---
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'cambia-esta-clave-en-produccion-123!')
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave-secreta-muy-segura-123')
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
-app.config['SESSION_COOKIE_SECURE'] = False  # PythonAnywhere
+app.config['SESSION_COOKIE_SECURE'] = False 
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # ==================== INICIALIZACIÓN DE DB ====================
-# IMPORTANTE: Primero importar el objeto db de tus modelos
-from models import db 
+from models import db, Usuario 
 db.init_app(app)
 
-print(f"📁 Base de datos activa en: {db_path}")
-
-# ==================== CARPETAS DE SUBIDA ====================
-app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'uploads')
-app.config['UPLOAD_FOLDER_VIDEOS'] = os.path.join(app.config['UPLOAD_FOLDER'], 'videos')
-app.config['UPLOAD_FOLDER_IMAGES'] = os.path.join(app.config['UPLOAD_FOLDER'], 'images')
-app.config['UPLOAD_FOLDER_GALLERY'] = os.path.join(app.config['UPLOAD_FOLDER'], 'gallery')
-
-# Crear todas las carpetas necesarias de forma automática
-for folder in [app.config['UPLOAD_FOLDER'], 
-               app.config['UPLOAD_FOLDER_VIDEOS'], 
-               app.config['UPLOAD_FOLDER_IMAGES'], 
-               app.config['UPLOAD_FOLDER_GALLERY']]:
-    os.makedirs(folder, exist_ok=True)
-
-# ==================== CONTINUACIÓN DEL CÓDIGO ====================
-# Aquí siguen tus rutas (@app.route) y el resto de la lógica...
-# ==================== INICIALIZAR EXTENSIONES ====================
-db = SQLAlchemy(app)
-# csrf = CSRFProtect(app)
+# ==================== LOGIN MANAGER ====================
 login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
-login_manager.login_message = 'Por favor inicia sesión para acceder al panel de administración.'
-login_manager.login_message_category = 'info'
+login_manager.login_message = 'Por favor inicia sesión para acceder.'
 
-# ==================== CONFIGURACIONES DE SEGURIDAD ====================
+@login_manager.user_loader
+def load_user(user_id):
+    return Usuario.query.get(int(user_id))
+
+# ==================== CONSTANTES Y SEGURIDAD (Faltantes) ====================
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv'}
+ALLOWED_IMAGES = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+ALLOWED_VIDEOS = {'mp4', 'mov', 'avi', 'mkv', 'webm'}
+
 ALLOWED_REDIRECT_DOMAINS = {
     'youtube.com', 'www.youtube.com', 'youtu.be',
     'facebook.com', 'www.facebook.com', 'fb.com',
@@ -95,9 +67,15 @@ ALLOWED_REDIRECT_DOMAINS = {
     'paypal.com', 'www.paypal.com'
 }
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv'}
-ALLOWED_IMAGES = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-ALLOWED_VIDEOS = {'mp4', 'mov', 'avi', 'mkv', 'webm'}
+# ==================== CARPETAS DE SUBIDA ====================
+app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'uploads')
+app.config['UPLOAD_FOLDER_VIDEOS'] = os.path.join(app.config['UPLOAD_FOLDER'], 'videos')
+app.config['UPLOAD_FOLDER_IMAGES'] = os.path.join(app.config['UPLOAD_FOLDER'], 'images')
+app.config['UPLOAD_FOLDER_GALLERY'] = os.path.join(app.config['UPLOAD_FOLDER'], 'gallery')
+
+for folder in [app.config['UPLOAD_FOLDER'], app.config['UPLOAD_FOLDER_VIDEOS'], 
+               app.config['UPLOAD_FOLDER_IMAGES'], app.config['UPLOAD_FOLDER_GALLERY']]:
+    os.makedirs(folder, exist_ok=True)
 
 # ==================== FUNCIONES UTILITARIAS ====================
 def allowed_file(filename, allowed_types=None):
