@@ -10295,7 +10295,8 @@
     margin-bottom: 1rem;
     height: 3.4em;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 2; /* Versión para Chrome/Safari antiguos */
+    line-clamp: 2;         /* Propiedad estándar (CORRECCIÓN) */
     -webkit-box-orient: vertical;
     overflow: hidden;
     letter-spacing: -0.5px;
