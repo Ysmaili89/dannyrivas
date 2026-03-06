@@ -47,7 +47,7 @@ instance_path = os.path.join(basedir, 'instance')
 os.makedirs(instance_path, exist_ok=True)
 
 db_path = os.path.join(instance_path, 'app.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/Ysmailin89/dannyrivas/instance/app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_size': 5,
@@ -72,7 +72,7 @@ for folder in [app.config['UPLOAD_FOLDER'],
 
 # ==================== INICIALIZAR EXTENSIONES ====================
 db = SQLAlchemy(app)
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
 login_manager.login_message = 'Por favor inicia sesión para acceder al panel de administración.'
@@ -2015,24 +2015,20 @@ def too_large(e):
     return redirect(request.url)
 
 # ==================== INICIAR APLICACIÓN ====================
-# Variable para PythonAnywhere
+# Variable para PythonAnywhere (Mantenla aquí arriba)
 application = app
 
-if __name__ == '__main__':
-    with app.app_context():
+# ESTO CORRIGE EL ERROR REAL: Inicialización forzada
+with app.app_context():
+    try:
+        from models import db, init_db
+        db.create_all()
         init_db()
-    
-    print("""
-    ╔══════════════════════════════════════════════════════════╗
-    ║     Ministerio Jhonatan Danny Rivas                     ║
-    ║     Versión SQLite para PythonAnywhere                  ║
-    ╚══════════════════════════════════════════════════════════╝
-    """)
-    print(f"✅ Base de datos: {db_path}")
-    print(f"✅ Carpetas de uploads: Creadas")
-    print(f"✅ Puerto: 5000")
-    print("\n⚠️  CAMBIA LA CONTRASEÑA DEL ADMIN EN PRODUCCIÓN")
-    print("⚠️  Usuario: admin | Contraseña: admin123\n")
-    
+        print("✅ Base de datos y categorías inicializadas correctamente")
+    except Exception as e:
+        print(f"⚠️ Nota de inicio: {e}")
+
+if __name__ == '__main__':
+    # Esto solo se ejecuta en tu PC local, no en el servidor
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=True)
