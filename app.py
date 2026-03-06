@@ -2015,20 +2015,22 @@ def too_large(e):
     return redirect(request.url)
 
 # ==================== INICIAR APLICACIÓN ====================
-# Variable para PythonAnywhere (Mantenla aquí arriba)
+# Variable para PythonAnywhere 
 application = app
 
-# ESTO CORRIGE EL ERROR REAL: Inicialización forzada
+# ESTO CORRIGE EL ERROR 500 REAL
 with app.app_context():
     try:
         from models import db, init_db
         db.create_all()
         init_db()
-        print("✅ Base de datos y categorías inicializadas correctamente")
+        print("✅ Base de datos inicializada correctamente")
     except Exception as e:
-        print(f"⚠️ Nota de inicio: {e}")
+        # Esto imprimirá el error real en tu Error Log de PythonAnywhere
+        print(f"❌ Error crítico al iniciar DB: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == '__main__':
-    # Esto solo se ejecuta en tu PC local, no en el servidor
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
