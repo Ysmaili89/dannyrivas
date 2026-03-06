@@ -96,7 +96,7 @@ class Categoria(TimeStampMixin, ActivoMixin, db.Model):
     orden = db.Column(db.Integer, default=0)
     
     # Relaciones
-    videos = db.relationship('Video', back_populates='categoria_rel', lazy='dynamic')
+    videos = db.relationship('Video', back_populates='categoria_rel', lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<Categoría {self.nombre}>'
@@ -111,7 +111,7 @@ class Video(TimeStampMixin, ActivoMixin, db.Model):
     descripcion = db.Column(db.Text)
     
     # YouTube (opcional)
-    youtube_url = db.Column(db.String(500), nullable=True)
+    youtube_url = db.Column(db.String(500), nullable=True, index=True)
     
     # Archivo local
     archivo = db.Column(db.String(200), nullable=True)
@@ -125,7 +125,7 @@ class Video(TimeStampMixin, ActivoMixin, db.Model):
     vistas = db.Column(db.Integer, default=0)
     
     # Relaciones
-    categoria_id = db.Column(db.Integer, db.ForeignKey('categorias.id'), index=True)
+    categoria_id = db.Column(db.Integer, db.ForeignKey('categorias.id', ondelete='SET NULL'), index=True)
     categoria_rel = db.relationship('Categoria', back_populates='videos')
     
     # Flags
@@ -135,6 +135,7 @@ class Video(TimeStampMixin, ActivoMixin, db.Model):
 
     __table_args__ = (
         db.Index('idx_video_busqueda', 'titulo', 'estado', 'destacado'),
+        db.Index('idx_video_categoria_estado', 'categoria_id', 'estado'),
     )
 
     def incrementar_vistas(self):
@@ -145,8 +146,15 @@ class Video(TimeStampMixin, ActivoMixin, db.Model):
     def youtube_id(self):
         """Extrae el ID de YouTube de la URL"""
         if self.youtube_url:
-            match = re.search(r'(?:v=|youtu\.be/|shorts/|embed/)([^&?/]+)', self.youtube_url)
-            return match.group(1) if match else None
+            # Patrones mejorados para YouTube
+            patterns = [
+                r'(?:v=|/v/|youtu\.be/|shorts/|embed/|watch\?v=)([^&?/\n]+)',
+                r'(?:youtube\.com/)([^&?/\n]+)'
+            ]
+            for pattern in patterns:
+                match = re.search(pattern, self.youtube_url)
+                if match:
+                    return match.group(1)
         return None
 
     @property
@@ -167,6 +175,15 @@ class Video(TimeStampMixin, ActivoMixin, db.Model):
             return f'https://img.youtube.com/vi/{self.youtube_id}/maxresdefault.jpg'
         return '/static/images/video-placeholder.jpg'
 
+    @property
+    def tiempo_lectura(self):
+        """Estima el tiempo de lectura basado en la descripción"""
+        if self.descripcion:
+            palabras = len(self.descripcion.split())
+            minutos = max(1, palabras // 200)
+            return f'{minutos} min'
+        return '1 min'
+
     def __repr__(self):
         return f'<Video {self.titulo}>'
 
@@ -180,7 +197,7 @@ class Short(TimeStampMixin, ActivoMixin, db.Model):
     descripcion = db.Column(db.Text)
     
     # YouTube (opcional)
-    youtube_url = db.Column(db.String(500), nullable=True)
+    youtube_url = db.Column(db.String(500), nullable=True, index=True)
     
     # Archivo local
     video = db.Column(db.String(200), nullable=True)
@@ -283,6 +300,16 @@ class Oracion(TimeStampMixin, db.Model):
             return 'Anónimo'
         return self.nombre or 'Anónimo'
 
+    @property
+    def urgencia_icono(self):
+        """Devuelve el icono según la urgencia"""
+        icons = {
+            'normal': '🔵',
+            'urgente': '🟠',
+            'muy-urgente': '🔴'
+        }
+        return icons.get(self.urgencia, '🔵')
+
     def __repr__(self):
         return f'<Oración {self.nombre_mostrar}>'
 
@@ -323,6 +350,20 @@ class Invitacion(TimeStampMixin, db.Model):
     confirmada = db.Column(db.Boolean, default=False, nullable=False, index=True)
     notas_admin = db.Column(db.Text)
     fecha_envio = db.Column(db.DateTime, default=datetime.now, index=True)
+
+    @property
+    def tipo_evento_icono(self):
+        """Devuelve el icono según el tipo de evento"""
+        icons = {
+            'culto': '⛪',
+            'cruzada': '🌟',
+            'retiro': '🏕️',
+            'conferencia': '🎯',
+            'celula': '🏠',
+            'calle': '📢',
+            'otro': '📌'
+        }
+        return icons.get(self.tipo_evento, '📅')
 
     def __repr__(self):
         return f'<Invitación {self.nombre}>'
@@ -404,20 +445,20 @@ class Configuracion(TimeStampMixin, db.Model):
     videos_destacados = db.Column(db.Boolean, default=True)
     categorias_orden = db.Column(db.String(20), default='nombre')
     
-    # REDES SOCIALES
-    facebook_url = db.Column(db.String(500))
-    instagram_url = db.Column(db.String(500))
-    youtube_url = db.Column(db.String(500))
-    tiktok_url = db.Column(db.String(500))
+    # REDES SOCIALES (TUS URLs CORRECTAS)
+    facebook_url = db.Column(db.String(500), default='https://www.facebook.com/share/1CbPDerCJ3/')
+    instagram_url = db.Column(db.String(500), default='https://www.instagram.com/rivasjonathanoficial')
+    youtube_url = db.Column(db.String(500), default='https://youtube.com/@jhonatanrivasoficial4487')
+    tiktok_url = db.Column(db.String(500), default='https://www.tiktok.com/@evangelistajhonat8')
     twitter_url = db.Column(db.String(500))
     linkedin_url = db.Column(db.String(500))
     live_tiktok_url = db.Column(db.String(500))
     
     # Contacto
-    email_contacto = db.Column(db.String(100))
-    telefono = db.Column(db.String(20))
-    whatsapp = db.Column(db.String(20))
-    direccion = db.Column(db.Text)
+    email_contacto = db.Column(db.String(100), default='info@jhonatandannyrivas.com')
+    telefono = db.Column(db.String(20), default='+1 809-915-8969')
+    whatsapp = db.Column(db.String(20), default='18099158969')
+    direccion = db.Column(db.Text, default='Santo Domingo, República Dominicana')
     latitud = db.Column(db.String(20))
     longitud = db.Column(db.String(20))
     
@@ -455,6 +496,9 @@ class Configuracion(TimeStampMixin, db.Model):
             'videos_por_pagina': self.videos_por_pagina,
             'shorts_por_pagina': self.shorts_por_pagina,
         }
+
+    def __repr__(self):
+        return f'<Configuración>'
 
 
 class Donacion(TimeStampMixin, ActivoMixin, db.Model):
@@ -499,6 +543,7 @@ def crear_datos_iniciales():
 
     # Verificar si ya hay datos
     if Usuario.query.first():
+        print("📦 Datos iniciales ya existen")
         return
 
     print("📦 Creando datos iniciales...")
@@ -524,10 +569,10 @@ def crear_datos_iniciales():
             telefono='+1 809-915-8969',
             whatsapp='18099158969',
             direccion='Santo Domingo, República Dominicana',
-            facebook_url='https://www.facebook.com/share/1CbPDerCJ3/?mibextid=wwXIfr',
-            instagram_url='https://www.instagram.com/rivasjonathanoficial?igsh=cXV2ZjVzbGR3ZHhu&utm_source=qr/',
-            youtube_url='https://youtube.com/@jhonatanrivasoficial4487?si=yQU-b-1hoPN3iq8M',
-            tiktok_url='https://www.tiktok.com/@evangelistajhonat8?_r=1&_t=ZS-94NVVixZ3e1',
+            facebook_url='https://www.facebook.com/share/1CbPDerCJ3/',
+            instagram_url='https://www.instagram.com/rivasjonathanoficial',
+            youtube_url='https://youtube.com/@jhonatanrivasoficial4487',
+            tiktok_url='https://www.tiktok.com/@evangelistajhonat8',
             twitter_url='',
             linkedin_url='',
             live_tiktok_url='https://www.tiktok.com/@evangelistajhonat8/live',
@@ -564,7 +609,8 @@ def crear_datos_iniciales():
         ]
         
         for cat_data in categorias:
-            categoria = Categoria(**cat_data, orden=0)
+            cat_data['orden'] = 0
+            categoria = Categoria(**cat_data)
             db.session.add(categoria)
 
         db.session.commit()

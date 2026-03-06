@@ -13,6 +13,10 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from flask_sqlalchemy import SQLAlchemy
+
+# ==================== INICIALIZACIÓN DE DB ====================
+db = SQLAlchemy()
 
 # ==================== CONFIGURACIÓN DE LA APP ====================
 app = Flask(__name__)
@@ -22,7 +26,10 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 # --- RUTA DE BASE DE DATOS ---
 if 'PYTHONANYWHERE_DOMAIN' in os.environ:
+    # En PythonAnywhere, usa la ruta absoluta correcta
     db_path = '/home/Ysmailin89/dannyrivas/instance/app.db'
+    # Asegúrate de que el directorio instance existe
+    os.makedirs('/home/Ysmailin89/dannyrivas/instance', exist_ok=True)
 else:
     instance_path = os.path.join(basedir, 'instance')
     os.makedirs(instance_path, exist_ok=True)
@@ -38,8 +45,7 @@ app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
-# ==================== INICIALIZACIÓN DE DB ====================
-from models import db, Usuario 
+# Inicializar SQLAlchemy con la app
 db.init_app(app)
 
 # ==================== LOGIN MANAGER ====================
@@ -47,11 +53,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
 login_manager.login_message = 'Por favor inicia sesión para acceder.'
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Usuario.query.get(int(user_id))
-
-# ==================== CONSTANTES Y SEGURIDAD (Faltantes) ====================
+# ==================== CONSTANTES Y SEGURIDAD ====================
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv'}
 ALLOWED_IMAGES = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 ALLOWED_VIDEOS = {'mp4', 'mov', 'avi', 'mkv', 'webm'}
@@ -76,80 +78,6 @@ app.config['UPLOAD_FOLDER_GALLERY'] = os.path.join(app.config['UPLOAD_FOLDER'], 
 for folder in [app.config['UPLOAD_FOLDER'], app.config['UPLOAD_FOLDER_VIDEOS'], 
                app.config['UPLOAD_FOLDER_IMAGES'], app.config['UPLOAD_FOLDER_GALLERY']]:
     os.makedirs(folder, exist_ok=True)
-
-# ==================== FUNCIONES UTILITARIAS ====================
-def allowed_file(filename, allowed_types=None):
-    if allowed_types is None:
-        allowed_types = ALLOWED_EXTENSIONS
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_types
-
-def allowed_image(filename):
-    return allowed_file(filename, ALLOWED_IMAGES)
-
-def allowed_video(filename):
-    return allowed_file(filename, ALLOWED_VIDEOS)
-
-def generar_nombre_unico(directorio, nombre_base, extension):
-    """Genera nombre único para archivos"""
-    timestamp = int(datetime.now().timestamp())
-    filename = secure_filename(f"{nombre_base}_{timestamp}.{extension}")
-    
-    contador = 1
-    ruta_completa = os.path.join(directorio, filename)
-    while os.path.exists(ruta_completa):
-        filename = secure_filename(f"{nombre_base}_{timestamp}_{contador}.{extension}")
-        ruta_completa = os.path.join(directorio, filename)
-        contador += 1
-    
-    return filename
-
-def es_url_segura(url):
-    """Valida URLs para redirecciones seguras"""
-    if not url:
-        return False
-    try:
-        parsed = urlparse(url)
-        if not parsed.netloc:
-            return True
-        domain = parsed.netloc.lower()
-        if domain.startswith('www.'):
-            domain = domain[4:]
-        for allowed in ALLOWED_REDIRECT_DOMAINS:
-            if domain == allowed or domain.endswith('.' + allowed):
-                return True
-        return False
-    except Exception:
-        return False
-
-def validar_whatsapp(numero):
-    """Valida número de WhatsApp"""
-    if not numero:
-        return None
-    numero_limpio = re.sub(r'[^\d+]', '', numero)
-    if numero_limpio.count('+') > 1:
-        return None
-    if '+' in numero_limpio and not numero_limpio.startswith('+'):
-        return None
-    numero_digitos = numero_limpio.replace('+', '')
-    if not numero_digitos.isdigit() or len(numero_digitos) < 10 or len(numero_digitos) > 15:
-        return None
-    return numero_digitos
-
-@login_manager.user_loader
-def load_user(user_id):
-    return db.session.get(Usuario, int(user_id))
-
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            flash('Por favor inicia sesión para acceder.', 'warning')
-            return redirect(url_for('iniciar_sesion'))
-        if not current_user.es_admin:
-            flash('No tienes permisos para acceder a esta página.', 'error')
-            return redirect(url_for('index'))
-        return f(*args, **kwargs)
-    return decorated_function
 
 # ==================== MODELOS ====================
 class Usuario(UserMixin, db.Model):
@@ -183,7 +111,6 @@ class Categoria(db.Model):
     color = db.Column(db.String(20), default='#D4AF37')
     orden = db.Column(db.Integer, default=0)
     fecha_creacion = db.Column(db.DateTime, default=datetime.now)
-    videos = db.relationship('Video', back_populates='categoria_rel', lazy='dynamic')
 
 class Video(db.Model):
     __tablename__ = 'videos'
@@ -201,7 +128,6 @@ class Video(db.Model):
     estado = db.Column(db.String(20), default='publicado')
     fecha_publicacion = db.Column(db.DateTime, default=datetime.now)
     categoria_id = db.Column(db.Integer, db.ForeignKey('categorias.id'))
-    categoria_rel = db.relationship('Categoria', back_populates='videos')
 
     __table_args__ = (
         db.Index('idx_video_estado', 'estado'),
@@ -449,6 +375,83 @@ class Configuracion(db.Model):
             return f'/static/uploads/images/{self.logo}'
         return None
 
+# ==================== FUNCIONES UTILITARIAS ====================
+def allowed_file(filename, allowed_types=None):
+    if allowed_types is None:
+        allowed_types = ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_types
+
+def allowed_image(filename):
+    return allowed_file(filename, ALLOWED_IMAGES)
+
+def allowed_video(filename):
+    return allowed_file(filename, ALLOWED_VIDEOS)
+
+def generar_nombre_unico(directorio, nombre_base, extension):
+    """Genera nombre único para archivos"""
+    timestamp = int(datetime.now().timestamp())
+    filename = secure_filename(f"{nombre_base}_{timestamp}.{extension}")
+    
+    contador = 1
+    ruta_completa = os.path.join(directorio, filename)
+    while os.path.exists(ruta_completa):
+        filename = secure_filename(f"{nombre_base}_{timestamp}_{contador}.{extension}")
+        ruta_completa = os.path.join(directorio, filename)
+        contador += 1
+    
+    return filename
+
+def es_url_segura(url):
+    """Valida URLs para redirecciones seguras"""
+    if not url:
+        return False
+    try:
+        parsed = urlparse(url)
+        if not parsed.netloc:
+            return True
+        domain = parsed.netloc.lower()
+        if domain.startswith('www.'):
+            domain = domain[4:]
+        for allowed in ALLOWED_REDIRECT_DOMAINS:
+            if domain == allowed or domain.endswith('.' + allowed):
+                return True
+        return False
+    except Exception:
+        return False
+
+def validar_whatsapp(numero):
+    """Valida número de WhatsApp"""
+    if not numero:
+        return None
+    numero_limpio = re.sub(r'[^\d+]', '', numero)
+    if numero_limpio.count('+') > 1:
+        return None
+    if '+' in numero_limpio and not numero_limpio.startswith('+'):
+        return None
+    numero_digitos = numero_limpio.replace('+', '')
+    if not numero_digitos.isdigit() or len(numero_digitos) < 10 or len(numero_digitos) > 15:
+        return None
+    return numero_digitos
+
+@login_manager.user_loader
+def load_user(user_id):
+    try:
+        return db.session.get(Usuario, int(user_id))
+    except:
+        return None
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash('Por favor inicia sesión para acceder.', 'warning')
+            return redirect(url_for('iniciar_sesion'))
+        if not current_user.es_admin:
+            flash('No tienes permisos para acceder a esta página.', 'error')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # ==================== FUNCIONES DE INICIALIZACIÓN ====================
 def ahora():
     return datetime.now()
@@ -497,6 +500,7 @@ def inject_config():
 def init_db():
     """Inicializa la base de datos con datos por defecto"""
     try:
+        # Crear todas las tablas
         db.create_all()
         print("✅ Tablas creadas")
         
@@ -546,23 +550,26 @@ def init_db():
             print('✅ Categorías creadas')
             
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Error en init_db: {e}")
         db.session.rollback()
+        traceback.print_exc()
 
 # ==================== VALIDACIONES ====================
 def validar_youtube_url_unica(youtube_url, exclude_id=None, tipo='video'):
     if not youtube_url:
         return True, None
-    video_query = Video.query.filter_by(youtube_url=youtube_url)
-    if exclude_id and tipo == 'video':
-        video_query = video_query.filter(Video.id != exclude_id)
-    if video_query.first():
-        return False, "❌ URL de YouTube ya registrada en otro video"
-    short_query = Short.query.filter_by(youtube_url=youtube_url)
-    if exclude_id and tipo == 'short':
-        short_query = short_query.filter(Short.id != exclude_id)
-    if short_query.first():
-        return False, "❌ URL de YouTube ya registrada en un short"
+    if tipo == 'video':
+        video_query = Video.query.filter_by(youtube_url=youtube_url)
+        if exclude_id:
+            video_query = video_query.filter(Video.id != exclude_id)
+        if video_query.first():
+            return False, "❌ URL de YouTube ya registrada en otro video"
+    elif tipo == 'short':
+        short_query = Short.query.filter_by(youtube_url=youtube_url)
+        if exclude_id:
+            short_query = short_query.filter(Short.id != exclude_id)
+        if short_query.first():
+            return False, "❌ URL de YouTube ya registrada en un short"
     return True, None
 
 def validar_url_externa_unica(url, exclude_id=None):
@@ -579,7 +586,6 @@ def validar_url_externa_unica(url, exclude_id=None):
 @app.route('/')
 def index():
     try:
-        pagina_videos = request.args.get('page_videos', 1, type=int)
         videos = Video.query.filter_by(estado='publicado')\
             .order_by(Video.fecha_publicacion.desc())\
             .limit(12).all()
@@ -594,6 +600,7 @@ def index():
 @app.route('/video')
 def video():
     try:
+        from sqlalchemy import or_
         pagina = request.args.get('page', 1, type=int)
         videos_paginados = Video.query.filter_by(estado='publicado')\
             .order_by(Video.fecha_publicacion.desc())\
@@ -636,7 +643,7 @@ def ver_video(id):
         ).order_by(Video.fecha_publicacion.desc()).limit(6).all()
         return render_template('ver_video.html', video=video, relacionados=relacionados)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en ver_video: {e}")
         flash('Video no encontrado', 'error')
         return redirect(url_for('video'))
 
@@ -652,7 +659,7 @@ def ver_short(id):
         ).order_by(Short.fecha_publicacion.desc()).limit(6).all()
         return render_template('ver_short.html', short=short, relacionados=relacionados)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en ver_short: {e}")
         flash('Short no encontrado', 'error')
         return redirect(url_for('short'))
 
@@ -662,7 +669,7 @@ def categoria():
         categorias = Categoria.query.order_by(Categoria.nombre).all()
         return render_template('categoria.html', categorias=categorias)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en categoria: {e}")
         return render_template('categoria.html', categorias=[])
 
 @app.route('/categoria/<slug>')
@@ -680,7 +687,7 @@ def categoria_detalle(slug):
                              pagina_actual=pagina,
                              total_paginas=videos_paginados.pages)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en categoria_detalle: {e}")
         flash('Categoría no encontrada', 'error')
         return redirect(url_for('categoria'))
 
@@ -1000,6 +1007,7 @@ def admin_dashboard():
                              ultimos_contactos=ultimos_contactos)
     except Exception as e:
         print(f"Error en dashboard: {e}")
+        traceback.print_exc()
         return render_template('admin/dashboard.html', stats={})
 
 @app.route('/admin/perfil')
@@ -1023,7 +1031,7 @@ def lista_videos():
                              total_paginas=videos.pages,
                              categorias=categorias)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_videos: {e}")
         flash('Error al cargar videos', 'error')
         return render_template('admin/lista_videos.html', videos=[])
 
@@ -1161,7 +1169,7 @@ def lista_shorts():
                              pagina_actual=pagina,
                              total_paginas=shorts.pages)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_shorts: {e}")
         return render_template('admin/lista_shorts.html', shorts=[])
 
 @app.route('/admin/shorts/crear', methods=['GET', 'POST'])
@@ -1311,7 +1319,7 @@ def lista_categorias():
         categorias = Categoria.query.all()
         return render_template('admin/lista_categorias.html', categorias=categorias)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_categorias: {e}")
         return render_template('admin/lista_categorias.html', categorias=[])
 
 @app.route('/admin/categorias/crear', methods=['GET', 'POST'])
@@ -1362,7 +1370,9 @@ def editar_categoria(id):
 def eliminar_categoria(id):
     categoria = Categoria.query.get_or_404(id)
     try:
-        if categoria.videos and categoria.videos.count() > 0:
+        # Verificar si hay videos asociados
+        videos_count = Video.query.filter_by(categoria_id=id).count()
+        if videos_count > 0:
             flash('No se puede eliminar: tiene videos asociados', 'error')
             return redirect(url_for('lista_categorias'))
         db.session.delete(categoria)
@@ -1380,14 +1390,14 @@ def eliminar_categoria(id):
 def lista_testimonios():
     try:
         pagina = request.args.get('page', 1, type=int)
-        testimonios = Testimonio.query.order_by(Testimonio.fecha.desc())\
+        testimonios_paginados = Testimonio.query.order_by(Testimonio.fecha.desc())\
             .paginate(page=pagina, per_page=20, error_out=False)
         pendientes = Testimonio.query.filter_by(publicado=False).count()
         return render_template('admin/lista_testimonios.html',
-                             testimonios=testimonios,
+                             testimonios=testimonios_paginados,
                              testimonios_pendientes=pendientes)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_testimonios: {e}")
         return render_template('admin/lista_testimonios.html', testimonios=[])
 
 @app.route('/admin/testimonios/<int:id>/publicar', methods=['POST'])
@@ -1442,11 +1452,11 @@ def eliminar_testimonio(id):
 def lista_oraciones():
     try:
         pagina = request.args.get('page', 1, type=int)
-        oraciones = Oracion.query.order_by(Oracion.fecha.desc())\
+        oraciones_paginados = Oracion.query.order_by(Oracion.fecha.desc())\
             .paginate(page=pagina, per_page=20, error_out=False)
-        return render_template('admin/lista_oraciones.html', oraciones=oraciones)
+        return render_template('admin/lista_oraciones.html', oraciones=oraciones_paginados)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_oraciones: {e}")
         return render_template('admin/lista_oraciones.html', oraciones=[])
 
 @app.route('/admin/oraciones/<int:id>/responder', methods=['POST'])
@@ -1496,14 +1506,14 @@ def eliminar_oracion(id):
 def lista_contactos():
     try:
         pagina = request.args.get('page', 1, type=int)
-        contactos = Contacto.query.order_by(Contacto.fecha.desc())\
+        contactos_paginados = Contacto.query.order_by(Contacto.fecha.desc())\
             .paginate(page=pagina, per_page=20, error_out=False)
         no_leidos = Contacto.query.filter_by(leido=False).count()
         return render_template('admin/lista_contactos.html',
-                             contactos=contactos,
+                             contactos=contactos_paginados,
                              no_leidos_count=no_leidos)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_contactos: {e}")
         return render_template('admin/lista_contactos.html', contactos=[])
 
 @app.route('/admin/contactos/<int:id>/leer', methods=['POST'])
@@ -1553,14 +1563,14 @@ def eliminar_contacto(id):
 def lista_invitaciones():
     try:
         pagina = request.args.get('page', 1, type=int)
-        invitaciones = Invitacion.query.order_by(Invitacion.fecha_envio.desc())\
+        invitaciones_paginados = Invitacion.query.order_by(Invitacion.fecha_envio.desc())\
             .paginate(page=pagina, per_page=20, error_out=False)
         pendientes = Invitacion.query.filter_by(confirmada=False).count()
         return render_template('admin/lista_invitaciones.html',
-                             invitaciones=invitaciones,
+                             invitaciones=invitaciones_paginados,
                              pendientes_count=pendientes)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_invitaciones: {e}")
         return render_template('admin/lista_invitaciones.html', invitaciones=[])
 
 @app.route('/admin/invitaciones/<int:id>/confirmar', methods=['POST'])
@@ -1612,7 +1622,7 @@ def lista_usuarios():
         usuarios = Usuario.query.all()
         return render_template('admin/lista_usuarios.html', usuarios=usuarios)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_usuarios: {e}")
         return render_template('admin/lista_usuarios.html', usuarios=[])
 
 @app.route('/admin/usuarios/crear', methods=['GET', 'POST'])
@@ -1683,7 +1693,7 @@ def lista_newsletter():
         suscriptores = Newsletter.query.order_by(Newsletter.fecha_suscripcion.desc()).all()
         return render_template('admin/lista_newsletter.html', suscriptores=suscriptores)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_newsletter: {e}")
         return render_template('admin/lista_newsletter.html', suscriptores=[])
 
 @app.route('/admin/newsletter/<int:id>/toggle', methods=['POST'])
@@ -1725,7 +1735,7 @@ def lista_galeria():
                              pagina_actual=pagina,
                              total_paginas=imagenes.pages)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error en lista_galeria: {e}")
         return render_template('admin/lista_galeria.html', imagenes=[])
 
 @app.route('/admin/galeria/crear', methods=['GET', 'POST'])
@@ -1973,7 +1983,7 @@ def configuracion():
 @app.route('/admin/configurar-redes', methods=['GET', 'POST'])
 @login_required
 @admin_required
-def configurar_redes(): # <--- Esto arregla el error del url_for
+def configurar_redes():
     config = Configuracion.query.first()
     if request.method == 'POST':
         if not config:
@@ -2016,6 +2026,8 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     db.session.rollback()
+    print(f"Error 500: {e}")
+    traceback.print_exc()
     return render_template('500.html'), 500
 
 @app.errorhandler(413)
@@ -2027,17 +2039,15 @@ def too_large(e):
 # Variable para PythonAnywhere 
 application = app
 
-# ESTO CORRIGE EL ERROR 500 REAL
+# Crear tablas e inicializar datos
 with app.app_context():
     try:
-        from models import db
         db.create_all()
+        print("✅ Tablas creadas/verificadas")
         init_db()
         print("✅ Base de datos inicializada correctamente")
     except Exception as e:
-        # Esto imprimirá el error real en tu Error Log de PythonAnywhere
         print(f"❌ Error crítico al iniciar DB: {str(e)}")
-        import traceback
         traceback.print_exc()
 
 if __name__ == '__main__':

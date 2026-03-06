@@ -5,7 +5,7 @@ VERSIÓN OPTIMIZADA PARA PYTHONANYWHERE CON SQLITE
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileSize
-from wtforms import StringField, TextAreaField, SelectField, BooleanField, IntegerField, URLField, DateField, PasswordField, HiddenField
+from wtforms import StringField, TextAreaField, SelectField, BooleanField, IntegerField, URLField, DateField, PasswordField, HiddenField, FieldList
 from wtforms.validators import DataRequired, Email, Length, Optional, URL, NumberRange, ValidationError, EqualTo, Regexp
 import pkg_resources
 import re
@@ -16,7 +16,7 @@ try:
 except:
     FLASK_WTF_VERSION = (1, 0, 0)
 
-# Constantes de tamaño
+# Constantes de tamaño (en bytes)
 MAX_VIDEO_SIZE = 500 * 1024 * 1024  # 500MB
 MAX_SHORT_SIZE = 200 * 1024 * 1024   # 200MB
 MAX_IMAGE_SIZE = 10 * 1024 * 1024    # 10MB
@@ -47,12 +47,12 @@ else:
             if field.data.content_length > MAX_IMAGE_SIZE:
                 raise ValidationError('La imagen no puede ser mayor a 10MB')
 
+# ========================= VALIDADORES PERSONALIZADOS =========================
 
 def validate_slug(form, field):
     """Valida que el slug tenga el formato correcto"""
     if not re.match(r'^[a-z0-9]+(?:-[a-z0-9]+)*$', field.data):
         raise ValidationError('El slug solo puede contener letras minúsculas, números y guiones')
-
 
 def validate_youtube_url(form, field):
     """Valida que sea una URL de YouTube válida"""
@@ -73,7 +73,6 @@ def validate_youtube_url(form, field):
         
         raise ValidationError('❌ Ingresa una URL válida de YouTube (youtube.com, youtu.be, shorts)')
 
-
 def validate_whatsapp(form, field):
     """Valida número de WhatsApp"""
     if field.data:
@@ -81,6 +80,24 @@ def validate_whatsapp(form, field):
         if len(numero) < 10 or len(numero) > 15:
             raise ValidationError('El número debe tener entre 10 y 15 dígitos')
 
+def validate_unique_slug(model, field):
+    """Validador factory para slugs únicos"""
+    def _validator(form, field):
+        from app import db  # Importación diferida para evitar circular imports
+        existing = model.query.filter_by(slug=field.data).first()
+        if existing and existing.id != form.id.data:
+            raise ValidationError('Este slug ya está en uso. Elige otro.')
+    return _validator
+
+def validate_unique_url(model, field):
+    """Validador factory para URLs únicas"""
+    def _validator(form, field):
+        if field.data:
+            from app import db
+            existing = model.query.filter_by(youtube_url=field.data).first()
+            if existing and existing.id != form.id.data:
+                raise ValidationError('Esta URL de YouTube ya está registrada.')
+    return _validator
 
 # ========================= FORMULARIOS ADMIN =========================
 
@@ -122,7 +139,8 @@ class VideoForm(FlaskForm):
     
     duracion = StringField('Duración', validators=[
         Optional(),
-        Length(max=20, message='La duración no puede exceder 20 caracteres')
+        Length(max=20, message='La duración no puede exceder 20 caracteres'),
+        Regexp(r'^(\d+:)?\d{1,2}:\d{2}$', message='Formato inválido. Usa: MM:SS o HH:MM:SS')
     ], description='Ej: 45:30 o 1:15:30')
     
     categoria_id = SelectField('Categoría', coerce=int, validators=[Optional()])
@@ -133,6 +151,18 @@ class VideoForm(FlaskForm):
     ], default='publicado', validators=[DataRequired()])
     
     destacado = BooleanField('⭐ Marcar como video destacado')
+    
+    def validate(self, extra_validators=None):
+        if not super().validate(extra_validators):
+            return False
+        
+        # Validar que al menos una fuente de video esté presente
+        if not self.youtube_url.data and not self.video_file.data:
+            self.youtube_url.errors.append('Debes proporcionar una URL de YouTube o subir un archivo')
+            self.video_file.errors.append('Debes proporcionar una URL de YouTube o subir un archivo')
+            return False
+        
+        return True
 
 
 class ShortForm(FlaskForm):
@@ -173,13 +203,26 @@ class ShortForm(FlaskForm):
     
     duracion = StringField('Duración', validators=[
         Optional(),
-        Length(max=20, message='La duración no puede exceder 20 caracteres')
+        Length(max=20, message='La duración no puede exceder 20 caracteres'),
+        Regexp(r'^\d{1,2}:\d{2}$', message='Formato inválido. Usa: MM:SS')
     ], description='Ej: 0:45')
     
     estado = SelectField('Estado', choices=[
         ('publicado', '✅ Publicado'),
         ('borrador', '📝 Borrador')
     ], default='publicado', validators=[DataRequired()])
+    
+    def validate(self, extra_validators=None):
+        if not super().validate(extra_validators):
+            return False
+        
+        # Validar que al menos una fuente de video esté presente
+        if not self.youtube_url.data and not self.video_file.data:
+            self.youtube_url.errors.append('Debes proporcionar una URL de YouTube o subir un archivo')
+            self.video_file.errors.append('Debes proporcionar una URL de YouTube o subir un archivo')
+            return False
+        
+        return True
 
 
 class CategoriaForm(FlaskForm):
@@ -438,7 +481,8 @@ class InvitacionPublicoForm(FlaskForm):
     
     telefono = StringField('Teléfono de contacto', validators=[
         DataRequired(message='El teléfono es obligatorio'),
-        Length(min=7, max=20, message='El teléfono debe tener entre 7 y 20 caracteres')
+        Length(min=7, max=20, message='El teléfono debe tener entre 7 y 20 caracteres'),
+        Regexp(r'^[\d\s\+\-\(\)]+$', message='Formato de teléfono inválido')
     ])
     
     iglesia = StringField('Iglesia / Ministerio', validators=[
@@ -509,7 +553,8 @@ class UsuarioForm(FlaskForm):
     
     username = StringField('Nombre de usuario', validators=[
         DataRequired(message='El usuario es obligatorio'),
-        Length(min=3, max=80, message='El usuario debe tener entre 3 y 80 caracteres')
+        Length(min=3, max=80, message='El usuario debe tener entre 3 y 80 caracteres'),
+        Regexp(r'^[a-zA-Z0-9_]+$', message='Solo letras, números y guión bajo')
     ])
     
     email = StringField('Correo electrónico', validators=[
@@ -658,6 +703,21 @@ class GaleriaForm(FlaskForm):
         FileAllowed(ALLOWED_IMAGES, f'Solo imágenes: {", ".join(ALLOWED_IMAGES)}'),
         image_size_validator
     ], description='Formatos permitidos: JPG, PNG, GIF, WEBP (máx 10MB)')
+    
+    def validate(self, extra_validators=None):
+        if not super().validate(extra_validators):
+            return False
+        
+        if self.tipo_imagen.data == 'url' and not self.url_externa.data:
+            self.url_externa.errors.append('Debes proporcionar una URL')
+            return False
+        
+        if self.tipo_imagen.data == 'archivo' and not self.archivo.data:
+            if not self.id.data:  # Solo para creación
+                self.archivo.errors.append('Debes seleccionar un archivo')
+                return False
+        
+        return True
 
 
 class NewsletterForm(FlaskForm):
@@ -728,12 +788,14 @@ class ConfiguracionGeneralForm(FlaskForm):
     
     latitud = StringField('Latitud (para mapas)', validators=[
         Optional(),
-        Length(max=20)
+        Length(max=20),
+        Regexp(r'^-?\d{1,3}\.\d+$', message='Formato de latitud inválido')
     ])
     
     longitud = StringField('Longitud (para mapas)', validators=[
         Optional(),
-        Length(max=20)
+        Length(max=20),
+        Regexp(r'^-?\d{1,3}\.\d+$', message='Formato de longitud inválido')
     ])
     
     # Configuración de contenido
