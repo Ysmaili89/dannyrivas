@@ -24,16 +24,14 @@ app = Flask(__name__)
 # Directorio base
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# --- RUTA DE BASE DE DATOS ---
+# --- RUTA DE BASE DE DATOS (CORREGIDA PARA PYTHONANYWHERE) ---
 if 'PYTHONANYWHERE_DOMAIN' in os.environ:
-    # En PythonAnywhere, usa la ruta absoluta correcta
-    db_path = '/home/Ysmailin89/dannyrivas/instance/app.db'
-    # Asegúrate de que el directorio instance existe
-    os.makedirs('/home/Ysmailin89/dannyrivas/instance', exist_ok=True)
+    # En PythonAnywhere: BD en la raíz del proyecto (más simple y seguro)
+    db_path = '/home/Ysmailin89/dannyrivas/app.db'
+    # NOTA: Ya no usamos carpeta 'instance' para evitar problemas de permisos
 else:
-    instance_path = os.path.join(basedir, 'instance')
-    os.makedirs(instance_path, exist_ok=True)
-    db_path = os.path.join(instance_path, 'app.db')
+    # Desarrollo local: BD en la raíz también para consistencia
+    db_path = os.path.join(basedir, 'app.db')
 
 # --- CONFIGURACIONES ---
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
@@ -456,7 +454,8 @@ def admin_required(f):
 def ahora():
     return datetime.now()
 
-app.jinja_env.globals.update(ahora=ahora)
+# Registrar función ahora() para que esté disponible en todas las plantillas
+app.jinja_env.globals['now'] = ahora
 
 # Cache para configuración
 _config_cache = None
