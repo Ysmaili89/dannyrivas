@@ -2048,7 +2048,7 @@ application = app
 # ESTO CORRIGE EL ERROR 500 REAL
 with app.app_context():
     try:
-        from models import db, init_db
+        from models import db
         db.create_all()
         init_db()
         print("✅ Base de datos inicializada correctamente")
