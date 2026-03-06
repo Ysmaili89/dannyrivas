@@ -1987,6 +1987,32 @@ def configuracion():
     }
     return render_template('admin/configuracion.html', config=config, system_info=system_info)
 
+
+@app.route('/admin/configurar-redes', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def configurar_redes(): # <--- Esto arregla el error del url_for
+    config = Configuracion.query.first()
+    if request.method == 'POST':
+        if not config:
+            config = Configuracion()
+            db.session.add(config)
+        
+        # Guardar solo las redes
+        config.facebook_url = request.form.get('facebook_url', '').strip()
+        config.instagram_url = request.form.get('instagram_url', '').strip()
+        config.youtube_url = request.form.get('youtube_url', '').strip()
+        config.tiktok_url = request.form.get('tiktok_url', '').strip()
+        config.twitter_url = request.form.get('twitter_url', '').strip()
+        config.linkedin_url = request.form.get('linkedin_url', '').strip()
+        config.live_tiktok_url = request.form.get('live_tiktok_url', '').strip()
+        
+        db.session.commit()
+        flash('Redes sociales actualizadas con éxito', 'success')
+        return redirect(url_for('configurar_redes'))
+
+    return render_template('admin/confi_redes.html', config=config)
+
 # ==================== ADMIN - CACHÉ ====================
 @app.route('/admin/cache/limpiar', methods=['GET'])
 @login_required
