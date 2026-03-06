@@ -26,7 +26,6 @@ except ImportError as e:
     print(f"❌ Error: {e}")
     print("Instala: pip install -r requirements.txt")
     sys.exit(1)
-
 # ==================== CONFIGURACIÓN ====================
 app = Flask(__name__)
 
@@ -42,19 +41,21 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # ==================== BASE DE DATOS SQLITE ====================
-# Crear directorio instance si no existe
-instance_path = os.path.join(basedir, 'instance')
-os.makedirs(instance_path, exist_ok=True)
+# Detectar si estamos en el Hosting o en PC Local
+if 'PYTHONANYWHERE_DOMAIN' in os.environ:
+    # Ruta absoluta para PythonAnywhere
+    db_path = '/home/Ysmailin89/dannyrivas/instance/app.db'
+else:
+    # Ruta relativa para tu PC local
+    instance_path = os.path.join(basedir, 'instance')
+    os.makedirs(instance_path, exist_ok=True)
+    db_path = os.path.join(instance_path, 'app.db')
 
-db_path = os.path.join(instance_path, 'app.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/Ysmailin89/dannyrivas/instance/app.db'
+# IMPORTANTE: SQLite NO usa pool_size. Se eliminó para evitar el Error 500.
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_size': 5,
-    'pool_timeout': 30,
-}
 
-print(f"📁 Base de datos SQLite: {db_path}")
+print(f"📁 Base de datos activa en: {db_path}")
 
 # ==================== CARPETAS DE SUBIDA ====================
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'uploads')
@@ -62,13 +63,13 @@ app.config['UPLOAD_FOLDER_VIDEOS'] = os.path.join(app.config['UPLOAD_FOLDER'], '
 app.config['UPLOAD_FOLDER_IMAGES'] = os.path.join(app.config['UPLOAD_FOLDER'], 'images')
 app.config['UPLOAD_FOLDER_GALLERY'] = os.path.join(app.config['UPLOAD_FOLDER'], 'gallery')
 
-# Crear todas las carpetas
+# Crear todas las carpetas necesarias
 for folder in [app.config['UPLOAD_FOLDER'], 
                app.config['UPLOAD_FOLDER_VIDEOS'], 
                app.config['UPLOAD_FOLDER_IMAGES'], 
                app.config['UPLOAD_FOLDER_GALLERY']]:
     os.makedirs(folder, exist_ok=True)
-    print(f"✅ Carpeta: {folder}")
+    # print(f"✅ Carpeta verificada: {folder}") # Opcional
 
 # ==================== INICIALIZAR EXTENSIONES ====================
 db = SQLAlchemy(app)
