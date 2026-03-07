@@ -24,28 +24,31 @@ app = Flask(__name__)
 # Directorio base
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# --- RUTA DE BASE DE DATOS (CORREGIDA PARA PYTHONANYWHERE) ---
+# --- RUTA DE BASE DE DATOS (CORREGIDA PARA EL NUEVO USUARIO) ---
 if 'PYTHONANYWHERE_DOMAIN' in os.environ:
-    # En PythonAnywhere: BD en la raíz del proyecto (más simple y seguro)
-   db_path = '/home/Ysmailin89/dannyrivas/app.db'  # <-- DEBE SER evangelistajhonatanrivas
-    # NOTA: Ya no usamos carpeta 'instance' para evitar problemas de permisos
+    # En PythonAnywhere: Ruta absoluta para el usuario evangelistajhonatanrivas
+    db_path = '/home/evangelistajhonatanrivas/dannyrivas/app.db'
 else:
-    # Desarrollo local: BD en la raíz también para consistencia
+    # Desarrollo local: BD en la raíz del proyecto
     db_path = os.path.join(basedir, 'app.db')
 
 # --- CONFIGURACIONES ---
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave-secreta-muy-segura-123')
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024 
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave-secreta-ministerio-2026')
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # Permitir archivos de hasta 500MB
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
-app.config['SESSION_COOKIE_SECURE'] = False 
+
+# Configuración de Cookies (Optimizado para PythonAnywhere)
+app.config['SESSION_COOKIE_SECURE'] = False # Cambiar a True si activas HTTPS en el panel
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # Inicializar SQLAlchemy con la app
 db.init_app(app)
 
+# Variable para que el servidor WSGI de PythonAnywhere encuentre la app
+application = app
 # ==================== LOGIN MANAGER ====================
 login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
