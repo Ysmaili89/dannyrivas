@@ -27,7 +27,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # --- RUTA DE BASE DE DATOS (CORREGIDA PARA PYTHONANYWHERE) ---
 if 'PYTHONANYWHERE_DOMAIN' in os.environ:
     # En PythonAnywhere: BD en la raíz del proyecto (más simple y seguro)
-    db_path = '/home/Ysmailin89/dannyrivas/app.db'
+   db_path = '/home/Ysmailin89/dannyrivas/app.db'  # <-- DEBE SER evangelistajhonatanrivas
     # NOTA: Ya no usamos carpeta 'instance' para evitar problemas de permisos
 else:
     # Desarrollo local: BD en la raíz también para consistencia
