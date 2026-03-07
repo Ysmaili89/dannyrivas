@@ -10,51 +10,19 @@ from functools import wraps
 from urllib.parse import urlparse
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from flask_sqlalchemy import SQLAlchemy
 
-# ==================== INICIALIZACIÓN DE DB ====================
-db = SQLAlchemy()
+# ==================== IMPORTACIÓN DE MODELOS Y DB ====================
+# Importamos db y los modelos desde tu archivo models.py
+from models import db, Usuario, Categoria, Video, Configuracion, Contacto, Oracion
 
 # ==================== CONFIGURACIÓN DE LA APP ====================
 app = Flask(__name__)
-
-# Directorio base
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# --- RUTA DE BASE DE DATOS (CORREGIDA PARA EL NUEVO USUARIO) ---
-if 'PYTHONANYWHERE_DOMAIN' in os.environ:
-    # En PythonAnywhere: Ruta absoluta para el usuario evangelistajhonatanrivas
-    db_path = '/home/evangelistajhonatanrivas/dannyrivas/app.db'
-else:
-    # Desarrollo local: BD en la raíz del proyecto
-    db_path = os.path.join(basedir, 'app.db')
-
-# --- CONFIGURACIONES ---
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave-secreta-ministerio-2026')
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # Permitir archivos de hasta 500MB
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
-
-# Configuración de Cookies (Optimizado para PythonAnywhere)
-app.config['SESSION_COOKIE_SECURE'] = False # Cambiar a True si activas HTTPS en el panel
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-
-# Inicializar SQLAlchemy con la app
-db.init_app(app)
-
-# Variable para que el servidor WSGI de PythonAnywhere encuentre la app
-application = app
-# ==================== LOGIN MANAGER ====================
-login_manager = LoginManager(app)
-login_manager.login_view = 'iniciar_sesion'
-login_manager.login_message = 'Por favor inicia sesión para acceder.'
-
-# ==================== CONSTANTES Y SEGURIDAD ====================
+# --- CONSTANTES DE SEGURIDAD (Requeridas por tus funciones de validación) ---
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv'}
 ALLOWED_IMAGES = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 ALLOWED_VIDEOS = {'mp4', 'mov', 'avi', 'mkv', 'webm'}
@@ -70,16 +38,61 @@ ALLOWED_REDIRECT_DOMAINS = {
     'paypal.com', 'www.paypal.com'
 }
 
+# --- DETECCIÓN DE ENTORNO Y RUTA DE BASE DE DATOS ---
+IS_PYTHONANYWHERE = 'PYTHONANYWHERE_DOMAIN' in os.environ
+
+if IS_PYTHONANYWHERE:
+    db_path = '/home/evangelistajhonatanrivas/dannyrivas/app.db'
+    app.config['DEBUG'] = False
+else:
+    db_path = os.path.join(basedir, 'app.db')
+    app.config['DEBUG'] = True
+
+# --- CONFIGURACIONES GENERALES ---
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave-secreta-ministerio-2026')
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+
+# --- SEGURIDAD DE COOKIES ---
+app.config['SESSION_COOKIE_SECURE'] = IS_PYTHONANYWHERE 
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# Inicializar DB
+db.init_app(app)
+application = app
+
+# ==================== LOGIN MANAGER ====================
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'iniciar_sesion'
+login_manager.login_message = 'Por favor inicia sesión para acceder.'
+login_manager.login_message_category = 'info'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Usuario.query.get(int(user_id))
+
 # ==================== CARPETAS DE SUBIDA ====================
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'uploads')
-app.config['UPLOAD_FOLDER_VIDEOS'] = os.path.join(app.config['UPLOAD_FOLDER'], 'videos')
-app.config['UPLOAD_FOLDER_IMAGES'] = os.path.join(app.config['UPLOAD_FOLDER'], 'images')
-app.config['UPLOAD_FOLDER_GALLERY'] = os.path.join(app.config['UPLOAD_FOLDER'], 'gallery')
+UPLOAD_SUBFOLDERS = ['videos', 'images', 'gallery']
 
-for folder in [app.config['UPLOAD_FOLDER'], app.config['UPLOAD_FOLDER_VIDEOS'], 
-               app.config['UPLOAD_FOLDER_IMAGES'], app.config['UPLOAD_FOLDER_GALLERY']]:
-    os.makedirs(folder, exist_ok=True)
+for subfolder in UPLOAD_SUBFOLDERS:
+    folder_path = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
+    os.makedirs(folder_path, exist_ok=True)
 
+# ==================== DECORADORES Y UTILIDADES ====================
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.rol != 'admin':
+            flash('Acceso denegado. Se requieren permisos de administrador.', 'danger')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
+# Aquí continuarían tus rutas (@app.route)...
 # ==================== MODELOS ====================
 class Usuario(UserMixin, db.Model):
     __tablename__ = 'usuarios'
